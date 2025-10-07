@@ -1,9 +1,8 @@
 # RunMyModel Desktop
 
-A powerful desktop application that allows you to run large language models locally using Ollama. Chat with models like LLaMA, Mistral, CodeLlama, and more in a beautiful interface.
+A powerful desktop application that allows you to run large language models locally. Chat with models like LLaMA, Mistral, CodeLlama, and more in a beautiful interface.
 
-![RunMyModel Desktop](https://img.shields.io/badge/Version-1.0.0-blue)
-![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)
+
 
 ## ✨ Features
 
@@ -13,11 +12,16 @@ A powerful desktop application that allows you to run large language models loca
 - **System Prompts**: Pre-built prompts for different use cases (Creative, Coding, Research, etc.)
 - **Real-time Progress**: Track model downloads and generation progress
 - **Dark/Light Themes**: Toggle between themes for comfortable usage
-- **Cross-Platform**: Works on Windows, macOS, and Linux
+- **Cross-Platform**: Linux (available), Windows & macOS (coming soon)
 - **Offline Capable**: Once models are downloaded, works completely offline
 - **Professional Design**: Clean, modern UI with RunMyModel.org branding
 
 ## 🚀 Quick Start
+
+### Current Status
+- ✅ **Linux**: Fully functional AppImage available
+- 🔄 **Windows**: Coming soon (build issues being resolved)
+- 📅 **macOS**: Coming soon (planned for v1.0)
 
 ### Prerequisites
 
@@ -26,22 +30,19 @@ A powerful desktop application that allows you to run large language models loca
 - Git
 - curl (for downloading dependencies)
 
-### One-Command Setup & Packaging
+### Linux Installation
 
 ```bash
-# Clone and setup everything automatically
-git clone https://github.com/runmymodel/runmymodel-desktop.git
-cd runmymodel-desktop
-./setup-and-package.sh
-```
+# Clone the repository
+git clone https://github.com/NAME9390/RunMyModel.git
+cd RunMyModel/runmymodel-desktop
 
-This script will:
-- ✅ Install all dependencies
-- ✅ Download Ollama binaries automatically
-- ✅ Create placeholder icons
-- ✅ Build the application
-- ✅ Package for all platforms (.AppImage, .exe, .msi, .dmg)
-- ✅ Create ready-to-distribute packages
+# Build the AppImage
+./build_linux.sh
+
+# Run the AppImage
+./final-packages/RunMyModel\ Desktop_1.0.0_amd64.AppImage
+```
 
 ### Manual Setup
 
