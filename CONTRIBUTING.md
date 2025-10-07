@@ -2,6 +2,7 @@
 
 Thank you for your interest in contributing to RunMyModel Desktop! This document provides guidelines and information for contributors.
 
+
 ## 🚀 Getting Started
 
 ### Prerequisites
@@ -216,3 +217,5 @@ tail -f ~/.local/share/runmymodel-desktop/logs/app.log
 ---
 
 Thank you for contributing to RunMyModel Desktop! 🎉
+
+good luck... 
