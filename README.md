@@ -4,7 +4,6 @@ A powerful desktop application that allows you to run large language models loca
 
 ![RunMyModel Desktop](https://img.shields.io/badge/Version-1.0.0-blue)
 ![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)
-![License](https://img.shields.io/badge/License-MIT-green)
 
 ## ✨ Features
 
