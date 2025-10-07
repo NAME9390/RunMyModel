@@ -1,6 +1,6 @@
 # RunMyModel Desktop
 
-A powerful desktop application that allows you to run large language models locally using Ollama. Chat with models like LLaMA, Mistral, CodeLlama, and more in a beautiful ChatGPT-style interface.
+A powerful desktop application that allows you to run large language models locally using Ollama. Chat with models like LLaMA, Mistral, CodeLlama, and more in a beautiful interface.
 
 ![RunMyModel Desktop](https://img.shields.io/badge/Version-1.0.0-blue)
 ![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)
