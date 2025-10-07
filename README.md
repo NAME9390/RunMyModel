@@ -290,9 +290,6 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 4. Test thoroughly
 5. Submit a pull request
 
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 
@@ -303,8 +300,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Support
 
 - **Website**: [RunMyModel.org](https://runmymodel.org)
-- **Issues**: [GitHub Issues](https://github.com/runmymodel/runmymodel-desktop/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/runmymodel/runmymodel-desktop/discussions)
 
 ## 🔗 Links
 
