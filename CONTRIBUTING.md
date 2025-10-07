@@ -212,15 +212,6 @@ tail -f ~/.local/share/runmymodel-desktop/logs/app.log
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/)
 - [Zustand Documentation](https://github.com/pmndrs/zustand)
 
-## 🤝 Community
-
-- **Discord**: [RunMyModel Community](https://discord.gg/runmymodel)
-- **GitHub Discussions**: [Project Discussions](https://github.com/runmymodel/runmymodel-desktop/discussions)
-- **Issues**: [GitHub Issues](https://github.com/runmymodel/runmymodel-desktop/issues)
-
-## 📄 License
-
-By contributing, you agree that your contributions will be licensed under the MIT License.
 
 ---
 
