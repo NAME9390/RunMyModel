@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
-import { Download, Search, X, CheckCircle, AlertCircle, Clock } from 'lucide-react'
+import { Download, Search, X, CheckCircle, AlertCircle, Clock, ExternalLink } from 'lucide-react'
 import { useModelStore } from '../store/modelStore'
-import { backendService } from '../services/backendService'
+import { backendService, HuggingFaceModelInfo } from '../services/backendService'
 
 interface ModelManagerProps {
   onClose: () => void
@@ -9,7 +9,7 @@ interface ModelManagerProps {
 
 export const ModelManager: React.FC<ModelManagerProps> = ({ onClose }) => {
   const [searchQuery, setSearchQuery] = useState('')
-  const [searchResults, setSearchResults] = useState<any[]>([])
+  const [searchResults, setSearchResults] = useState<HuggingFaceModelInfo[]>([])
   const [isSearching, setIsSearching] = useState(false)
   
   const { 
@@ -39,29 +39,147 @@ export const ModelManager: React.FC<ModelManagerProps> = ({ onClose }) => {
     }
   }
 
-  const handleDownload = async (modelId: string) => {
+  const handleDownload = async (modelName: string) => {
     try {
-      await downloadModel(modelId)
+      await downloadModel(modelName)
     } catch (error) {
       console.error('Download error:', error)
     }
   }
 
-  const getDownloadStatus = (modelId: string) => {
-    return downloadProgress[modelId] || null
+  const getDownloadStatus = (modelName: string) => {
+    return downloadProgress[modelName] || null
   }
 
-  const formatBytes = (bytes: number) => {
-    return backendService.formatBytes(bytes)
+  const formatModelSize = (size?: string) => {
+    if (!size) return 'Unknown'
+    return backendService.formatModelSize(size)
   }
 
-  const formatNumber = (num: number) => {
-    if (num >= 1000000) {
-      return (num / 1000000).toFixed(1) + 'M'
-    } else if (num >= 1000) {
-      return (num / 1000).toFixed(1) + 'K'
+  const getModelRating = (model: HuggingFaceModelInfo) => {
+    return backendService.getModelRating(model)
+  }
+
+  const getModelTaskType = (model: HuggingFaceModelInfo) => {
+    return backendService.getModelTaskType(model)
+  }
+
+  const isModelDownloaded = (model: HuggingFaceModelInfo) => {
+    return backendService.isModelDownloaded(model)
+  }
+
+  const getModelDisplayName = (modelName: string) => {
+    // Extract a more readable name from the Hugging Face model name
+    const parts = modelName.split('/')
+    if (parts.length > 1) {
+      return parts[1].replace(/-/g, ' ').replace(/_/g, ' ')
     }
-    return num.toString()
+    return modelName
+  }
+
+  const getModelAuthor = (modelName: string) => {
+    const parts = modelName.split('/')
+    return parts[0] || 'Unknown'
+  }
+
+  const renderModelCard = (model: HuggingFaceModelInfo) => {
+    const downloadStatus = getDownloadStatus(model.name)
+    const displayName = getModelDisplayName(model.name)
+    const author = getModelAuthor(model.name)
+    const rating = getModelRating(model)
+    const taskType = getModelTaskType(model)
+    const downloaded = isModelDownloaded(model)
+
+    return (
+      <div
+        key={model.name}
+        className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+      >
+        <div className="flex-1">
+          <div className="flex items-center space-x-3">
+            <h4 className="font-medium text-gray-900 dark:text-white">
+              {displayName}
+            </h4>
+            <span className="text-sm text-gray-500 dark:text-gray-400">
+              by {author}
+            </span>
+            {rating > 0 && (
+              <span className="px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 text-xs rounded">
+                ⭐ {rating}
+              </span>
+            )}
+          </div>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            {taskType}
+          </p>
+          <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500 dark:text-gray-400">
+            <span>{formatModelSize(model.size)}</span>
+            <span>{taskType}</span>
+            {downloaded && (
+              <span className="text-green-600 dark:text-green-400">Downloaded</span>
+            )}
+          </div>
+          <div className="flex items-center space-x-2 mt-2">
+            <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded">
+              {model.size || 'Unknown Size'}
+            </span>
+            <span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs rounded">
+              {taskType}
+            </span>
+            {model.url && (
+              <a
+                href={model.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center space-x-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+              >
+                <ExternalLink className="w-3 h-3" />
+                <span className="text-xs">View on HF</span>
+              </a>
+            )}
+          </div>
+        </div>
+        <div className="ml-4">
+          {downloadStatus ? (
+            <div className="flex items-center space-x-2">
+              {downloadStatus.status === 'downloading' && (
+                <>
+                  <Clock className="w-4 h-4 text-blue-600" />
+                  <span className="text-sm text-blue-600">
+                    {Math.round(downloadStatus.progress)}%
+                  </span>
+                </>
+              )}
+              {downloadStatus.status === 'completed' && (
+                <>
+                  <CheckCircle className="w-4 h-4 text-green-600" />
+                  <span className="text-sm text-green-600">Downloaded</span>
+                </>
+              )}
+              {downloadStatus.status === 'error' && (
+                <>
+                  <AlertCircle className="w-4 h-4 text-red-600" />
+                  <span className="text-sm text-red-600">Error</span>
+                </>
+              )}
+            </div>
+          ) : downloaded ? (
+            <div className="flex items-center space-x-2">
+              <CheckCircle className="w-4 h-4 text-green-600" />
+              <span className="text-sm text-green-600">Ready</span>
+            </div>
+          ) : (
+            <button
+              onClick={() => handleDownload(model.name)}
+              className="flex items-center space-x-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+            >
+              <Download className="w-4 h-4" />
+              <span>Download</span>
+            </button>
+          )}
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -70,7 +188,7 @@ export const ModelManager: React.FC<ModelManagerProps> = ({ onClose }) => {
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-            AI Models
+            Hugging Face Models
           </h2>
           <button
             onClick={onClose}
@@ -87,7 +205,7 @@ export const ModelManager: React.FC<ModelManagerProps> = ({ onClose }) => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
                 type="text"
-                placeholder="Search models..."
+                placeholder="Search Hugging Face models..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
@@ -115,81 +233,10 @@ export const ModelManager: React.FC<ModelManagerProps> = ({ onClose }) => {
               {/* Available Models */}
               <div className="mb-6">
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-                  Available Models
+                  Available Models ({availableModels.length})
                 </h3>
                 <div className="space-y-3">
-                  {availableModels.map((model) => {
-                    const downloadStatus = getDownloadStatus(model.id)
-                    return (
-                      <div
-                        key={model.id}
-                        className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
-                      >
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-3">
-                            <h4 className="font-medium text-gray-900 dark:text-white">
-                              {model.name}
-                            </h4>
-                            <span className="text-sm text-gray-500 dark:text-gray-400">
-                              by {model.author}
-                            </span>
-                          </div>
-                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                            {model.description}
-                          </p>
-                          <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500 dark:text-gray-400">
-                            <span>{formatBytes(model.size)}</span>
-                            <span>{formatNumber(model.downloads)} downloads</span>
-                            <span>{formatNumber(model.likes)} likes</span>
-                          </div>
-                          <div className="flex flex-wrap gap-1 mt-2">
-                            {model.tags.slice(0, 3).map((tag) => (
-                              <span
-                                key={tag}
-                                className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded"
-                              >
-                                {tag}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                        <div className="ml-4">
-                          {downloadStatus ? (
-                            <div className="flex items-center space-x-2">
-                              {downloadStatus.status === 'downloading' && (
-                                <>
-                                  <Clock className="w-4 h-4 text-blue-600" />
-                                  <span className="text-sm text-blue-600">
-                                    {Math.round(downloadStatus.progress)}%
-                                  </span>
-                                </>
-                              )}
-                              {downloadStatus.status === 'completed' && (
-                                <>
-                                  <CheckCircle className="w-4 h-4 text-green-600" />
-                                  <span className="text-sm text-green-600">Downloaded</span>
-                                </>
-                              )}
-                              {downloadStatus.status === 'error' && (
-                                <>
-                                  <AlertCircle className="w-4 h-4 text-red-600" />
-                                  <span className="text-sm text-red-600">Error</span>
-                                </>
-                              )}
-                            </div>
-                          ) : (
-                            <button
-                              onClick={() => handleDownload(model.id)}
-                              className="flex items-center space-x-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
-                            >
-                              <Download className="w-4 h-4" />
-                              <span>Download</span>
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    )
-                  })}
+                  {availableModels.map(renderModelCard)}
                 </div>
               </div>
 
@@ -197,71 +244,10 @@ export const ModelManager: React.FC<ModelManagerProps> = ({ onClose }) => {
               {searchResults.length > 0 && (
                 <div>
                   <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-                    Search Results
+                    Search Results ({searchResults.length})
                   </h3>
                   <div className="space-y-3">
-                    {searchResults.map((model) => {
-                      const downloadStatus = getDownloadStatus(model.id)
-                      return (
-                        <div
-                          key={model.id}
-                          className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
-                        >
-                          <div className="flex-1">
-                            <div className="flex items-center space-x-3">
-                              <h4 className="font-medium text-gray-900 dark:text-white">
-                                {model.name}
-                              </h4>
-                              <span className="text-sm text-gray-500 dark:text-gray-400">
-                                by {model.author}
-                              </span>
-                            </div>
-                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                              {model.description}
-                            </p>
-                            <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500 dark:text-gray-400">
-                              <span>{formatBytes(model.size)}</span>
-                              <span>{formatNumber(model.downloads)} downloads</span>
-                              <span>{formatNumber(model.likes)} likes</span>
-                            </div>
-                          </div>
-                          <div className="ml-4">
-                            {downloadStatus ? (
-                              <div className="flex items-center space-x-2">
-                                {downloadStatus.status === 'downloading' && (
-                                  <>
-                                    <Clock className="w-4 h-4 text-blue-600" />
-                                    <span className="text-sm text-blue-600">
-                                      {Math.round(downloadStatus.progress)}%
-                                    </span>
-                                  </>
-                                )}
-                                {downloadStatus.status === 'completed' && (
-                                  <>
-                                    <CheckCircle className="w-4 h-4 text-green-600" />
-                                    <span className="text-sm text-green-600">Downloaded</span>
-                                  </>
-                                )}
-                                {downloadStatus.status === 'error' && (
-                                  <>
-                                    <AlertCircle className="w-4 h-4 text-red-600" />
-                                    <span className="text-sm text-red-600">Error</span>
-                                  </>
-                                )}
-                              </div>
-                            ) : (
-                              <button
-                                onClick={() => handleDownload(model.id)}
-                                className="flex items-center space-x-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
-                              >
-                                <Download className="w-4 h-4" />
-                                <span>Download</span>
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      )
-                    })}
+                    {searchResults.map(renderModelCard)}
                   </div>
                 </div>
               )}

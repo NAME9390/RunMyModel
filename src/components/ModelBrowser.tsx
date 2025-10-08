@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { Search, Download, Trash2, CheckCircle, AlertCircle, HardDrive, Cpu, Zap } from 'lucide-react'
-import { backendService, OllamaModelInfo } from '../services/backendService'
+import { Search, Download, Trash2, CheckCircle, AlertCircle, HardDrive, Cpu, Zap, ExternalLink } from 'lucide-react'
+import { backendService, HuggingFaceModelInfo } from '../services/backendService'
 import { useModelStore } from '../store/modelStore'
 
 interface ModelBrowserProps {
@@ -8,10 +8,10 @@ interface ModelBrowserProps {
 }
 
 export const ModelBrowser: React.FC<ModelBrowserProps> = ({ onClose }) => {
-  const [allModels, setAllModels] = useState<OllamaModelInfo[]>([])
-  const [filteredModels, setFilteredModels] = useState<OllamaModelInfo[]>([])
+  const [allModels, setAllModels] = useState<HuggingFaceModelInfo[]>([])
+  const [filteredModels, setFilteredModels] = useState<HuggingFaceModelInfo[]>([])
   const [searchQuery, setSearchQuery] = useState('')
-  const [selectedFamily, setSelectedFamily] = useState<string>('all')
+  const [selectedTaskType, setSelectedTaskType] = useState<string>('all')
   const [isLoading, setIsLoading] = useState(true)
   const [installingModels, setInstallingModels] = useState<Set<string>>(new Set())
   
@@ -23,7 +23,7 @@ export const ModelBrowser: React.FC<ModelBrowserProps> = ({ onClose }) => {
 
   useEffect(() => {
     filterModels()
-  }, [allModels, searchQuery, selectedFamily])
+  }, [allModels, searchQuery, selectedTaskType])
 
   const loadModels = async () => {
     setIsLoading(true)
@@ -45,22 +45,22 @@ export const ModelBrowser: React.FC<ModelBrowserProps> = ({ onClose }) => {
     if (searchQuery) {
       filtered = filtered.filter(model =>
         model.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        model.family?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        model.parameter_size?.toLowerCase().includes(searchQuery.toLowerCase())
+        model.task_type?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        model.size?.toLowerCase().includes(searchQuery.toLowerCase())
       )
     }
 
-    // Filter by family
-    if (selectedFamily !== 'all') {
-      filtered = filtered.filter(model => model.family === selectedFamily)
+    // Filter by task type
+    if (selectedTaskType !== 'all') {
+      filtered = filtered.filter(model => model.task_type === selectedTaskType)
     }
 
     setFilteredModels(filtered)
   }
 
-  const getUniqueFamilies = () => {
-    const families = new Set(allModels.map(model => model.family).filter(Boolean))
-    return Array.from(families).sort()
+  const getUniqueTaskTypes = () => {
+    const taskTypes = new Set(allModels.map(model => model.task_type).filter(Boolean))
+    return Array.from(taskTypes).sort()
   }
 
   const isModelInstalled = (modelName: string) => {
@@ -92,138 +92,52 @@ export const ModelBrowser: React.FC<ModelBrowserProps> = ({ onClose }) => {
     }
   }
 
-  const getModelIcon = (family: string | undefined) => {
-    if (!family) return 'AI'
+  const getModelIcon = (modelName: string) => {
+    const nameLower = modelName.toLowerCase()
     
-    const familyLower = family.toLowerCase()
-    
-    // Llama family variations
-    if (familyLower.includes('llama')) {
-      if (familyLower.includes('code')) return 'CODE'
-      if (familyLower.includes('tiny')) return 'TINY'
-      if (familyLower.includes('dolphin')) return 'DOLPHIN'
-      if (familyLower.includes('vision')) return 'VISION'
+    if (nameLower.includes('llama')) {
+      if (nameLower.includes('code')) return 'CODE'
       return 'LLAMA'
     }
     
-    // Other model families
-    switch (familyLower) {
-      case 'mistral':
-        return 'MISTRAL'
-      case 'gemma':
-      case 'gemma3':
-      case 'gemma3n':
-        return 'GEMMA'
-      case 'phi3':
-      case 'phi4':
-        return 'PHI'
-      case 'qwen':
-      case 'qwen2.5':
-      case 'qwen2.5-coder':
-      case 'qwen3':
-      case 'qwen3-coder':
-      case 'qwq':
-        return 'QWEN'
-      case 'orca-mini':
-        return 'ORCA'
-      case 'deepseek':
-      case 'deepseek-r1':
-      case 'deepseek-coder':
-      case 'deepseek-coder-v2':
-      case 'deepseek-llm':
-      case 'deepseek-v2':
-        return 'DEEPSEEK'
-      case 'falcon':
-      case 'falcon3':
-        return 'FALCON'
-      case 'granite':
-      case 'granite3.1-moe':
-      case 'granite3.2':
-      case 'granite3.2-vision':
-      case 'granite3.3':
-      case 'granite-code':
-        return 'GRANITE'
-      case 'mixtral':
-      case 'dolphin-mixtral':
-        return 'MIXTRAL'
-      case 'starcoder':
-      case 'starcoder2':
-        return 'STAR'
-      case 'codegemma':
-        return 'GEMMA'
-      case 'snowflake-arctic-embed':
-        return 'SNOWFLAKE'
-      case 'smollm':
-      case 'smollm2':
-        return 'SMOLLM'
-      case 'openthinker':
-        return 'THINKER'
-      case 'cogito':
-        return 'COGITO'
-      case 'codestral':
-        return 'CODESTRAL'
-      case 'wizardlm2':
-      case 'wizardcoder':
-      case 'wizard-vicuna-uncensored':
-        return 'WIZARD'
-      case 'magistral':
-        return 'MAGISTRAL'
-      case 'deepscaler':
-        return 'SCALER'
-      case 'devstral':
-        return 'DEVSTRAL'
-      case 'vicuna':
-        return 'VICUNA'
-      case 'openchat':
-        return 'CHAT'
-      case 'nous-hermes':
-      case 'nous-hermes2':
-        return 'HERMES'
-      case 'exaone-deep':
-        return 'EXAONE'
-      case 'mistral-openorca':
-        return 'ORCA'
-      case 'codegeex4':
-        return 'CODEGEEX'
-      case 'openhermes':
-        return 'HERMES'
-      case 'codeqwen':
-        return 'QWEN'
-      case 'opencoder':
-      case 'opencoder-open':
-        return 'CODER'
-      case 'aya':
-        return 'AYA'
-      case 'tinydolphin':
-        return 'DOLPHIN'
-      case 'glm4':
-        return 'GLM'
-      case 'stable-code':
-        return 'STABLE'
-      case 'neural-chat':
-        return 'NEURAL'
-      case 'command-r-plus':
-        return 'COMMAND'
-      case 'bakllava':
-        return 'BAKLLAVA'
-      case 'bge-m3':
-        return 'BGE'
-      case 'all-minilm':
-        return 'MINILM'
-      case 'xmodel':
-        return 'XMODEL'
-      case 'bmodel':
-        return 'BMODEL'
-      default:
-        return 'AI'
-    }
+    if (nameLower.includes('qwen')) return 'QWEN'
+    if (nameLower.includes('mistral')) return 'MISTRAL'
+    if (nameLower.includes('gemma')) return 'GEMMA'
+    if (nameLower.includes('phi')) return 'PHI'
+    if (nameLower.includes('deepseek')) return 'DEEPSEEK'
+    if (nameLower.includes('falcon')) return 'FALCON'
+    if (nameLower.includes('granite')) return 'GRANITE'
+    if (nameLower.includes('mixtral')) return 'MIXTRAL'
+    if (nameLower.includes('starcoder')) return 'STAR'
+    if (nameLower.includes('codellama')) return 'CODE'
+    if (nameLower.includes('dialogpt')) return 'DIALOG'
+    if (nameLower.includes('gpt-neo')) return 'GPT'
+    if (nameLower.includes('llava')) return 'VISION'
+    if (nameLower.includes('bert')) return 'BERT'
+    if (nameLower.includes('distilbert')) return 'DISTIL'
+    
+    return 'AI'
   }
 
-  const getSizeColor = (size: number | undefined) => {
+  const getModelDisplayName = (modelName: string) => {
+    const parts = modelName.split('/')
+    if (parts.length > 1) {
+      return parts[1].replace(/-/g, ' ').replace(/_/g, ' ')
+    }
+    return modelName
+  }
+
+  const getModelAuthor = (modelName: string) => {
+    const parts = modelName.split('/')
+    return parts[0] || 'Unknown'
+  }
+
+  const getSizeColor = (size?: string) => {
     if (!size) return 'text-gray-500'
-    if (size < 2_000_000_000) return 'text-green-600' // < 2GB
-    if (size < 8_000_000_000) return 'text-yellow-600' // < 8GB
-    return 'text-red-600' // >= 8GB
+    const sizeValue = parseFloat(size)
+    if (sizeValue < 2) return 'text-green-600' // < 2B
+    if (sizeValue < 8) return 'text-yellow-600' // < 8B
+    return 'text-red-600' // >= 8B
   }
 
   if (isLoading) {
@@ -245,7 +159,7 @@ export const ModelBrowser: React.FC<ModelBrowserProps> = ({ onClose }) => {
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Model Browser</h2>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Hugging Face Model Browser</h2>
             <p className="text-gray-600 dark:text-gray-400 mt-1">
               Browse and install {allModels.length} available models
             </p>
@@ -269,7 +183,7 @@ export const ModelBrowser: React.FC<ModelBrowserProps> = ({ onClose }) => {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input
                   type="text"
-                  placeholder="Search models..."
+                  placeholder="Search Hugging Face models..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -277,17 +191,17 @@ export const ModelBrowser: React.FC<ModelBrowserProps> = ({ onClose }) => {
               </div>
             </div>
 
-            {/* Family Filter */}
+            {/* Task Type Filter */}
             <div className="sm:w-48">
               <select
-                value={selectedFamily}
-                onChange={(e) => setSelectedFamily(e.target.value)}
+                value={selectedTaskType}
+                onChange={(e) => setSelectedTaskType(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="all">All Families</option>
-                {getUniqueFamilies().map(family => (
-                  <option key={family} value={family}>
-                    {family}
+                <option value="all">All Task Types</option>
+                {getUniqueTaskTypes().map(taskType => (
+                  <option key={taskType} value={taskType}>
+                    {taskType}
                   </option>
                 ))}
               </select>
@@ -301,6 +215,8 @@ export const ModelBrowser: React.FC<ModelBrowserProps> = ({ onClose }) => {
             {filteredModels.map((model) => {
               const isInstalled = isModelInstalled(model.name)
               const isInstalling = installingModels.has(model.name)
+              const displayName = getModelDisplayName(model.name)
+              const author = getModelAuthor(model.name)
               
               return (
                 <div
@@ -312,15 +228,15 @@ export const ModelBrowser: React.FC<ModelBrowserProps> = ({ onClose }) => {
                     <div className="flex items-center">
                       <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mr-3">
                         <span className="text-xs font-bold text-blue-700 dark:text-blue-300">
-                          {getModelIcon(model.family)}
+                          {getModelIcon(model.name)}
                         </span>
                       </div>
                       <div>
                         <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
-                          {model.name.split(':')[0]}
+                          {displayName}
                         </h3>
                         <p className="text-xs text-gray-600 dark:text-gray-400">
-                          {model.name.split(':')[1]}
+                          by {author}
                         </p>
                       </div>
                     </div>
@@ -333,18 +249,22 @@ export const ModelBrowser: React.FC<ModelBrowserProps> = ({ onClose }) => {
                   <div className="space-y-2 mb-4">
                     <div className="flex items-center text-xs text-gray-600 dark:text-gray-400">
                       <Cpu className="w-3 h-3 mr-1" />
-                      {model.parameter_size || 'Unknown'} parameters
+                      {model.size || 'Unknown'} parameters
                     </div>
                     <div className="flex items-center text-xs text-gray-600 dark:text-gray-400">
                       <HardDrive className="w-3 h-3 mr-1" />
                       <span className={getSizeColor(model.size)}>
-                        {model.size ? backendService.formatBytes(model.size) : 'Unknown size'}
+                        {model.size ? backendService.formatModelSize(model.size) : 'Unknown size'}
                       </span>
                     </div>
-                    {model.quantization_level && (
+                    <div className="flex items-center text-xs text-gray-600 dark:text-gray-400">
+                      <Zap className="w-3 h-3 mr-1" />
+                      {model.task_type || 'Unknown task'}
+                    </div>
+                    {model.rating && (
                       <div className="flex items-center text-xs text-gray-600 dark:text-gray-400">
-                        <Zap className="w-3 h-3 mr-1" />
-                        {model.quantization_level}
+                        <span className="mr-1">⭐</span>
+                        Rating: {model.rating}/5
                       </div>
                     )}
                   </div>
@@ -376,6 +296,14 @@ export const ModelBrowser: React.FC<ModelBrowserProps> = ({ onClose }) => {
                             Install
                           </>
                         )}
+                      </button>
+                    )}
+                    {model.url && (
+                      <button
+                        onClick={() => window.open(model.url, '_blank')}
+                        className="px-3 py-2 bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-800 transition-colors text-sm"
+                      >
+                        <ExternalLink className="w-4 h-4" />
                       </button>
                     )}
                   </div>

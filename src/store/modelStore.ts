@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
-import { backendService, ModelInfo, OllamaModelInfo } from '../services/backendService'
+import { backendService, HuggingFaceModelInfo } from '../services/backendService'
 
 export interface ModelDownloadProgress {
   model: string
@@ -13,16 +13,14 @@ export interface ModelDownloadProgress {
 }
 
 export interface ModelState {
-  availableModels: ModelInfo[]
+  availableModels: HuggingFaceModelInfo[]
   installedModels: string[]
-  allOllamaModels: OllamaModelInfo[]
   currentModel: string | null
   downloadProgress: Record<string, ModelDownloadProgress>
   isLoading: boolean
   error: string | null
-  setAvailableModels: (models: ModelInfo[]) => void
+  setAvailableModels: (models: HuggingFaceModelInfo[]) => void
   setInstalledModels: (models: string[]) => void
-  setAllOllamaModels: (models: OllamaModelInfo[]) => void
   setCurrentModel: (model: string | null) => void
   setDownloadProgress: (model: string, progress: ModelDownloadProgress) => void
   removeDownloadProgress: (model: string) => void
@@ -30,10 +28,9 @@ export interface ModelState {
   setError: (error: string | null) => void
   refreshModels: () => Promise<void>
   refreshInstalledModels: () => Promise<void>
-  refreshAllOllamaModels: () => Promise<void>
-  downloadModel: (modelId: string) => Promise<void>
+  downloadModel: (modelName: string) => Promise<void>
   removeModel: (modelName: string) => Promise<void>
-  searchModels: (query: string) => Promise<ModelInfo[]>
+  searchModels: (query: string) => Promise<HuggingFaceModelInfo[]>
 }
 
 export const useModelStore = create<ModelState>()(
@@ -41,7 +38,6 @@ export const useModelStore = create<ModelState>()(
     (set, get) => ({
       availableModels: [],
       installedModels: [],
-      allOllamaModels: [],
       currentModel: null,
       downloadProgress: {},
       isLoading: false,
@@ -49,7 +45,6 @@ export const useModelStore = create<ModelState>()(
       
       setAvailableModels: (models) => set({ availableModels: models }),
       setInstalledModels: (models) => set({ installedModels: models }),
-      setAllOllamaModels: (models) => set({ allOllamaModels: models }),
       setCurrentModel: (model) => set({ currentModel: model }),
       setDownloadProgress: (model, progress) => 
         set(state => ({ 
@@ -87,16 +82,6 @@ export const useModelStore = create<ModelState>()(
         }
       },
 
-      refreshAllOllamaModels: async () => {
-        try {
-          const allModels = await backendService.getAllAvailableModels()
-          set({ allOllamaModels: allModels })
-        } catch (error) {
-          console.error('Error refreshing all Ollama models:', error)
-          set({ error: 'Failed to refresh all models' })
-        }
-      },
-
       downloadModel: async (modelName) => {
         const progress: ModelDownloadProgress = {
           model: modelName,
@@ -113,7 +98,7 @@ export const useModelStore = create<ModelState>()(
         }))
 
         try {
-          // Real Ollama model installation
+          // Real Hugging Face model download
           await backendService.installModel(modelName)
           
           // Complete the download
@@ -129,8 +114,9 @@ export const useModelStore = create<ModelState>()(
             }
           }))
 
-          // Refresh installed models
+          // Refresh installed models and available models
           await get().refreshInstalledModels()
+          await get().refreshModels()
         } catch (error) {
           set(state => ({
             downloadProgress: {
@@ -149,6 +135,7 @@ export const useModelStore = create<ModelState>()(
         try {
           await backendService.removeModel(modelName)
           await get().refreshInstalledModels()
+          await get().refreshModels()
         } catch (error) {
           console.error('Error removing model:', error)
           throw error
@@ -170,8 +157,7 @@ export const useModelStore = create<ModelState>()(
       partialize: (state) => ({ 
         currentModel: state.currentModel,
         availableModels: state.availableModels,
-        installedModels: state.installedModels,
-        allOllamaModels: state.allOllamaModels
+        installedModels: state.installedModels
       })
     }
   )

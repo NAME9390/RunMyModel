@@ -13,10 +13,11 @@ import {
   SortDesc,
   X,
   Tag,
-  HardDrive
+  HardDrive,
+  ExternalLink
 } from 'lucide-react'
 import { useModelStore } from '../store/modelStore'
-import { backendService, ModelInfo } from '../services/backendService'
+import { backendService, HuggingFaceModelInfo } from '../services/backendService'
 
 interface ModelsPageProps {
   onClose: () => void
@@ -25,11 +26,11 @@ interface ModelsPageProps {
 export const ModelsPage: React.FC<ModelsPageProps> = ({ onClose }) => {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
-  const [sortBy, setSortBy] = useState<'name' | 'downloads' | 'likes' | 'size'>('downloads')
+  const [sortBy, setSortBy] = useState<'name' | 'rating' | 'size' | 'task'>('rating')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [showFilters, setShowFilters] = useState(false)
-  const [selectedTags, setSelectedTags] = useState<string[]>([])
+  const [selectedTaskTypes, setSelectedTaskTypes] = useState<string[]>([])
   
   const { 
     availableModels, 
@@ -39,8 +40,8 @@ export const ModelsPage: React.FC<ModelsPageProps> = ({ onClose }) => {
     isLoading 
   } = useModelStore()
 
-  const [filteredModels, setFilteredModels] = useState<ModelInfo[]>([])
-  const [allTags, setAllTags] = useState<string[]>([])
+  const [filteredModels, setFilteredModels] = useState<HuggingFaceModelInfo[]>([])
+  const [allTaskTypes, setAllTaskTypes] = useState<string[]>([])
 
   useEffect(() => {
     refreshModels()
@@ -53,21 +54,20 @@ export const ModelsPage: React.FC<ModelsPageProps> = ({ onClose }) => {
     if (searchQuery.trim()) {
       models = models.filter(model => 
         model.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        model.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        model.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        model.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+        model.task_type?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        model.size?.toLowerCase().includes(searchQuery.toLowerCase())
       )
     }
 
     // Filter by category
     if (selectedCategory !== 'all') {
-      models = models.filter(model => model.category === selectedCategory)
+      models = models.filter(model => model.task_type === selectedCategory)
     }
 
-    // Filter by tags
-    if (selectedTags.length > 0) {
+    // Filter by task types
+    if (selectedTaskTypes.length > 0) {
       models = models.filter(model => 
-        selectedTags.some(tag => model.tags.includes(tag))
+        selectedTaskTypes.includes(model.task_type || '')
       )
     }
 
@@ -80,21 +80,21 @@ export const ModelsPage: React.FC<ModelsPageProps> = ({ onClose }) => {
           aValue = a.name.toLowerCase()
           bValue = b.name.toLowerCase()
           break
-        case 'downloads':
-          aValue = a.downloads
-          bValue = b.downloads
-          break
-        case 'likes':
-          aValue = a.likes
-          bValue = b.likes
+        case 'rating':
+          aValue = a.rating || 0
+          bValue = b.rating || 0
           break
         case 'size':
-          aValue = a.size
-          bValue = b.size
+          aValue = parseFloat(a.size || '0')
+          bValue = parseFloat(b.size || '0')
+          break
+        case 'task':
+          aValue = a.task_type || ''
+          bValue = b.task_type || ''
           break
         default:
-          aValue = a.downloads
-          bValue = b.downloads
+          aValue = a.rating || 0
+          bValue = b.rating || 0
       }
 
       if (sortOrder === 'asc') {
@@ -105,68 +105,259 @@ export const ModelsPage: React.FC<ModelsPageProps> = ({ onClose }) => {
     })
 
     setFilteredModels(models)
-  }, [availableModels, searchQuery, selectedCategory, sortBy, sortOrder, selectedTags])
+  }, [availableModels, searchQuery, selectedCategory, sortBy, sortOrder, selectedTaskTypes])
 
   useEffect(() => {
-    // Extract all unique tags
-    const tags = new Set<string>()
+    // Extract all unique task types
+    const taskTypes = new Set<string>()
     availableModels.forEach(model => {
-      model.tags.forEach(tag => tags.add(tag))
+      if (model.task_type) {
+        taskTypes.add(model.task_type)
+      }
     })
-    setAllTags(Array.from(tags).sort())
+    setAllTaskTypes(Array.from(taskTypes).sort())
   }, [availableModels])
 
   const categories = [
     { id: 'all', name: 'All Models', count: availableModels.length },
-    { id: 'text-generation', name: 'Text Generation', count: availableModels.filter(m => m.category === 'text-generation').length },
-    { id: 'code-generation', name: 'Code Generation', count: availableModels.filter(m => m.category === 'code-generation').length },
-    { id: 'question-answering', name: 'Question Answering', count: availableModels.filter(m => m.category === 'question-answering').length },
-    { id: 'summarization', name: 'Summarization', count: availableModels.filter(m => m.category === 'summarization').length },
-    { id: 'translation', name: 'Translation', count: availableModels.filter(m => m.category === 'translation').length },
-    { id: 'sentiment-analysis', name: 'Sentiment Analysis', count: availableModels.filter(m => m.category === 'sentiment-analysis').length },
-    { id: 'token-classification', name: 'Named Entity Recognition', count: availableModels.filter(m => m.category === 'token-classification').length },
-    { id: 'text-classification', name: 'Text Classification', count: availableModels.filter(m => m.category === 'text-classification').length }
+    { id: 'Text Generation', name: 'Text Generation', count: availableModels.filter(m => m.task_type === 'Text Generation').length },
+    { id: 'Code Generation', name: 'Code Generation', count: availableModels.filter(m => m.task_type === 'Code Generation').length },
+    { id: 'Multimodal', name: 'Multimodal', count: availableModels.filter(m => m.task_type === 'Multimodal').length },
+    { id: 'Text Classification', name: 'Text Classification', count: availableModels.filter(m => m.task_type === 'Text Classification').length }
   ]
 
-  const handleDownload = async (modelId: string) => {
+  const handleDownload = async (modelName: string) => {
     try {
-      await downloadModel(modelId)
+      await downloadModel(modelName)
     } catch (error) {
       console.error('Download error:', error)
     }
   }
 
-  const getDownloadStatus = (modelId: string) => {
-    return downloadProgress[modelId] || null
+  const getDownloadStatus = (modelName: string) => {
+    return downloadProgress[modelName] || null
   }
 
-  const formatBytes = (bytes: number) => {
-    return backendService.formatBytes(bytes)
+  const formatModelSize = (size?: string) => {
+    if (!size) return 'Unknown'
+    return backendService.formatModelSize(size)
   }
 
-  const formatNumber = (num: number) => {
-    if (num >= 1000000) {
-      return (num / 1000000).toFixed(1) + 'M'
-    } else if (num >= 1000) {
-      return (num / 1000).toFixed(1) + 'K'
+  const getModelDisplayName = (modelName: string) => {
+    const parts = modelName.split('/')
+    if (parts.length > 1) {
+      return parts[1].replace(/-/g, ' ').replace(/_/g, ' ')
     }
-    return num.toString()
+    return modelName
   }
 
-  const toggleTag = (tag: string) => {
-    setSelectedTags(prev => 
-      prev.includes(tag) 
-        ? prev.filter(t => t !== tag)
-        : [...prev, tag]
+  const getModelAuthor = (modelName: string) => {
+    const parts = modelName.split('/')
+    return parts[0] || 'Unknown'
+  }
+
+  const toggleTaskType = (taskType: string) => {
+    setSelectedTaskTypes(prev => 
+      prev.includes(taskType) 
+        ? prev.filter(t => t !== taskType)
+        : [...prev, taskType]
     )
   }
 
   const clearFilters = () => {
     setSearchQuery('')
     setSelectedCategory('all')
-    setSelectedTags([])
-    setSortBy('downloads')
+    setSelectedTaskTypes([])
+    setSortBy('rating')
     setSortOrder('desc')
+  }
+
+  const renderModelCard = (model: HuggingFaceModelInfo, isList: boolean = false) => {
+    const downloadStatus = getDownloadStatus(model.name)
+    const displayName = getModelDisplayName(model.name)
+    const author = getModelAuthor(model.name)
+    const taskType = model.task_type || 'Unknown'
+    const rating = model.rating || 0
+    const downloaded = model.downloaded
+
+    if (isList) {
+      return (
+        <div
+          key={model.name}
+          className="flex items-center p-6 bg-white dark:bg-gray-700 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+        >
+          <div className="flex-1">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-semibold text-gray-900 dark:text-white">
+                {displayName}
+              </h3>
+              <div className="flex items-center gap-1 text-yellow-500">
+                <Star className="w-4 h-4 fill-current" />
+                <span className="text-sm font-medium">{rating}/5</span>
+              </div>
+            </div>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+              by {author} • {taskType}
+            </p>
+            <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+              <div className="flex items-center gap-1">
+                <HardDrive className="w-4 h-4" />
+                <span>{formatModelSize(model.size)}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Tag className="w-4 h-4" />
+                <span>{taskType}</span>
+              </div>
+              {downloaded && (
+                <div className="flex items-center gap-1 text-green-600">
+                  <CheckCircle className="w-4 h-4" />
+                  <span>Downloaded</span>
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="ml-6 flex items-center gap-2">
+            {model.url && (
+              <button
+                onClick={() => window.open(model.url, '_blank')}
+                className="p-2 bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-800 transition-colors"
+              >
+                <ExternalLink className="w-4 h-4" />
+              </button>
+            )}
+            {downloadStatus ? (
+              <div className="flex items-center space-x-2">
+                {downloadStatus.status === 'downloading' && (
+                  <>
+                    <Clock className="w-4 h-4 text-blue-600" />
+                    <span className="text-sm text-blue-600">
+                      {Math.round(downloadStatus.progress)}%
+                    </span>
+                  </>
+                )}
+                {downloadStatus.status === 'completed' && (
+                  <>
+                    <CheckCircle className="w-4 h-4 text-green-600" />
+                    <span className="text-sm text-green-600">Downloaded</span>
+                  </>
+                )}
+                {downloadStatus.status === 'error' && (
+                  <>
+                    <AlertCircle className="w-4 h-4 text-red-600" />
+                    <span className="text-sm text-red-600">Error</span>
+                  </>
+                )}
+              </div>
+            ) : (
+              <button
+                onClick={() => handleDownload(model.name)}
+                className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium"
+              >
+                <Download className="w-4 h-4" />
+                <span>Download</span>
+              </button>
+            )}
+          </div>
+        </div>
+      )
+    }
+
+    return (
+      <div
+        key={model.name}
+        className="p-6 bg-white dark:bg-gray-700 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+      >
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex-1">
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
+              {displayName}
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+              by {author}
+            </p>
+            <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2">
+              {taskType}
+            </p>
+          </div>
+          <div className="flex items-center gap-1 text-yellow-500 ml-4">
+            <Star className="w-4 h-4 fill-current" />
+            <span className="text-sm font-medium">{rating}/5</span>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-1 mb-4">
+          <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded">
+            {model.size || 'Unknown Size'}
+          </span>
+          <span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs rounded">
+            {taskType}
+          </span>
+          {downloaded && (
+            <span className="px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 text-xs rounded">
+              Downloaded
+            </span>
+          )}
+        </div>
+
+        <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-4">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-1">
+              <HardDrive className="w-4 h-4" />
+              <span>{formatModelSize(model.size)}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Tag className="w-4 h-4" />
+              <span>{taskType}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            {model.url && (
+              <button
+                onClick={() => window.open(model.url, '_blank')}
+                className="p-2 bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-800 transition-colors"
+              >
+                <ExternalLink className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+          {downloadStatus ? (
+            <div className="flex items-center space-x-2">
+              {downloadStatus.status === 'downloading' && (
+                <>
+                  <Clock className="w-4 h-4 text-blue-600" />
+                  <span className="text-sm text-blue-600">
+                    {Math.round(downloadStatus.progress)}%
+                  </span>
+                </>
+              )}
+              {downloadStatus.status === 'completed' && (
+                <>
+                  <CheckCircle className="w-4 h-4 text-green-600" />
+                  <span className="text-sm text-green-600">Downloaded</span>
+                </>
+              )}
+              {downloadStatus.status === 'error' && (
+                <>
+                  <AlertCircle className="w-4 h-4 text-red-600" />
+                  <span className="text-sm text-red-600">Error</span>
+                </>
+              )}
+            </div>
+          ) : (
+            <button
+              onClick={() => handleDownload(model.name)}
+              className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium"
+            >
+              <Download className="w-4 h-4" />
+              <span>Download</span>
+            </button>
+          )}
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -176,7 +367,7 @@ export const ModelsPage: React.FC<ModelsPageProps> = ({ onClose }) => {
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
           <div>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-              AI Models Library
+              Hugging Face Models Library
             </h2>
             <p className="text-gray-600 dark:text-gray-400 mt-1">
               {filteredModels.length} of {availableModels.length} models
@@ -198,7 +389,7 @@ export const ModelsPage: React.FC<ModelsPageProps> = ({ onClose }) => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
                 type="text"
-                placeholder="Search models, authors, or tags..."
+                placeholder="Search Hugging Face models..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
@@ -212,10 +403,10 @@ export const ModelsPage: React.FC<ModelsPageProps> = ({ onClose }) => {
                 onChange={(e) => setSortBy(e.target.value as any)}
                 className="px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               >
-                <option value="downloads">Downloads</option>
-                <option value="likes">Likes</option>
+                <option value="rating">Rating</option>
                 <option value="name">Name</option>
                 <option value="size">Size</option>
+                <option value="task">Task Type</option>
               </select>
               
               <button
@@ -262,20 +453,20 @@ export const ModelsPage: React.FC<ModelsPageProps> = ({ onClose }) => {
                   ))}
                 </div>
 
-                {/* Tags */}
+                {/* Task Types */}
                 <div className="flex flex-wrap gap-2">
-                  {allTags.slice(0, 10).map(tag => (
+                  {allTaskTypes.slice(0, 10).map(taskType => (
                     <button
-                      key={tag}
-                      onClick={() => toggleTag(tag)}
+                      key={taskType}
+                      onClick={() => toggleTaskType(taskType)}
                       className={`px-2 py-1 rounded-full text-xs font-medium transition-colors flex items-center gap-1 ${
-                        selectedTags.includes(tag)
+                        selectedTaskTypes.includes(taskType)
                           ? 'bg-purple-600 text-white'
                           : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500'
                       }`}
                     >
                       <Tag className="w-3 h-3" />
-                      {tag}
+                      {taskType}
                     </button>
                   ))}
                 </div>
@@ -305,172 +496,7 @@ export const ModelsPage: React.FC<ModelsPageProps> = ({ onClose }) => {
             </div>
           ) : (
             <div className={`p-6 ${viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-4'}`}>
-              {filteredModels.map((model) => {
-                const downloadStatus = getDownloadStatus(model.id)
-                return (
-                  <div
-                    key={model.id}
-                    className={`bg-white dark:bg-gray-700 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 ${
-                      viewMode === 'list' ? 'flex items-center p-6' : 'p-6'
-                    }`}
-                  >
-                    {viewMode === 'grid' ? (
-                      <>
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="flex-1">
-                            <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
-                              {model.name}
-                            </h3>
-                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                              by {model.author}
-                            </p>
-                            <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2">
-                              {model.description}
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-1 text-yellow-500 ml-4">
-                            <Star className="w-4 h-4 fill-current" />
-                            <span className="text-sm font-medium">4.8</span>
-                          </div>
-                        </div>
-
-                        <div className="flex flex-wrap gap-1 mb-4">
-                          {model.tags.slice(0, 3).map((tag) => (
-                            <span
-                              key={tag}
-                              className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                          {model.tags.length > 3 && (
-                            <span className="px-2 py-1 bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-400 text-xs rounded">
-                              +{model.tags.length - 3}
-                            </span>
-                          )}
-                        </div>
-
-                        <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-4">
-                          <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-1">
-                              <HardDrive className="w-4 h-4" />
-                              <span>{formatBytes(model.size)}</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Download className="w-4 h-4" />
-                              <span>{formatNumber(model.downloads)}</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Star className="w-4 h-4" />
-                              <span>{formatNumber(model.likes)}</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center justify-between">
-                          {downloadStatus ? (
-                            <div className="flex items-center space-x-2">
-                              {downloadStatus.status === 'downloading' && (
-                                <>
-                                  <Clock className="w-4 h-4 text-blue-600" />
-                                  <span className="text-sm text-blue-600">
-                                    {Math.round(downloadStatus.progress)}%
-                                  </span>
-                                </>
-                              )}
-                              {downloadStatus.status === 'completed' && (
-                                <>
-                                  <CheckCircle className="w-4 h-4 text-green-600" />
-                                  <span className="text-sm text-green-600">Downloaded</span>
-                                </>
-                              )}
-                              {downloadStatus.status === 'error' && (
-                                <>
-                                  <AlertCircle className="w-4 h-4 text-red-600" />
-                                  <span className="text-sm text-red-600">Error</span>
-                                </>
-                              )}
-                            </div>
-                          ) : (
-                            <button
-                              onClick={() => handleDownload(model.id)}
-                              className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium"
-                            >
-                              <Download className="w-4 h-4" />
-                              <span>Download</span>
-                            </button>
-                          )}
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between mb-2">
-                            <h3 className="font-semibold text-gray-900 dark:text-white">
-                              {model.name}
-                            </h3>
-                            <div className="flex items-center gap-1 text-yellow-500">
-                              <Star className="w-4 h-4 fill-current" />
-                              <span className="text-sm font-medium">4.8</span>
-                            </div>
-                          </div>
-                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                            by {model.author} • {model.description}
-                          </p>
-                          <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
-                            <div className="flex items-center gap-1">
-                              <HardDrive className="w-4 h-4" />
-                              <span>{formatBytes(model.size)}</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Download className="w-4 h-4" />
-                              <span>{formatNumber(model.downloads)} downloads</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Star className="w-4 h-4" />
-                              <span>{formatNumber(model.likes)} likes</span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="ml-6">
-                          {downloadStatus ? (
-                            <div className="flex items-center space-x-2">
-                              {downloadStatus.status === 'downloading' && (
-                                <>
-                                  <Clock className="w-4 h-4 text-blue-600" />
-                                  <span className="text-sm text-blue-600">
-                                    {Math.round(downloadStatus.progress)}%
-                                  </span>
-                                </>
-                              )}
-                              {downloadStatus.status === 'completed' && (
-                                <>
-                                  <CheckCircle className="w-4 h-4 text-green-600" />
-                                  <span className="text-sm text-green-600">Downloaded</span>
-                                </>
-                              )}
-                              {downloadStatus.status === 'error' && (
-                                <>
-                                  <AlertCircle className="w-4 h-4 text-red-600" />
-                                  <span className="text-sm text-red-600">Error</span>
-                                </>
-                              )}
-                            </div>
-                          ) : (
-                            <button
-                              onClick={() => handleDownload(model.id)}
-                              className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium"
-                            >
-                              <Download className="w-4 h-4" />
-                              <span>Download</span>
-                            </button>
-                          )}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                )
-              })}
+              {filteredModels.map((model) => renderModelCard(model, viewMode === 'list'))}
             </div>
           )}
         </div>

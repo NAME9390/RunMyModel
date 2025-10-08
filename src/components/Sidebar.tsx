@@ -36,7 +36,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onShowAbout, onShowCustomModel
     addChat({
       title: 'New Chat',
       messages: [],
-      model: currentModel || availableModels[0]?.id || 'microsoft/DialoGPT-medium'
+      model: currentModel || availableModels[0]?.name || 'microsoft/DialoGPT-medium'
     })
   }
 
@@ -256,7 +256,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onShowAbout, onShowCustomModel
       {showModelSelector && (
         <ModelSelector 
           onSelectModel={(model) => {
-            setCurrentModel(model.id)
+            setCurrentModel(model.name)
             setShowModelSelector(false)
           }}
           onClose={() => setShowModelSelector(false)}

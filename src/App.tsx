@@ -1,8 +1,16 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ *
+ * Copyright (c) 2025 RunMyModel.org
+ */
+
 import { useState, useEffect } from 'react'
-import { invoke } from '@tauri-apps/api/core'
-import { listen } from '@tauri-apps/api/event'
-import { Sidebar } from './components/Sidebar'
-import { ChatWindow } from './components/ChatWindow'
+// import { invoke } from '@tauri-apps/api/core'
+// import { listen } from '@tauri-apps/api/event'
+import { ModernSidebar } from './components/ModernSidebar'
+import { ModernChatWindow } from './components/ModernChatWindow'
 import { SplashScreen } from './components/SplashScreen'
 import { AboutModal } from './components/AboutModal'
 import { WelcomePage } from './components/WelcomePage'
@@ -13,7 +21,7 @@ import { useAppStore } from './store/appStore'
 import { useChatStore } from './store/chatStore'
 import { useModelStore } from './store/modelStore'
 import { backendService } from './services/backendService'
-import { SystemInfo } from './types/system'
+// import { SystemInfo } from './types/system'
 
 type Page = 'welcome' | 'chat' | 'models' | 'custom-models'
 
@@ -33,8 +41,8 @@ function App() {
         await backendService.initialize()
         
         // Check system info
-        const systemInfo = await invoke<SystemInfo>('get_system_info')
-        console.log('System info:', systemInfo)
+        // const systemInfo = await invoke<SystemInfo>('get_system_info')
+        // console.log('System info:', systemInfo)
         
         // Load saved theme
         const savedTheme = localStorage.getItem('theme')
@@ -88,13 +96,13 @@ function App() {
 
   // Listen for Ollama events
   useEffect(() => {
-    const unlisten = listen('ollama-progress', (event) => {
-      console.log('Ollama progress:', event.payload)
-    })
+    // const unlisten = listen('ollama-progress', (event: any) => {
+    //   console.log('Ollama progress:', event.payload)
+    // })
 
-    return () => {
-      unlisten.then(fn => fn())
-    }
+    // return () => {
+    //   unlisten.then((fn: any) => fn())
+    // }
   }, [])
 
   // Listen for deep link events
@@ -102,29 +110,29 @@ function App() {
     const handleDeepLink = async () => {
       try {
         // Listen for protocol events
-        const unlisten = await listen('tauri://url', (event) => {
-          console.log('Deep link received:', event.payload)
-          const url = event.payload as string
+        // const unlisten = await listen('tauri://url', (event: any) => {
+        //   console.log('Deep link received:', event.payload)
+        //   const url = event.payload as string
           
-          // Parse the URL to extract model name
-          if (url.startsWith('runmymodel://install/')) {
-            const modelName = decodeURIComponent(url.replace('runmymodel://install/', ''))
-            console.log('Installing model from deep link:', modelName)
+        //   // Parse the URL to extract model name
+        //   if (url.startsWith('runmymodel://install/')) {
+        //     const modelName = decodeURIComponent(url.replace('runmymodel://install/', ''))
+        //     console.log('Installing model from deep link:', modelName)
             
-            // Install the model
-            invoke('install_model_from_url', { modelName })
-              .then((result) => {
-                console.log('Model installation result:', result)
-                // Refresh installed models
-                useModelStore.getState().refreshInstalledModels()
-              })
-              .catch((error) => {
-                console.error('Failed to install model:', error)
-              })
-          }
-        })
+        //     // Install the model
+        //     invoke('install_model_from_url', { modelName })
+        //       .then((result: any) => {
+        //         console.log('Model installation result:', result)
+        //         // Refresh installed models
+        //         useModelStore.getState().refreshInstalledModels()
+        //       })
+        //       .catch((error: any) => {
+        //         console.error('Failed to install model:', error)
+        //       })
+        //   }
+        // })
 
-        return unlisten
+        // return unlisten
       } catch (error) {
         console.error('Error setting up deep link listener:', error)
         return () => {}
@@ -153,20 +161,20 @@ function App() {
       case 'welcome':
         return <WelcomePage onGetStarted={() => setCurrentPage('chat')} />
       case 'chat':
-        return <ChatWindow />
+        return <ModernChatWindow />
       case 'models':
         return <ModelsPage onClose={() => setCurrentPage('chat')} />
       case 'custom-models':
         return <CustomModelPage onClose={() => setCurrentPage('chat')} />
       default:
-        return <ChatWindow />
+        return <ModernChatWindow />
     }
   }
 
   return (
     <div className="h-screen flex bg-gray-50 dark:bg-gray-900">
       {currentPage !== 'welcome' && (
-        <Sidebar 
+        <ModernSidebar 
           onShowAbout={() => setShowAbout(true)}
           onShowModels={() => setCurrentPage('models')}
           onShowCustomModels={() => setCurrentPage('custom-models')}

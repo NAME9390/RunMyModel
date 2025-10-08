@@ -1,313 +1,195 @@
 # RunMyModel Desktop
 
-A powerful desktop application that allows you to run large language models locally. Chat with models like LLaMA, Mistral, CodeLlama, and more in a beautiful interface.
+A modern desktop application for running Large Language Models (LLMs) locally using Hugging Face models. Built with React and TypeScript, featuring a clean, Open WebUI-inspired interface.
 
+## 🚀 Features
 
+- **Modern UI**: Clean, responsive interface inspired by Open WebUI
+- **Local AI**: Run LLMs locally on your machine using Hugging Face models
+- **Privacy-Focused**: All processing happens locally - no data sent to external servers
+- **Cross-Platform**: Works on Linux and Windows
+- **Dark Mode**: Built-in dark/light theme support
+- **Markdown Support**: Rich text rendering with syntax highlighting
+- **Model Management**: Easy model selection and management
 
-## ✨ Features
+## 📋 Prerequisites
 
-- **Local LLM Execution**: Run models locally using Ollama CLI integration
-- **ChatGPT-Style Interface**: Beautiful, responsive chat interface with markdown support
-- **Model Management**: Download, manage, and switch between different models
-- **System Prompts**: Pre-built prompts for different use cases (Creative, Coding, Research, etc.)
-- **Real-time Progress**: Track model downloads and generation progress
-- **Dark/Light Themes**: Toggle between themes for comfortable usage
-- **Cross-Platform**: Linux (available), Windows & macOS (coming soon)
-- **Offline Capable**: Once models are downloaded, works completely offline
-- **Professional Design**: Clean, modern UI with RunMyModel.org branding
+- **Node.js**: Version 18 or higher
+- **npm**: Comes with Node.js
+- **Modern Browser**: Chrome, Firefox, Edge, or Chromium
 
-## 🚀 Quick Start
+## 🛠️ Installation
 
-### Current Status
-- ✅ **Linux**: Fully functional AppImage available
-- 🔄 **Windows**: Coming soon (build issues being resolved)
-- 📅 **macOS**: Coming soon (planned for v1.0)
+### Quick Start
 
-### Prerequisites
-
-- Node.js 18+ and npm
-- Rust (for Tauri development)
-- Git
-- curl (for downloading dependencies)
-
-### Linux Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/NAME9390/RunMyModel.git
-cd RunMyModel/runmymodel-desktop
-
-# Build the AppImage
-./build_linux.sh
-
-# Run the AppImage
-./final-packages/RunMyModel\ Desktop_1.0.0_amd64.AppImage
-```
-
-### Manual Setup
-
-1. **Clone the repository**
+1. **Clone the repository**:
    ```bash
-   git clone https://github.com/runmymodel/runmymodel-desktop.git
+   git clone <repository-url>
    cd runmymodel-desktop
    ```
 
-2. **Install dependencies**
+2. **Build the application**:
+   ```bash
+   ./build.sh
+   ```
+
+3. **Run the application**:
+   - **Linux**: `./executables/linux/runmymodel-desktop.sh`
+   - **Windows**: `executables\windows\runmymodel-desktop.bat`
+
+### Development Setup
+
+1. **Install dependencies**:
    ```bash
    npm install
    ```
 
-3. **Download Ollama binaries**
+2. **Start development server**:
    ```bash
-   ./download-ollama.sh
+   npm run dev
    ```
+
+3. **Build for production**:
+   ```bash
+   npm run build
+   ```
+
+## 📦 Building
+
+The project includes a universal build script that creates executables for both Linux and Windows:
+
+```bash
+# Build for both platforms
+./build.sh
+
+# Build only for Linux
+./build.sh --linux-only
+
+# Build only for Windows
+./build.sh --windows-only
+
+# Skip creating distribution packages
+./build.sh --no-packages
+```
+
+### Build Output
+
+After building, you'll find the executables in the `executables/` directory:
+
+```
+executables/
+├── linux/
+│   ├── runmymodel-desktop.sh
+│   ├── runmymodel-desktop.desktop
+│   └── dist/
+└── windows/
+    ├── runmymodel-desktop.bat
+    ├── install.bat
+    └── dist/
+```
+
+## 🎯 Usage
+
+### Linux
+
+1. **Run directly**:
+   ```bash
+   ./executables/linux/runmymodel-desktop.sh
+   ```
+
+2. **Install system-wide**:
+   ```bash
+   # Copy desktop file to applications directory
+   cp executables/linux/runmymodel-desktop.desktop ~/.local/share/applications/
    
-   Or manually download from [GitHub releases](https://github.com/ollama/ollama/releases) and place in `src-tauri/binaries/`
+   # Make executable
+   chmod +x ~/.local/share/applications/runmymodel-desktop.desktop
+   ```
 
-4. **Create application icons**
-   
-   Create the required icon files in `src-tauri/icons/`:
-   - `32x32.png`, `128x128.png`, `128x128@2x.png`
-   - `icon.icns` (macOS), `icon.ico` (Windows)
+### Windows
 
-### Development
+1. **Run directly**:
+   ```cmd
+   executables\windows\runmymodel-desktop.bat
+   ```
 
-```bash
-# Start development server
-npm run tauri:dev
+2. **Install system-wide**:
+   ```cmd
+   executables\windows\install.bat
+   ```
 
-# Build for production
-npm run tauri:build
-
-# Build for specific platforms
-npm run build:windows
-npm run build:linux
-npm run build:macos
-npm run build:macos-arm
-```
-
-## 🏗️ Building Executables
-
-### One-Command Packaging (Recommended)
-
-```bash
-# Package everything automatically
-./setup-and-package.sh
-```
-
-### Individual Platform Packaging
-
-```bash
-# Package all platforms
-./package-all.sh
-
-# Package specific platforms
-./package-linux.sh      # Creates .AppImage and .deb
-./package-windows.bat    # Creates .exe and .msi
-./package-macos.sh       # Creates .app and .dmg
-```
-
-### Manual Build
-
-```bash
-# Install dependencies
-npm install
-
-# Build frontend
-npm run build
-
-# Build Tauri app
-npm run tauri:build
-```
-
-### Output Locations
-
-- **Linux**: `src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/`
-- **Windows**: `src-tauri/target/x86_64-pc-windows-msvc/release/bundle/`
-- **macOS Intel**: `src-tauri/target/x86_64-apple-darwin/release/bundle/`
-- **macOS ARM**: `src-tauri/target/aarch64-apple-darwin/release/bundle/`
-- **Packages**: `packages/` (after running packaging scripts)
-
-## 🎯 Supported Models
-
-RunMyModel Desktop supports all models available in Ollama's library:
-
-### Popular Models
-- **LLaMA 3.2** (3B, 1B) - Meta's latest language model
-- **Mistral 7B** - High-performance open-source model
-- **CodeLlama 7B** - Specialized for code generation
-- **Phi-3 Mini** - Microsoft's efficient small model
-- **Gemma 2B** - Google's lightweight model
-- **TinyLlama 1.1B** - Ultra-lightweight model
-- **Qwen 2.5** - Alibaba's multilingual model
-- **DeepSeek Coder** - Specialized coding assistant
-- **Starling LM** - Fine-tuned conversational model
-
-### Model Categories
-- **General Purpose**: LLaMA, Mistral, Gemma
-- **Code Generation**: CodeLlama, DeepSeek Coder, StarCoder
-- **Multimodal**: LLaVA, BakLLaVA
-- **Specialized**: Medical, Legal, Creative writing models
-- **Enterprise**: Granite, Ring, Ultra-Large models
-
-## 🎨 System Prompts
-
-Choose from pre-built system prompts or create your own:
-
-- **Creative Writer**: Storytelling and artistic expression
-- **Code Assistant**: Programming and debugging help
-- **Data Analyst**: Data analysis and research
-- **Research Assistant**: Academic research and fact-checking
-- **General Assistant**: Helpful, harmless, and honest AI
-
-## ⚙️ Configuration
-
-The app stores configuration in local storage:
-
-```json
-{
-  "theme": "light|dark",
-  "currentModel": "llama3.2:3b",
-  "sidebarCollapsed": false,
-  "chats": [...],
-  "systemPrompts": [...]
-}
-```
-
-## 🛠️ Technology Stack
-
-### Frontend
-- **React 18** - UI framework
-- **TypeScript** - Type safety
-- **Tailwind CSS** - Styling
-- **Zustand** - State management
-- **React Markdown** - Markdown rendering
-- **Lucide React** - Icons
-
-### Backend
-- **Tauri** - Desktop app framework
-- **Rust** - System integration
-- **Ollama CLI** - LLM execution engine
-
-### Build Tools
-- **Vite** - Frontend bundler
-- **Tauri CLI** - Desktop app builder
-- **Cross-platform** - Windows, macOS, Linux
-
-## 📁 Project Structure
+## 🏗️ Project Structure
 
 ```
 runmymodel-desktop/
-├── src/                          # Frontend source
-│   ├── components/               # React components
-│   │   ├── Sidebar.tsx          # Main sidebar
-│   │   ├── ChatWindow.tsx       # Chat interface
-│   │   ├── ModelManager.tsx     # Model management
-│   │   ├── SystemPromptSelector.tsx
-│   │   ├── AboutModal.tsx       # About dialog
-│   │   └── SplashScreen.tsx     # Loading screen
-│   ├── store/                   # State management
-│   │   ├── appStore.ts          # App state
-│   │   ├── chatStore.ts         # Chat state
-│   │   └── modelStore.ts        # Model state
-│   ├── services/                # Services
-│   │   └── ollamaService.ts     # Ollama integration
-│   ├── types/                   # TypeScript types
-│   │   └── system.ts            # System types
-│   └── lib/                     # Utilities
-│       └── utils.ts             # Helper functions
-├── src-tauri/                   # Backend source
-│   ├── src/
-│   │   └── main.rs              # Rust backend
-│   ├── binaries/                # Ollama binaries
-│   ├── icons/                   # App icons
-│   ├── Cargo.toml               # Rust dependencies
-│   └── tauri.conf.json          # Tauri config
-├── build.sh                     # Linux/macOS build script
-├── build.bat                    # Windows build script
-└── package.json                 # Node.js dependencies
+├── src/                    # Source code
+│   ├── components/         # React components
+│   │   ├── ui/            # Reusable UI components
+│   │   ├── ModernChatWindow.tsx
+│   │   └── ModernSidebar.tsx
+│   ├── store/             # State management
+│   ├── services/          # API services
+│   └── types/             # TypeScript types
+├── executables/           # Built executables (gitignored)
+├── dist/                  # Frontend build output
+├── build.sh              # Universal build script
+├── package.json          # Dependencies and scripts
+└── README.md             # This file
 ```
 
 ## 🔧 Development
 
-### Adding New Features
+### Available Scripts
 
-1. **Frontend**: Add components in `src/components/`
-2. **Backend**: Add Tauri commands in `src-tauri/src/main.rs`
-3. **State**: Update stores in `src/store/`
-4. **Types**: Add types in `src/types/`
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
+- `npm run type-check` - Run TypeScript type checking
 
-### Debugging
+### Tech Stack
 
-```bash
-# Enable debug logging
-RUST_LOG=debug npm run tauri:dev
+- **Frontend**: React 18, TypeScript, Tailwind CSS
+- **Build Tool**: Vite
+- **State Management**: Zustand
+- **UI Components**: Custom components with Radix UI primitives
+- **Styling**: Tailwind CSS with custom design system
 
-# Check console logs
-# Open DevTools in the app (Ctrl+Shift+I)
-```
+## 📄 License
 
-### Testing
-
-```bash
-# Type checking
-npm run type-check
-
-# Linting
-npm run lint
-
-# Build verification
-npm run build
-```
-
-## 🚀 Deployment
-
-### Creating Installers
-
-The built executables can be packaged into installers:
-
-- **Windows**: Use NSIS or WiX for `.msi` installers
-- **macOS**: Use `create-dmg` for `.dmg` files
-- **Linux**: Use `appimagetool` for `.AppImage` files
-
-### Distribution
-
-1. Build executables for all platforms
-2. Create installers/packages
-3. Test on target systems
-4. Upload to release platforms
-5. Update documentation
+This project is licensed under the Mozilla Public License 2.0 (MPL-2.0). See the [LICENSE](LICENSE) file for details.
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
-
-### Development Setup
-
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
+2. Create a feature branch: `git checkout -b feature-name`
+3. Commit your changes: `git commit -am 'Add feature'`
+4. Push to the branch: `git push origin feature-name`
 5. Submit a pull request
 
+## 🐛 Troubleshooting
+
+### Common Issues
+
+1. **Build fails**: Ensure Node.js 18+ is installed
+2. **App won't start**: Check that a modern browser is installed
+3. **Models not loading**: Verify internet connection for initial model downloads
+
+### Getting Help
+
+- Check the [Issues](https://github.com/your-repo/issues) page
+- Create a new issue with detailed information about your problem
+
+## 📈 Roadmap
+
+- [ ] Native desktop app wrapper (Electron/Tauri)
+- [ ] Model download progress indicators
+- [ ] Chat export/import functionality
+- [ ] Plugin system for custom models
+- [ ] Voice input/output support
 
 ## 🙏 Acknowledgments
 
-- [Ollama](https://ollama.ai) - For the amazing LLM runtime
-- [Tauri](https://tauri.app) - For the desktop app framework
-- [RunMyModel.org](https://runmymodel.org) - For inspiration and support
-
-## 📞 Support
-
-- **Website**: [RunMyModel.org](https://runmymodel.org)
-
-## 🔗 Links
-
-- [RunMyModel.org](https://runmymodel.org) - Main website
-- [Ollama](https://ollama.ai) - LLM runtime
-- [Tauri](https://tauri.app) - Desktop app framework
-- [Model Library](https://ollama.ai/library) - Available models
-
----
-
-Made with ❤️ by [RunMyModel.org](https://runmymodel.org)
+- Inspired by [Open WebUI](https://github.com/open-webui/open-webui) design patterns
+- Built with [Hugging Face](https://huggingface.co/) models
+- UI components based on [Radix UI](https://www.radix-ui.com/) primitives

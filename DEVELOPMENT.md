@@ -1,152 +1,259 @@
-# RunMyModel Desktop - Development Setup
+# Development Guide
 
-This guide will help you set up RunMyModel Desktop for development.
+This document provides detailed information for developers working on RunMyModel Desktop.
 
-## Prerequisites
+## 🏗️ Architecture
 
-- Node.js 18+ and npm
-- Rust (latest stable)
-- Git
-- Ollama CLI (for testing)
+### Frontend Architecture
 
-## Quick Setup
+The application follows a modern React architecture with the following key components:
 
-1. **Clone and install**
-   ```bash
-   git clone https://github.com/runmymodel/runmymodel-desktop.git
-   cd runmymodel-desktop
-   npm install
-   ```
+- **Components**: Reusable UI components in `src/components/`
+- **Stores**: State management using Zustand in `src/store/`
+- **Services**: API and backend communication in `src/services/`
+- **Types**: TypeScript type definitions in `src/types/`
 
-2. **Download Ollama binaries**
-   
-   Get the latest Ollama binaries from [GitHub releases](https://github.com/ollama/ollama/releases):
-   
-   ```bash
-   # Create binaries directory
-   mkdir -p src-tauri/binaries
-   
-   # Download binaries (replace URLs with latest versions)
-   curl -L -o src-tauri/binaries/ollama-linux-amd64 https://github.com/ollama/ollama/releases/latest/download/ollama-linux-amd64
-   curl -L -o src-tauri/binaries/ollama-windows-amd64.exe https://github.com/ollama/ollama/releases/latest/download/ollama-windows-amd64.exe
-   curl -L -o src-tauri/binaries/ollama-darwin-amd64 https://github.com/ollama/ollama/releases/latest/download/ollama-darwin-amd64
-   curl -L -o src-tauri/binaries/ollama-darwin-arm64 https://github.com/ollama/ollama/releases/latest/download/ollama-darwin-arm64
-   
-   # Make Linux binary executable
-   chmod +x src-tauri/binaries/ollama-linux-amd64
-   chmod +x src-tauri/binaries/ollama-darwin-amd64
-   chmod +x src-tauri/binaries/ollama-darwin-arm64
-   ```
+### State Management
 
-3. **Create application icons**
-   
-   You'll need to create icon files in `src-tauri/icons/`:
-   - `32x32.png`
-   - `128x128.png`
-   - `128x128@2x.png`
-   - `icon.icns` (macOS)
-   - `icon.ico` (Windows)
-   
-   For now, you can use placeholder icons or create simple ones using online tools.
+The application uses Zustand for state management with three main stores:
 
-4. **Start development**
-   ```bash
-   npm run tauri:dev
-   ```
+1. **AppStore**: Global application state (theme, settings)
+2. **ChatStore**: Chat-related state (messages, conversations)
+3. **ModelStore**: Model management state (installed models, current model)
 
-## Development Commands
+### Component Structure
+
+```
+src/components/
+├── ui/                    # Reusable UI components
+│   ├── button.tsx        # Button component with variants
+│   ├── input.tsx         # Input component
+│   ├── textarea.tsx      # Textarea component
+│   └── card.tsx          # Card component
+├── ModernChatWindow.tsx  # Main chat interface
+├── ModernSidebar.tsx     # Sidebar with navigation
+└── ...                   # Other components
+```
+
+## 🎨 Design System
+
+### Color Palette
+
+The application uses a custom design system with CSS variables:
+
+```css
+:root {
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+  --primary: 221.2 83.2% 53.3%;
+  --secondary: 210 40% 96%;
+  --muted: 210 40% 96%;
+  --accent: 210 40% 96%;
+  --destructive: 0 84.2% 60.2%;
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 221.2 83.2% 53.3%;
+}
+```
+
+### Dark Mode
+
+Dark mode is implemented using CSS custom properties and Tailwind's dark mode classes:
+
+```css
+.dark {
+  --background: 222.2 84% 4.9%;
+  --foreground: 210 40% 98%;
+  /* ... other dark mode variables */
+}
+```
+
+## 🔧 Build System
+
+### Vite Configuration
+
+The project uses Vite for building with the following configuration:
+
+- **TypeScript**: Full TypeScript support with type checking
+- **Tailwind CSS**: Utility-first CSS framework
+- **PostCSS**: CSS processing with autoprefixer
+- **Hot Module Replacement**: Fast development with HMR
+
+### Build Process
+
+1. **TypeScript Compilation**: `tsc --noEmit`
+2. **Frontend Build**: `vite build`
+3. **Asset Optimization**: Minification and compression
+4. **Platform Packaging**: Linux and Windows executables
+
+## 📦 Packaging
+
+### Universal Build Script
+
+The `build.sh` script handles cross-platform builds:
 
 ```bash
-# Development server
-npm run tauri:dev
+#!/bin/bash
+# Builds for Linux and Windows
+# Creates distribution packages
+# Handles dependencies and prerequisites
+```
 
-# Build frontend only
-npm run build
+### Platform-Specific Packaging
 
-# Build for production
-npm run tauri:build
+#### Linux
+- Shell script launcher
+- Desktop entry file
+- TAR.GZ distribution package
 
-# Build for specific platforms
-npm run build:windows
-npm run build:linux
-npm run build:macos
-npm run build:macos-arm
+#### Windows
+- Batch file launcher
+- Installer script
+- ZIP distribution package
 
-# Type checking
+## 🧪 Testing
+
+### Type Checking
+
+```bash
 npm run type-check
+```
 
-# Linting
+### Linting
+
+```bash
 npm run lint
 ```
 
-## Project Structure
+### Manual Testing
 
-```
-runmymodel-desktop/
-├── src/                    # Frontend (React + TypeScript)
-│   ├── components/         # React components
-│   ├── store/             # Zustand stores
-│   ├── services/          # API services
-│   ├── types/             # TypeScript types
-│   └── lib/               # Utilities
-├── src-tauri/             # Backend (Rust + Tauri)
-│   ├── src/               # Rust source
-│   ├── binaries/          # Ollama binaries
-│   ├── icons/             # App icons
-│   └── Cargo.toml         # Rust dependencies
-├── build.sh               # Build script (Linux/macOS)
-├── build.bat              # Build script (Windows)
-└── package.json           # Node.js dependencies
-```
+1. **Development Server**: `npm run dev`
+2. **Production Build**: `npm run build && npm run preview`
+3. **Cross-Platform**: Test on both Linux and Windows
 
-## Troubleshooting
+## 🚀 Deployment
+
+### Development Deployment
+
+1. **Local Development**:
+   ```bash
+   npm run dev
+   ```
+
+2. **Production Build**:
+   ```bash
+   ./build.sh
+   ```
+
+### Distribution
+
+1. **Create Packages**:
+   ```bash
+   ./build.sh
+   ```
+
+2. **Upload to Releases**:
+   - Linux: `executables/runmymodel-desktop-linux.tar.gz`
+   - Windows: `executables/runmymodel-desktop-windows.zip`
+
+## 🔍 Debugging
+
+### Development Tools
+
+- **React DevTools**: Browser extension for React debugging
+- **TypeScript**: Compile-time error checking
+- **ESLint**: Code quality and style checking
+- **Browser DevTools**: Runtime debugging
 
 ### Common Issues
 
-1. **Rust not found**
-   ```bash
-   # Install Rust
-   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-   source ~/.cargo/env
-   ```
+1. **Build Failures**: Check Node.js version and dependencies
+2. **Type Errors**: Run `npm run type-check` for detailed errors
+3. **Styling Issues**: Verify Tailwind CSS classes and custom properties
 
-2. **Tauri CLI not found**
-   ```bash
-   # Install Tauri CLI
-   npm install -g @tauri-apps/cli
-   ```
+## 📝 Code Style
 
-3. **Ollama binary not found**
-   - Ensure binaries are in `src-tauri/binaries/`
-   - Check file permissions (Linux/macOS)
-   - Verify binary architecture matches your system
+### TypeScript
 
-4. **Build errors**
-   - Clear node_modules: `rm -rf node_modules && npm install`
-   - Clear Rust cache: `cargo clean`
-   - Check Rust version: `rustc --version`
+- Use strict TypeScript configuration
+- Define proper interfaces for all data structures
+- Use type assertions sparingly
+- Prefer type guards over type assertions
 
-### Debug Mode
+### React
 
-```bash
-# Enable debug logging
-RUST_LOG=debug npm run tauri:dev
+- Use functional components with hooks
+- Implement proper error boundaries
+- Use React.memo for performance optimization
+- Follow React best practices for state management
 
-# Check console logs in DevTools (Ctrl+Shift+I)
+### CSS
+
+- Use Tailwind CSS utility classes
+- Define custom CSS variables for theming
+- Use CSS modules for component-specific styles
+- Follow mobile-first responsive design
+
+## 🔄 State Management Patterns
+
+### Zustand Stores
+
+```typescript
+// Example store structure
+interface AppState {
+  // State
+  theme: 'light' | 'dark'
+  
+  // Actions
+  setTheme: (theme: 'light' | 'dark') => void
+}
+
+export const useAppStore = create<AppState>()(
+  persist(
+    (set) => ({
+      theme: 'light',
+      setTheme: (theme) => set({ theme }),
+    }),
+    {
+      name: 'app-store',
+      storage: createJSONStorage(() => localStorage),
+    }
+  )
+)
 ```
 
-## Next Steps
+### Component State
 
-1. **Test the app**: Try downloading and running a model
-2. **Make changes**: Modify components or add features
-3. **Build**: Create production builds for your platform
-4. **Contribute**: Submit pull requests for improvements
+- Use local state for component-specific data
+- Use stores for shared application state
+- Implement proper state updates and side effects
 
-## Resources
+## 🌐 API Integration
 
-- [Tauri Documentation](https://tauri.app/v1/guides/)
+### Backend Services
+
+The application integrates with backend services through:
+
+- **Hugging Face API**: Model inference and management
+- **Local Backend**: C++ backend for system integration
+- **File System**: Local file operations and storage
+
+### Error Handling
+
+```typescript
+try {
+  const response = await api.call()
+  // Handle success
+} catch (error) {
+  console.error('API Error:', error)
+  // Handle error state
+}
+```
+
+## 📚 Resources
+
 - [React Documentation](https://react.dev/)
-- [Ollama Documentation](https://ollama.ai/docs)
-- [RunMyModel.org](https://runmymodel.org)
-
-Happy coding! 🚀
+- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
+- [Tailwind CSS Docs](https://tailwindcss.com/docs)
+- [Zustand Guide](https://github.com/pmndrs/zustand)
+- [Vite Guide](https://vitejs.dev/guide/)
