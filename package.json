@@ -1,6 +1,6 @@
 {
   "name": "runmymodel-desktop",
-  "version": "1.0.0",
+  "version": "0.2.0-ALPHA",
   "description": "RunMyModel Desktop - Run LLMs locally with Hugging Face",
   "main": "index.js",
   "scripts": {

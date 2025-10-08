@@ -70,9 +70,18 @@ export class BackendService {
   private cachedModels: HuggingFaceModelInfo[] = []
   private lastFetchTime: number = 0
   private readonly CACHE_DURATION = 30 * 60 * 1000 // 30 minutes
-  private readonly API_BASE_URL = 'http://localhost:8080/api'
+  private API_BASE_URL = 'http://localhost:8080/api'
 
-  private constructor() {}
+  private constructor() {
+    // Allow overriding backend port via global (injected from Qt) or window var
+    try {
+      // @ts-ignore
+      const runtimePort = (window as any)?.__BACKEND_PORT__
+      if (runtimePort && typeof runtimePort === 'number') {
+        this.API_BASE_URL = `http://localhost:${runtimePort}/api`
+      }
+    } catch {}
+  }
 
   public static getInstance(): BackendService {
     if (!BackendService.instance) {

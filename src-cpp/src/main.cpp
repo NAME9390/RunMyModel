@@ -1,12 +1,15 @@
 #include <QApplication>
+#include "backend.h"
 #include <QWebEngineView>
 #include <QWebEngineProfile>
 #include <QWebChannel>
+#include <QWebEngineScript>
+#include <QWebEngineProfile>
+#include <QtWebEngineCore/QWebEngineScriptCollection>
 #include <QDir>
 #include <QStandardPaths>
 #include <QMessageBox>
 #include <QDebug>
-#include "backend.h"
 
 int main(int argc, char *argv[])
 {
@@ -14,7 +17,7 @@ int main(int argc, char *argv[])
     
     // Set application properties
     app.setApplicationName("RunMyModel Desktop");
-    app.setApplicationVersion("1.0.0");
+    app.setApplicationVersion("0.2.0-ALPHA");
     app.setOrganizationName("RunMyModel.org");
     
     // Create main window
@@ -22,68 +25,43 @@ int main(int argc, char *argv[])
     webView->setWindowTitle("RunMyModel Desktop");
     webView->resize(1200, 800);
     
-    // Create backend
+    // Start backend server
     Backend *backend = new Backend();
-    
-    // Setup web channel for communication
-    QWebChannel *channel = new QWebChannel();
-    channel->registerObject("backend", backend);
-    
-    QWebEnginePage *page = webView->page();
-    page->setWebChannel(channel);
-    
-    // Load the frontend
+    backend->startWebServer();
+
+    // Load frontend from filesystem
     QString frontendPath = QDir::currentPath() + "/dist/index.html";
+    
     if (QFile::exists(frontendPath)) {
-        page->load(QUrl::fromLocalFile(frontendPath));
+        // Load from filesystem
+        // Inject backend port so the frontend uses the correct API base
+        {
+            QWebEngineScript script;
+            script.setName("inject-backend-port");
+            script.setInjectionPoint(QWebEngineScript::DocumentCreation);
+            script.setWorldId(QWebEngineScript::MainWorld);
+            const QString code = QString("window.__BACKEND_PORT__=%1;").arg(backend->getWebServerPort());
+            script.setSourceCode(code);
+            webView->page()->profile()->scripts()->insert(script);
+        }
+        QUrl url = QUrl::fromLocalFile(frontendPath);
+        webView->load(url);
+        qDebug() << "Loading frontend from filesystem:" << frontendPath;
     } else {
-        // Fallback to a simple HTML page if dist doesn't exist
-        QString html = R"(
-<!DOCTYPE html>
-<html>
-<head>
-    <title>RunMyModel Desktop</title>
-    <meta charset="utf-8">
-    <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
-</head>
-<body>
-    <h1>RunMyModel Desktop</h1>
-    <p>Loading...</p>
-    <script>
-        new QWebChannel(qt.webChannelTransport, function (channel) {
-            window.backend = channel.objects.backend;
-            console.log('Backend connected:', window.backend);
-            
-            // Test backend connection
-            if (window.backend) {
-                window.backend.getSystemInfo().then(function(info) {
-                    console.log('System info:', info);
-                    document.body.innerHTML = '<h1>RunMyModel Desktop</h1><p>Backend connected successfully!</p><pre>' + JSON.stringify(info, null, 2) + '</pre>';
-                }).catch(function(error) {
-                    console.error('Error getting system info:', error);
-                    document.body.innerHTML = '<h1>RunMyModel Desktop</h1><p>Error connecting to backend: ' + error + '</p>';
-                });
-            }
-        });
-    </script>
-</body>
-</html>
-        )";
-        page->setHtml(html);
+        // Simple fallback HTML
+        QString html = "<!DOCTYPE html><html><head><title>RunMyModel Desktop</title></head><body><h1>RunMyModel Desktop</h1><p>Qt Desktop Application is running!</p><p>Frontend files not found at: " + frontendPath + "</p></body></html>";
+        webView->setHtml(html);
+        qDebug() << "Using simple fallback HTML";
     }
     
     // Show the window
     webView->show();
-    
-    // Start backend services
-    backend->startWebServer();
     
     int result = app.exec();
     
     // Cleanup
     backend->stopWebServer();
     delete backend;
-    delete channel;
     delete webView;
     
     return result;

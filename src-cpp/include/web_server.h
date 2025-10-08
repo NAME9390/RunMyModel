@@ -5,7 +5,8 @@
 #include <QString>
 #include <QJsonObject>
 #include <QJsonArray>
-#include <QHttpServer>
+#include <QTcpServer>
+#include <QTcpSocket>
 #include <QWebEngineView>
 #include <QWebEnginePage>
 #include <QWebChannel>
@@ -24,14 +25,17 @@ public:
     bool startServer(quint16 port = 8080);
     void stopServer();
     bool isRunning() const;
+    quint16 port() const { return m_port; }
 
     void setBackend(Backend *backend);
 
 private slots:
+    void onNewConnection();
     void onWebChannelObjectReceived(const QJsonObject &message);
+    void onSocketReadyRead();
 
 private:
-    QHttpServer *m_httpServer;
+    QTcpServer *m_tcpServer;
     QWebEngineView *m_webView;
     QWebEnginePage *m_webPage;
     QWebChannel *m_webChannel;
@@ -39,8 +43,8 @@ private:
     quint16 m_port;
     bool m_running;
 
-    void setupRoutes();
     void setupWebChannel();
+    void handleHttpRequest(QTcpSocket *socket, const QString &request);
     QJsonObject handleApiRequest(const QString &endpoint, const QJsonObject &data);
     
     // API endpoints

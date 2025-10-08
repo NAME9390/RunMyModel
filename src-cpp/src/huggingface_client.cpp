@@ -11,6 +11,7 @@
 #include <QUrl>
 #include <QDebug>
 #include <QTimer>
+#include <QCoreApplication>
 
 HuggingFaceClient::HuggingFaceClient(QObject *parent)
     : QObject(parent)
@@ -35,34 +36,88 @@ QJsonArray HuggingFaceClient::getAvailableModels()
 {
     QJsonArray models;
     
-    // Read models from models.txt file
-    QFile modelsFile("models.txt");
+    // Determine candidate locations for llms.txt/models.txt
+    const QString appDir = QCoreApplication::applicationDirPath();
+    const QString cwdDir = QDir::currentPath();
+    const QStringList candidates = {
+        appDir + "/llms.txt",
+        appDir + "/models.txt",
+        cwdDir + "/llms.txt",
+        cwdDir + "/models.txt",
+        appDir + "/dist/llms.txt",
+        appDir + "/dist/models.txt"
+    };
+
+    QString pickedPath;
+    for (const QString &p : candidates) {
+        if (QFile::exists(p)) { pickedPath = p; break; }
+    }
+
+    QFile modelsFile(pickedPath);
     if (!modelsFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qWarning() << "Could not open models.txt file";
+        qWarning() << "Could not open llms.txt or models.txt file from candidates" << candidates;
         return models;
     }
     
     QTextStream in(&modelsFile);
     while (!in.atEnd()) {
         QString line = in.readLine().trimmed();
-        
-        // Skip empty lines and comments
         if (line.isEmpty() || line.startsWith('#')) {
             continue;
         }
-        
-        // Parse CSV format: Model Name, Parameter Size, Task Type, Rating, Hugging Face URL
+        // Format: name, size, task, url  OR  name, size, task, rating/downloads, url
         QStringList parts = line.split(',');
-        if (parts.size() >= 5) {
-            QString modelName = parts[0].trimmed();
-            QString size = parts[1].trimmed();
-            QString taskType = parts[2].trimmed();
-            int rating = parts[3].trimmed().toInt();
-            QString url = parts[4].trimmed();
-            
-            QJsonObject model = parseModelInfo(modelName, size, taskType, rating, url);
-            models.append(model);
+        for (int i = 0; i < parts.size(); ++i) parts[i] = parts[i].trimmed();
+        
+        // Need at least 4 fields: name, size, task, url
+        if (parts.size() < 4) continue;
+
+        const QString modelName = parts[0];
+        const QString size = parts[1];
+        QString taskType = parts[2];
+        int ratingOrDownloads = 0;
+        QString url;
+
+        // Determine if we have 4 or 5+ fields
+        if (parts.size() == 4) {
+            // Format: name, size, task, url
+            url = parts[3];
+        } else {
+            // Format: name, size, task, rating/downloads, url
+            url = parts.last();
+            QString token = parts[3];
+            // Parse rating/downloads (may contain 'k' suffix)
+            bool ok = false;
+            QString cleanToken = token.toLower();
+            bool hasK = cleanToken.contains('k');
+            cleanToken.remove(QChar('k')).remove(QChar(','));
+            double val = cleanToken.toDouble(&ok);
+            if (ok) {
+                ratingOrDownloads = static_cast<int>(val * (hasK ? 1000 : 1));
+            }
         }
+
+        // Normalize task type labels
+        const QString t = taskType.toLower();
+        if (t.contains("text-to-image") || t == "text to image" || t == "image" || t == "t2i") {
+            taskType = "Text-to-Image";
+        } else if (t.contains("text-to-video") || t == "text to video" || t == "video" || t == "t2v") {
+            taskType = "Text-to-Video";
+        } else if (t.contains("tts") || t.contains("text-to-speech") || t == "speech") {
+            taskType = "Text-to-Speech";
+        } else if (t.contains("text generation") || t == "text") {
+            taskType = "Text Generation";
+        } else {
+            taskType = "Text Generation";  // Default
+        }
+
+        QJsonObject model = parseModelInfo(modelName, size, taskType, ratingOrDownloads, url);
+        models.append(model);
+    }
+    if (models.isEmpty()) {
+        qWarning() << "Parsed 0 models from" << pickedPath;
+    } else {
+        qDebug() << "Parsed" << models.size() << "models from" << pickedPath;
     }
     
     return models;

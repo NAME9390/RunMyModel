@@ -35,6 +35,9 @@ public:
     // Chat functionality
     Q_INVOKABLE QJsonObject chatWithHuggingFace(const QJsonObject &request);
 
+    // Expose web server port to the UI
+    Q_INVOKABLE int getWebServerPort() const;
+
 public slots:
     void startWebServer();
     void stopWebServer();

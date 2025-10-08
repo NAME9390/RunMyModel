@@ -9,6 +9,8 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  // Ensure built asset URLs are relative so file:// loading works in Qt
+  base: './',
   clearScreen: false,
   server: {
     port: 1420,

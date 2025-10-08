@@ -6,6 +6,7 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QStandardPaths>
+#include <QCoreApplication>
 #include <QTextStream>
 #include <QDebug>
 
@@ -156,9 +157,13 @@ void ModelManager::refreshModelList()
 
 void ModelManager::loadModelsFromFile()
 {
-    QFile modelsFile("models.txt");
+    // Look for llms.txt first in app dir, then models.txt
+    const QString appDir = QCoreApplication::applicationDirPath();
+    const QString llmsPath = appDir + "/llms.txt";
+    const QString modelsPath = appDir + "/models.txt";
+    QFile modelsFile(QFile::exists(llmsPath) ? llmsPath : modelsPath);
     if (!modelsFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qWarning() << "Could not open models.txt file";
+        qWarning() << "Could not open llms.txt or models.txt file";
         return;
     }
     
@@ -188,8 +193,8 @@ void ModelManager::loadModelsFromFile()
         }
     }
     
-    // Watch the models.txt file for changes
-    m_fileWatcher->addPath("models.txt");
+    // Watch the file for changes
+    m_fileWatcher->addPath(modelsFile.fileName());
 }
 
 void ModelManager::scanInstalledModels()
@@ -216,7 +221,9 @@ void ModelManager::scanInstalledModels()
 QString ModelManager::getCacheDirectory() const
 {
     QString cacheDir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
-    return cacheDir + "/huggingface/hub";
+    const QString path = cacheDir + "/huggingface/hub";
+    QDir().mkpath(path);
+    return path;
 }
 
 QJsonObject ModelManager::modelInfoToJson(const ModelInfo &info) const

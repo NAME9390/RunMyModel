@@ -1,22 +1,33 @@
 # RunMyModel Desktop
 
-A modern desktop application for running Large Language Models (LLMs) locally using Hugging Face models. Built with React and TypeScript, featuring a clean, Open WebUI-inspired interface.
+A modern Qt desktop application for running Large Language Models (LLMs) locally using Hugging Face models. Built with Qt6, C++, React, and TypeScript, featuring a clean, Open WebUI-inspired interface.
+
+**Version**: 0.2.0 ALPHA
 
 ## 🚀 Features
 
-- **Modern UI**: Clean, responsive interface inspired by Open WebUI
+- **Native Desktop App**: Built with Qt6 for true native performance
+- **Modern UI**: Clean, responsive React interface inspired by Open WebUI
 - **Local AI**: Run LLMs locally on your machine using Hugging Face models
 - **Privacy-Focused**: All processing happens locally - no data sent to external servers
 - **Cross-Platform**: Works on Linux and Windows
+- **360+ Models**: Access to hundreds of pre-configured models from Hugging Face
 - **Dark Mode**: Built-in dark/light theme support
 - **Markdown Support**: Rich text rendering with syntax highlighting
-- **Model Management**: Easy model selection and management
+- **Model Management**: Easy model selection, download, and management
 
 ## 📋 Prerequisites
 
+### For Users
+- **Linux**: Qt6 runtime libraries
+- **Windows**: Bundled dependencies (no installation required)
+
+### For Developers
 - **Node.js**: Version 18 or higher
 - **npm**: Comes with Node.js
-- **Modern Browser**: Chrome, Firefox, Edge, or Chromium
+- **Qt6**: Qt6 development packages (qt6-base-dev, qt6-webengine-dev)
+- **CMake**: Version 3.16 or higher
+- **C++ Compiler**: g++ or clang with C++17 support
 
 ## 🛠️ Installation
 
@@ -30,12 +41,17 @@ A modern desktop application for running Large Language Models (LLMs) locally us
 
 2. **Build the application**:
    ```bash
+   ./proper_build.sh
+   ```
+   Or use the full build script for packaging:
+   ```bash
    ./build.sh
    ```
 
 3. **Run the application**:
-   - **Linux**: `./executables/linux/runmymodel-desktop.sh`
-   - **Windows**: `executables\windows\runmymodel-desktop.bat`
+   - **From build directory**: `./build/RunMyModelDesktop`
+   - **Linux package**: `./executables/linux/runmymodel-desktop.sh`
+   - **Windows package**: `executables\windows\runmymodel-desktop.bat`
 
 ### Development Setup
 
@@ -122,18 +138,29 @@ executables/
 
 ```
 runmymodel-desktop/
-├── src/                    # Source code
+├── src/                    # Frontend source code (React/TypeScript)
 │   ├── components/         # React components
 │   │   ├── ui/            # Reusable UI components
 │   │   ├── ModernChatWindow.tsx
 │   │   └── ModernSidebar.tsx
-│   ├── store/             # State management
+│   ├── store/             # State management (Zustand)
 │   ├── services/          # API services
 │   └── types/             # TypeScript types
-├── executables/           # Built executables (gitignored)
+├── src-cpp/               # C++ backend source code
+│   ├── include/           # C++ header files
+│   │   ├── backend.h
+│   │   ├── web_server.h
+│   │   ├── model_manager.h
+│   │   └── huggingface_client.h
+│   └── src/               # C++ implementation files
+├── build/                 # CMake build output (gitignored)
+├── executables/           # Packaged executables (gitignored)
 ├── dist/                  # Frontend build output
-├── build.sh              # Universal build script
-├── package.json          # Dependencies and scripts
+├── llms.txt              # Model definitions (360+ models)
+├── CMakeLists.txt        # CMake configuration
+├── proper_build.sh       # Quick build script
+├── build.sh              # Full build script with packaging
+├── package.json          # Frontend dependencies
 └── README.md             # This file
 ```
 
@@ -149,11 +176,13 @@ runmymodel-desktop/
 
 ### Tech Stack
 
+- **Desktop Framework**: Qt6 (C++)
 - **Frontend**: React 18, TypeScript, Tailwind CSS
-- **Build Tool**: Vite
+- **Build Tool**: Vite (frontend), CMake (C++ backend)
 - **State Management**: Zustand
 - **UI Components**: Custom components with Radix UI primitives
 - **Styling**: Tailwind CSS with custom design system
+- **Backend**: C++ with Qt6 WebEngine, Network, and WebChannel
 
 ## 📄 License
 
@@ -171,9 +200,19 @@ This project is licensed under the Mozilla Public License 2.0 (MPL-2.0). See the
 
 ### Common Issues
 
-1. **Build fails**: Ensure Node.js 18+ is installed
-2. **App won't start**: Check that a modern browser is installed
-3. **Models not loading**: Verify internet connection for initial model downloads
+1. **Build fails**: 
+   - Ensure Node.js 18+ is installed
+   - Ensure Qt6 development packages are installed
+   - Ensure CMake 3.16+ is installed
+2. **App won't start**: 
+   - Check that Qt6 runtime libraries are installed
+   - Check that `llms.txt` is in the same directory as the executable
+3. **0 models available**: 
+   - Ensure `llms.txt` is in the build directory
+   - Check console output for parsing errors
+4. **Blank screen**: 
+   - Ensure `dist/` folder is next to the executable
+   - Check browser console for errors (Ctrl+Shift+I)
 
 ### Getting Help
 
@@ -182,11 +221,14 @@ This project is licensed under the Mozilla Public License 2.0 (MPL-2.0). See the
 
 ## 📈 Roadmap
 
-- [ ] Native desktop app wrapper (Electron/Tauri)
-- [ ] Model download progress indicators
+- [x] Native Qt desktop application
+- [x] 360+ pre-configured models from Hugging Face
+- [ ] Actual model download implementation
+- [ ] Model inference engine (llama.cpp integration)
 - [ ] Chat export/import functionality
 - [ ] Plugin system for custom models
 - [ ] Voice input/output support
+- [ ] AppImage and Windows installer packaging
 
 ## 🙏 Acknowledgments
 

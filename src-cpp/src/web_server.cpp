@@ -3,16 +3,18 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
-#include <QHttpServer>
+#include <QTcpServer>
+#include <QTcpSocket>
 #include <QWebEngineView>
 #include <QWebEnginePage>
 #include <QWebChannel>
-#include <QTcpServer>
+#include <QHostAddress>
 #include <QDebug>
+#include <QTextStream>
 
 WebServer::WebServer(QObject *parent)
     : QObject(parent)
-    , m_httpServer(new QHttpServer(this))
+    , m_tcpServer(new QTcpServer(this))
     , m_webView(nullptr)
     , m_webPage(nullptr)
     , m_webChannel(nullptr)
@@ -20,7 +22,7 @@ WebServer::WebServer(QObject *parent)
     , m_port(8080)
     , m_running(false)
 {
-    setupRoutes();
+    connect(m_tcpServer, &QTcpServer::newConnection, this, &WebServer::onNewConnection);
 }
 
 WebServer::~WebServer()
@@ -36,19 +38,14 @@ bool WebServer::startServer(quint16 port)
     
     m_port = port;
     
-    // Create TCP server and bind it
-    QTcpServer *tcpServer = new QTcpServer(this);
-    if (!tcpServer->listen(QHostAddress::LocalHost, m_port)) {
-        qWarning() << "Failed to start TCP server on port" << m_port;
-        delete tcpServer;
-        return false;
-    }
-    
-    // Bind the HTTP server to the TCP server
-    if (!m_httpServer->bind(tcpServer)) {
-        qWarning() << "Failed to bind HTTP server to TCP server";
-        delete tcpServer;
-        return false;
+    // Try desired port; if busy, try ephemeral port 0
+    if (!m_tcpServer->listen(QHostAddress::LocalHost, m_port)) {
+        qWarning() << "Failed to start TCP server on port" << m_port << ", trying ephemeral port...";
+        if (!m_tcpServer->listen(QHostAddress::LocalHost, 0)) {
+            qWarning() << "Failed to start TCP server";
+            return false;
+        }
+        m_port = m_tcpServer->serverPort();
     }
     
     m_running = true;
@@ -63,9 +60,7 @@ void WebServer::stopServer()
         return;
     }
     
-    m_httpServer->deleteLater();
-    m_httpServer = new QHttpServer(this);
-    
+    m_tcpServer->close();
     m_running = false;
     qDebug() << "Web server stopped";
 }
@@ -78,52 +73,75 @@ bool WebServer::isRunning() const
 void WebServer::setBackend(Backend *backend)
 {
     m_backend = backend;
+    setupWebChannel();
 }
 
-void WebServer::onWebChannelObjectReceived(const QJsonObject &message)
+void WebServer::onNewConnection()
 {
-    Q_UNUSED(message)
-    // Handle web channel messages if needed
+    QTcpSocket *socket = m_tcpServer->nextPendingConnection();
+    if (socket) {
+        connect(socket, &QTcpSocket::readyRead, this, &WebServer::onSocketReadyRead);
+        connect(socket, &QTcpSocket::disconnected, socket, &QTcpSocket::deleteLater);
+    }
 }
 
-void WebServer::setupRoutes()
+void WebServer::onSocketReadyRead()
 {
-    // API routes
-    m_httpServer->route("/api/system-info", QHttpServerRequest::Method::Get, [this]() {
-        return QJsonDocument(handleGetSystemInfo()).toJson();
-    });
+    QTcpSocket *socket = qobject_cast<QTcpSocket*>(sender());
+    if (!socket) return;
     
-    m_httpServer->route("/api/models", QHttpServerRequest::Method::Get, [this]() {
-        return QJsonDocument(handleGetModels()).toJson();
-    });
+    QByteArray data = socket->readAll();
+    QString request = QString::fromUtf8(data);
     
-    m_httpServer->route("/api/download-model", QHttpServerRequest::Method::Post, [this](const QHttpServerRequest &request) {
-        QJsonDocument doc = QJsonDocument::fromJson(request.body());
-        QJsonObject data = doc.object();
-        return QJsonDocument(handleDownloadModel(data)).toJson();
-    });
+    handleHttpRequest(socket, request);
+}
+
+void WebServer::handleHttpRequest(QTcpSocket *socket, const QString &request)
+{
+    QStringList lines = request.split("\r\n");
+    if (lines.isEmpty()) return;
     
-    m_httpServer->route("/api/remove-model", QHttpServerRequest::Method::Post, [this](const QHttpServerRequest &request) {
-        QJsonDocument doc = QJsonDocument::fromJson(request.body());
-        QJsonObject data = doc.object();
-        return QJsonDocument(handleRemoveModel(data)).toJson();
-    });
+    QString requestLine = lines.first();
+    QStringList parts = requestLine.split(" ");
+    if (parts.size() < 2) return;
     
-    m_httpServer->route("/api/chat", QHttpServerRequest::Method::Post, [this](const QHttpServerRequest &request) {
-        QJsonDocument doc = QJsonDocument::fromJson(request.body());
-        QJsonObject data = doc.object();
-        return QJsonDocument(handleChat(data)).toJson();
-    });
+    QString method = parts[0];
+    QString path = parts[1];
     
-    m_httpServer->route("/api/download-progress", QHttpServerRequest::Method::Post, [this](const QHttpServerRequest &request) {
-        QJsonDocument doc = QJsonDocument::fromJson(request.body());
-        QJsonObject data = doc.object();
-        return QJsonDocument(handleGetDownloadProgress(data)).toJson();
-    });
+    // Simple HTTP response
+    QString response;
+    QString contentType = "application/json";
+
+    // Handle CORS preflight
+    if (method == "OPTIONS") {
+        QString preflight = QString("HTTP/1.1 204 No Content\r\n"
+                                    "Access-Control-Allow-Origin: *\r\n"
+                                    "Access-Control-Allow-Methods: GET, POST, OPTIONS\r\n"
+                                    "Access-Control-Allow-Headers: Content-Type\r\n"
+                                    "Access-Control-Max-Age: 86400\r\n"
+                                    "Content-Length: 0\r\n"
+                                    "Connection: close\r\n\r\n");
+        socket->write(preflight.toUtf8());
+        socket->disconnectFromHost();
+        return;
+    }
     
-    // Serve static files
-    m_httpServer->route("/", QHttpServerRequest::Method::Get, [this]() {
-        return QHttpServerResponse("text/html", R"(
+    if (path.startsWith("/api/")) {
+        // Handle API requests
+        QJsonObject data;
+        if (method == "POST") {
+            // Extract JSON from request body
+            QString body = request.split("\r\n\r\n").last();
+            QJsonDocument doc = QJsonDocument::fromJson(body.toUtf8());
+            data = doc.object();
+        }
+        
+        QJsonObject result = handleApiRequest(path, data);
+        response = QJsonDocument(result).toJson();
+    } else {
+        // Serve the main HTML page
+        contentType = "text/html";
+        response = R"(
 <!DOCTYPE html>
 <html>
 <head>
@@ -153,8 +171,31 @@ void WebServer::setupRoutes()
     </script>
 </body>
 </html>
-        )");
-    });
+        )";
+    }
+    
+    // Send HTTP response
+    QString httpResponse = QString("HTTP/1.1 200 OK\r\n"
+                                  "Content-Type: %1\r\n"
+                                  "Access-Control-Allow-Origin: *\r\n"
+                                  "Access-Control-Allow-Methods: GET, POST, OPTIONS\r\n"
+                                  "Access-Control-Allow-Headers: Content-Type\r\n"
+                                  "Content-Length: %2\r\n"
+                                  "Connection: close\r\n"
+                                  "\r\n"
+                                  "%3")
+                          .arg(contentType)
+                          .arg(response.length())
+                          .arg(response);
+    
+    socket->write(httpResponse.toUtf8());
+    socket->disconnectFromHost();
+}
+
+void WebServer::onWebChannelObjectReceived(const QJsonObject &message)
+{
+    Q_UNUSED(message)
+    // Handle web channel messages if needed
 }
 
 void WebServer::setupWebChannel()
@@ -170,8 +211,19 @@ void WebServer::setupWebChannel()
 
 QJsonObject WebServer::handleApiRequest(const QString &endpoint, const QJsonObject &data)
 {
-    Q_UNUSED(endpoint)
-    Q_UNUSED(data)
+    if (endpoint == "/api/system-info") {
+        return handleGetSystemInfo();
+    } else if (endpoint == "/api/models") {
+        return handleGetModels();
+    } else if (endpoint == "/api/download-model") {
+        return handleDownloadModel(data);
+    } else if (endpoint == "/api/remove-model") {
+        return handleRemoveModel(data);
+    } else if (endpoint == "/api/chat") {
+        return handleChat(data);
+    } else if (endpoint == "/api/download-progress") {
+        return handleGetDownloadProgress(data);
+    }
     
     QJsonObject response;
     response["error"] = "Unknown endpoint";

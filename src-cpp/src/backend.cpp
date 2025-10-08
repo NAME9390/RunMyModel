@@ -85,6 +85,14 @@ void Backend::stopWebServer()
     m_webServer->stopServer();
 }
 
+int Backend::getWebServerPort() const
+{
+    if (m_webServer) {
+        return static_cast<int>(m_webServer->port());
+    }
+    return 8080;  // Default fallback
+}
+
 void Backend::onModelDownloadProgress(const QString &modelName, double progress)
 {
     emit modelDownloadProgress(modelName, progress);
