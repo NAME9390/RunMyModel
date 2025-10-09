@@ -86,3 +86,8 @@ void Backend::onModelDownloadError(const QString &modelName, const QString &erro
 {
     emit modelDownloadError(modelName, error);
 }
+
+bool Backend::cancelModelDownload(const QString &modelName)
+{
+    return m_huggingFaceClient->cancelDownload(modelName);
+}

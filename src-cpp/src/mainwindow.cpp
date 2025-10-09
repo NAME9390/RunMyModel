@@ -76,8 +76,14 @@ void MainWindow::setupDownloadDock()
     
     // Connect signals
     connect(m_downloadPanel, &DownloadPanel::cancelDownloadRequested, [this](const QString &modelName) {
-        // TODO: Implement cancel
         qDebug() << "Cancel requested for:" << modelName;
+        bool cancelled = m_backend->cancelModelDownload(modelName);
+        if (cancelled) {
+            m_downloadPanel->errorDownload(modelName, "Cancelled");
+            if (m_modelCards.contains(modelName)) {
+                m_modelCards[modelName]->setDownloading(false);
+            }
+        }
     });
     
     connect(m_downloadPanel, &DownloadPanel::allDownloadsComplete, [this]() {
@@ -743,19 +749,34 @@ void MainWindow::applyModernStyling()
             border-radius: 12px;
         }
         
-        /* Download Panel */
+        /* Download Panel - Enhanced */
         #downloadDock {
-            background-color: #f9fafb;
+            background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                stop:0 #f9fafb, stop:1 #ffffff);
+        }
+        
+        #downloadDock::title {
+            background-color: #3b82f6;
+            color: white;
+            padding: 8px;
+            font-weight: bold;
         }
         
         #downloadPanel {
-            background-color: #f9fafb;
+            background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                stop:0 #f9fafb, stop:1 #f3f4f6);
         }
         
         #downloadItem {
             background-color: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 4px;
+        }
+        
+        #downloadItem:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 4px 6px rgba(59, 130, 246, 0.1);
         }
         
         #downloadItemName {
@@ -773,28 +794,37 @@ void MainWindow::applyModernStyling()
         }
         
         #downloadProgressBar {
-            border: 1px solid #e5e7eb;
-            border-radius: 4px;
+            border: 2px solid #e5e7eb;
+            border-radius: 6px;
             background-color: #f3f4f6;
             text-align: center;
+            font-weight: bold;
+            color: #1f2937;
         }
         
         #downloadProgressBar::chunk {
             background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                stop:0 #3b82f6, stop:1 #2563eb);
+                stop:0 #3b82f6, stop:0.5 #2563eb, stop:1 #1d4ed8);
             border-radius: 4px;
         }
         
         #cancelBtn {
-            background-color: #ef4444;
+            background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                stop:0 #ef4444, stop:1 #dc2626);
             color: white;
             border: none;
             border-radius: 14px;
             font-weight: bold;
+            font-size: 14px;
         }
         
         #cancelBtn:hover {
-            background-color: #dc2626;
+            background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                stop:0 #dc2626, stop:1 #b91c1c);
+        }
+        
+        #cancelBtn:pressed {
+            background-color: #991b1b;
         }
         
         #emptyLabel {

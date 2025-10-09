@@ -29,6 +29,7 @@ public:
     Q_INVOKABLE QJsonArray getAllHuggingFaceModels();
     Q_INVOKABLE QString downloadHuggingFaceModel(const QString &modelName);
     Q_INVOKABLE QString removeHuggingFaceModel(const QString &modelName);
+    Q_INVOKABLE bool cancelModelDownload(const QString &modelName);
     Q_INVOKABLE QJsonObject getModelDownloadProgress(const QString &modelName);
     
     // Chat functionality

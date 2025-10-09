@@ -21,6 +21,7 @@ public:
     // Model operations
     QJsonArray getAvailableModels();
     QString downloadModel(const QString &modelName);
+    bool cancelDownload(const QString &modelName);
     QString removeModel(const QString &modelName);
     QJsonObject getModelInfo(const QString &modelName);
     

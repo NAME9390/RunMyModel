@@ -136,8 +136,8 @@ QString HuggingFaceClient::downloadModel(const QString &modelName)
         return QString("Error: Model %1 not found in available models").arg(modelName);
     }
     
-    // Create cache directory  
-    QString cachePath = QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + "/RunMyModelDesktop/models";
+    // Create model directory in /Documents/rmm
+    QString cachePath = getCacheDir();
     QDir cacheDir(cachePath);
     if (!cacheDir.exists()) {
         cacheDir.mkpath(".");
@@ -345,6 +345,28 @@ QString HuggingFaceClient::downloadModel(const QString &modelName)
     return QString("Started REAL download: %1\nQuerying Hugging Face API...").arg(modelName);
 }
 
+bool HuggingFaceClient::cancelDownload(const QString &modelName)
+{
+    if (!m_activeDownloads.contains(modelName)) {
+        qDebug() << "No active download for:" << modelName;
+        return false;
+    }
+    
+    DownloadInfo &info = m_activeDownloads[modelName];
+    
+    if (info.reply) {
+        qDebug() << "❌ Cancelling download:" << modelName;
+        info.reply->abort();
+        info.reply->deleteLater();
+        info.reply = nullptr;
+    }
+    
+    m_activeDownloads.remove(modelName);
+    emit downloadError(modelName, "Download cancelled by user");
+    
+    return true;
+}
+
 QString HuggingFaceClient::removeModel(const QString &modelName)
 {
     QString modelPath = getModelPath(modelName);
@@ -418,8 +440,18 @@ void HuggingFaceClient::onDownloadError(QNetworkReply::NetworkError error)
 
 QString HuggingFaceClient::getCacheDir() const
 {
-    QString cacheDir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
-    return cacheDir + "/huggingface/hub";
+    // Use /Documents/rmm for model storage
+    QString documentsPath = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+    QString rmmPath = documentsPath + "/rmm";
+    
+    // Silently ensure directory exists
+    QDir dir(rmmPath);
+    if (!dir.exists()) {
+        dir.mkpath(".");
+        qDebug() << "Created model directory:" << rmmPath;
+    }
+    
+    return rmmPath;
 }
 
 QString HuggingFaceClient::getModelPath(const QString &modelName) const
