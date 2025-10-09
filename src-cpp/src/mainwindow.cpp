@@ -791,13 +791,24 @@ void MainWindow::updateModelSelector()
 {
     m_modelSelector->clear();
     
-    for (const QJsonObject &model : m_availableModels) {
-        QString name = model["name"].toString();
-        QString size = model["size"].toString();
-        m_modelSelector->addItem(QString("%1 (%2)").arg(name, size), name);
+    // Add a placeholder
+    m_modelSelector->addItem("-- Select an installed model --", "");
+    
+    // TODO: Only add INSTALLED models to the selector
+    // For now, we'll add all models but the validation is in onSendMessage
+    
+    // Add custom models from the custom models list
+    for (int i = 0; i < m_customModelsList->count(); ++i) {
+        QListWidgetItem *item = m_customModelsList->item(i);
+        QString modelPath = item->data(Qt::UserRole).toString();
+        QString modelName = item->text().split('\n')[0]; // Get first line (name)
+        m_modelSelector->addItem(QString("🔧 %1").arg(modelName), modelPath);
     }
     
-    if (m_modelSelector->count() > 0) {
+    // TODO: Add downloaded models from backend
+    // For demo purposes, keeping the list empty to encourage downloads
+    
+    if (m_modelSelector->count() > 1) {
         m_modelSelector->setCurrentIndex(0);
     }
 }
@@ -837,7 +848,34 @@ void MainWindow::onSendMessage()
     
     QString currentModel = m_modelSelector->currentData().toString();
     if (currentModel.isEmpty()) {
-        QMessageBox::warning(this, "No Model", "Please select a model first.");
+        QMessageBox::warning(this, "No Model Selected", 
+            "Please select a model from the dropdown first.");
+        return;
+    }
+    
+    // Check if model is installed
+    bool isInstalled = false;
+    QString modelPath = currentModel;
+    
+    // Check if it's a custom model (has full path)
+    if (QFile::exists(modelPath)) {
+        isInstalled = true;
+    } else {
+        // Check if it's a downloaded Hugging Face model
+        // TODO: Get actual installed models from backend
+        // For now, we'll allow the message but show a warning
+        QMessageBox msgBox(this);
+        msgBox.setWindowTitle("Model Not Installed");
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setText(QString("<h3>%1 is not installed</h3>").arg(currentModel));
+        msgBox.setInformativeText(
+            "This model needs to be downloaded before you can use it.\n\n"
+            "📥 Go to 'Browse Models' to download it.\n"
+            "⚙️ Or add it as a custom model if you have it locally.\n\n"
+            "Inference is not available for uninstalled models."
+        );
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.exec();
         return;
     }
     
@@ -1022,12 +1060,32 @@ void MainWindow::onDownloadModelRequested(const QString &modelName)
 {
     qDebug() << "Download requested for:" << modelName;
     
-    if (m_modelCards.contains(modelName)) {
-        m_modelCards[modelName]->setDownloading(true);
-    }
+    // Show confirmation dialog
+    QMessageBox msgBox(this);
+    msgBox.setWindowTitle("Confirm Download");
+    msgBox.setIcon(QMessageBox::Question);
+    msgBox.setText(QString("<h3>Download %1?</h3>").arg(modelName));
+    msgBox.setInformativeText(
+        "This will download the model from Hugging Face.\n\n"
+        "⚠️ Large models may take significant time and bandwidth.\n"
+        "📁 Models are saved to your cache directory.\n\n"
+        "Do you want to proceed?"
+    );
+    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    msgBox.setDefaultButton(QMessageBox::No);
     
-    QString result = m_backend->downloadHuggingFaceModel(modelName);
-    qDebug() << "Download started:" << result;
+    int ret = msgBox.exec();
+    
+    if (ret == QMessageBox::Yes) {
+        if (m_modelCards.contains(modelName)) {
+            m_modelCards[modelName]->setDownloading(true);
+        }
+        
+        QString result = m_backend->downloadHuggingFaceModel(modelName);
+        qDebug() << "Download started:" << result;
+    } else {
+        qDebug() << "Download cancelled by user:" << modelName;
+    }
 }
 
 void MainWindow::onAddCustomModel()
@@ -1066,13 +1124,27 @@ void MainWindow::onAddCustomModel()
     item->setData(Qt::UserRole, modelPath);
     m_customModelsList->addItem(item);
     
-    // Add to model selector
-    m_modelSelector->addItem(QString("%1 (Custom - %2)").arg(modelName, format), modelPath);
-    
     // Show success message
-    QMessageBox::information(this, "Custom Model Added",
-        QString("✅ Custom model '%1' has been added successfully!\n\n"
-                "You can now select it from the Chat page.").arg(modelName));
+    QMessageBox msgBox(this);
+    msgBox.setWindowTitle("Custom Model Added");
+    msgBox.setIcon(QMessageBox::Information);
+    msgBox.setText(QString("<h3>✅ Success!</h3>"));
+    msgBox.setInformativeText(
+        QString("Custom model <b>%1</b> has been added successfully!\n\n"
+                "📍 Location: %2\n"
+                "📊 Size: %3 MB\n"
+                "🎯 Format: %4\n\n"
+                "You can now select it from the Chat page to start using it.")
+            .arg(modelName)
+            .arg(modelPath)
+            .arg(fileInfo.size() / (1024 * 1024))
+            .arg(format)
+    );
+    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.exec();
+    
+    // Update model selector
+    updateModelSelector();
     
     // Clear form
     m_customModelPath->clear();
