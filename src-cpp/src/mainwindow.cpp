@@ -7,6 +7,7 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QDir>
+#include <QTimer>
 #include <QDebug>
 
 MainWindow::MainWindow(BackendClient *backendClient, QWidget *parent)
@@ -25,9 +26,13 @@ MainWindow::MainWindow(BackendClient *backendClient, QWidget *parent)
     
     setupUI();
     applyModernStyling();
-    loadAvailableModels();
-    loadInstalledModels();
-    updateModelSelector();
+    
+    // Load models AFTER UI is fully set up (to avoid null pointer crashes)
+    QTimer::singleShot(100, this, [this]() {
+        loadAvailableModels();
+        loadInstalledModels();
+        updateModelSelector();
+    });
     
     // Connect backend signals for download progress
     connect(m_backend, &Backend::modelDownloadProgress, this, &MainWindow::onModelDownloadProgress);
