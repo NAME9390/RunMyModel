@@ -176,15 +176,23 @@ void ModelManager::loadModelsFromFile()
             continue;
         }
         
-        // Parse CSV format: Model Name, Parameter Size, Task Type, Rating, Hugging Face URL
+        // Parse CSV format: Model Name, Parameter Size, Task Type, [Rating], Hugging Face URL
         QStringList parts = line.split(',');
-        if (parts.size() >= 5) {
+        if (parts.size() >= 4) {
             ModelInfo info;
             info.name = parts[0].trimmed();
             info.size = parts[1].trimmed();
             info.taskType = parts[2].trimmed();
-            info.rating = parts[3].trimmed().toInt();
-            info.url = parts[4].trimmed();
+            
+            // Handle both 4-field and 5-field formats
+            if (parts.size() == 4) {
+                info.rating = "N/A";
+                info.url = parts[3].trimmed();
+            } else {
+                info.rating = parts[3].trimmed();
+                info.url = parts[4].trimmed();
+            }
+            
             info.downloaded = false;
             info.localPath.clear();
             info.sizeBytes = 0;
@@ -232,7 +240,7 @@ QJsonObject ModelManager::modelInfoToJson(const ModelInfo &info) const
     json["name"] = info.name;
     json["size"] = info.size;
     json["task_type"] = info.taskType;
-    json["rating"] = info.rating;
+    json["rating"] = info.rating;  // Now QString, can be "N/A" or numeric string
     json["url"] = info.url;
     json["downloaded"] = info.downloaded;
     json["local_path"] = info.localPath;

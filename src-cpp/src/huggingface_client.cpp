@@ -75,26 +75,18 @@ QJsonArray HuggingFaceClient::getAvailableModels()
         const QString modelName = parts[0];
         const QString size = parts[1];
         QString taskType = parts[2];
-        int ratingOrDownloads = 0;
+        QString rating;
         QString url;
 
         // Determine if we have 4 or 5+ fields
         if (parts.size() == 4) {
-            // Format: name, size, task, url
+            // Format: name, size, task, url (no rating)
             url = parts[3];
+            rating = "N/A";
         } else {
             // Format: name, size, task, rating/downloads, url
             url = parts.last();
-            QString token = parts[3];
-            // Parse rating/downloads (may contain 'k' suffix)
-            bool ok = false;
-            QString cleanToken = token.toLower();
-            bool hasK = cleanToken.contains('k');
-            cleanToken.remove(QChar('k')).remove(QChar(','));
-            double val = cleanToken.toDouble(&ok);
-            if (ok) {
-                ratingOrDownloads = static_cast<int>(val * (hasK ? 1000 : 1));
-            }
+            rating = parts[3].trimmed();
         }
 
         // Normalize task type labels
@@ -111,7 +103,7 @@ QJsonArray HuggingFaceClient::getAvailableModels()
             taskType = "Text Generation";  // Default
         }
 
-        QJsonObject model = parseModelInfo(modelName, size, taskType, ratingOrDownloads, url);
+        QJsonObject model = parseModelInfo(modelName, size, taskType, rating, url);
         models.append(model);
     }
     if (models.isEmpty()) {
@@ -247,7 +239,7 @@ QString HuggingFaceClient::getModelPath(const QString &modelName) const
 }
 
 QJsonObject HuggingFaceClient::parseModelInfo(const QString &modelName, const QString &size, 
-                                             const QString &taskType, int rating, const QString &url) const
+                                             const QString &taskType, const QString &rating, const QString &url) const
 {
     QJsonObject model;
     model["name"] = modelName;

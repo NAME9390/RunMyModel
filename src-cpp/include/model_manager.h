@@ -47,7 +47,7 @@ private:
         QString name;
         QString size;
         QString taskType;
-        int rating;
+        QString rating;
         QString url;
         bool downloaded;
         QString localPath;

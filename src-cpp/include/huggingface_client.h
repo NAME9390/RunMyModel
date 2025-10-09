@@ -52,7 +52,7 @@ private:
     QString getCacheDir() const;
     QString getModelPath(const QString &modelName) const;
     QJsonObject parseModelInfo(const QString &modelName, const QString &size, 
-                              const QString &taskType, int rating, const QString &url) const;
+                              const QString &taskType, const QString &rating, const QString &url) const;
     void startProgressTracking(const QString &modelName, QNetworkReply *reply);
     void stopProgressTracking(const QString &modelName);
 };
