@@ -164,94 +164,185 @@ QString HuggingFaceClient::downloadModel(const QString &modelName)
     info.speed = 0;
     
     // REAL DOWNLOAD using QNetworkAccessManager
-    // First, we need to get the actual GGUF file URL from Hugging Face
-    // Format: https://huggingface.co/{model}/resolve/main/{filename}.gguf
+    // Hugging Face URLs are in format: https://huggingface.co/{author}/{model}
+    // We need to construct the actual file download URL
     
-    QString ggufUrl = modelUrl + "/resolve/main/model.gguf"; // Default filename
+    // Parse model URL to get author/model and construct proper download URL
+    QString downloadUrl;
     
-    QNetworkRequest request(ggufUrl);
+    // Check if URL already contains /resolve/ (direct file link)
+    if (modelUrl.contains("/resolve/")) {
+        downloadUrl = modelUrl;
+    } else {
+        // Try common GGUF file patterns
+        // Most models have files like: model-name-Q4_K_M.gguf, model-name-Q5_K_M.gguf, etc.
+        // For now, we'll need to query the API to find the actual file
+        
+        // Extract repo from URL: https://huggingface.co/author/model -> author/model
+        QString repo = modelUrl;
+        repo.remove("https://huggingface.co/");
+        
+        qDebug() << "Fetching file list from Hugging Face API for:" << repo;
+        
+        // Use Hugging Face API to list files
+        downloadUrl = QString("https://huggingface.co/api/models/%1").arg(repo);
+    }
+    
+    qDebug() << "Step 1: Fetching model info from:" << downloadUrl;
+    
+    QNetworkRequest request(downloadUrl);
     request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
     request.setRawHeader("User-Agent", "RunMyModel-Desktop/0.2.0");
     
     QNetworkReply *reply = m_networkManager->get(request);
     
-    // Connect download progress
-    connect(reply, &QNetworkReply::downloadProgress, 
-            [this, modelName](qint64 bytesReceived, qint64 bytesTotal) {
-        if (m_activeDownloads.contains(modelName)) {
-            DownloadInfo &info = m_activeDownloads[modelName];
-            info.receivedBytes = bytesReceived;
-            info.totalBytes = bytesTotal;
-            
-            // Calculate speed
-            QDateTime now = QDateTime::currentDateTime();
-            qint64 timeDiff = info.lastUpdateTime.msecsTo(now);
-            
-            if (timeDiff >= 500) { // Update speed every 500ms
-                qint64 bytesDiff = bytesReceived - info.lastReceivedBytes;
-                if (timeDiff > 0) {
-                    info.speed = (bytesDiff * 1000.0) / timeDiff; // bytes per second
-                }
-                info.lastReceivedBytes = bytesReceived;
-                info.lastUpdateTime = now;
-            }
-            
-            if (bytesTotal > 0) {
-                double progress = (double)bytesReceived / bytesTotal * 100.0;
-                emit downloadProgress(modelName, progress);
-                
-                if (info.speed > 0) {
-                    qDebug() << "Download progress:" << modelName 
-                             << QString::number(progress, 'f', 1) << "%" 
-                             << "(" << bytesReceived / (1024*1024) << "MB /"
-                             << bytesTotal / (1024*1024) << "MB)"
-                             << "@" << (info.speed / (1024*1024)) << "MB/s";
-                }
-            }
-        }
-    });
-    
-    // Connect finished signal
-    connect(reply, &QNetworkReply::finished, [this, modelName, modelPath, reply]() {
+    // First, get the model info to find actual GGUF files
+    connect(reply, &QNetworkReply::finished, [this, modelName, modelUrl, modelPath, reply]() {
         reply->deleteLater();
         
-        if (reply->error() == QNetworkReply::NoError) {
-            // Save the downloaded data
-            QFile file(modelPath + "/model.gguf");
-            if (file.open(QIODevice::WriteOnly)) {
-                file.write(reply->readAll());
-                file.close();
-                
-                qDebug() << "✅ Download complete:" << modelName;
-                qDebug() << "   Saved to:" << file.fileName();
-                qDebug() << "   Size:" << file.size() / (1024*1024) << "MB";
-                
-                m_activeDownloads.remove(modelName);
-                emit downloadComplete(modelName);
-            } else {
-                qWarning() << "❌ Failed to save file:" << file.fileName();
-                m_activeDownloads.remove(modelName);
-                emit downloadError(modelName, "Failed to save file");
-            }
-        } else {
-            QString errorMsg = reply->errorString();
-            qWarning() << "❌ Download error for" << modelName << ":" << errorMsg;
-            
-            // If 404, try alternate filename patterns
-            if (reply->error() == QNetworkReply::ContentNotFoundError) {
-                qDebug() << "   Trying alternate URL patterns...";
-                // TODO: Implement file discovery from Hugging Face API
-            }
-            
+        if (reply->error() != QNetworkReply::NoError) {
+            qWarning() << "❌ Failed to fetch model info:" << reply->errorString();
             m_activeDownloads.remove(modelName);
-            emit downloadError(modelName, errorMsg);
+            emit downloadError(modelName, "Failed to fetch model info: " + reply->errorString());
+            return;
         }
+        
+        // Parse JSON response to find GGUF files
+        QByteArray response = reply->readAll();
+        QJsonDocument doc = QJsonDocument::fromJson(response);
+        QJsonObject obj = doc.object();
+        
+        QString actualDownloadUrl;
+        qint64 fileSize = 0;
+        
+        // Look for siblings (files in the model)
+        if (obj.contains("siblings")) {
+            QJsonArray siblings = obj["siblings"].toArray();
+            
+            qDebug() << "Found" << siblings.size() << "files in model";
+            
+            // Prioritize Q4_K_M quantization (good balance of size/quality)
+            QStringList preferred = {"Q4_K_M.gguf", "q4_k_m.gguf", "Q5_K_M.gguf", "q5_k_m.gguf", ".gguf"};
+            
+            for (const QString &pattern : preferred) {
+                for (const QJsonValue &sibling : siblings) {
+                    QJsonObject file = sibling.toObject();
+                    QString filename = file["rfilename"].toString();
+                    
+                    if (filename.endsWith(pattern, Qt::CaseInsensitive)) {
+                        actualDownloadUrl = modelUrl + "/resolve/main/" + filename;
+                        fileSize = file["size"].toVariant().toLongLong();
+                        
+                        qDebug() << "Selected file:" << filename;
+                        qDebug() << "Size:" << (fileSize / (1024*1024)) << "MB";
+                        break;
+                    }
+                }
+                if (!actualDownloadUrl.isEmpty()) break;
+            }
+        }
+        
+        if (actualDownloadUrl.isEmpty()) {
+            qWarning() << "❌ No GGUF file found in model repository";
+            m_activeDownloads.remove(modelName);
+            emit downloadError(modelName, "No GGUF file found");
+            return;
+        }
+        
+        qDebug() << "Step 2: Starting REAL download from:" << actualDownloadUrl;
+        
+        // Now do the ACTUAL file download
+        QNetworkRequest fileRequest(actualDownloadUrl);
+        fileRequest.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+        fileRequest.setRawHeader("User-Agent", "RunMyModel-Desktop/0.2.0");
+        
+        QNetworkReply *fileReply = m_networkManager->get(fileRequest);
+        
+        // Update download info
+        if (m_activeDownloads.contains(modelName)) {
+            m_activeDownloads[modelName].reply = fileReply;
+            m_activeDownloads[modelName].totalBytes = fileSize;
+        }
+        
+        // Connect REAL download progress
+        connect(fileReply, &QNetworkReply::downloadProgress, 
+                [this, modelName](qint64 bytesReceived, qint64 bytesTotal) {
+            if (m_activeDownloads.contains(modelName)) {
+                DownloadInfo &info = m_activeDownloads[modelName];
+                info.receivedBytes = bytesReceived;
+                info.totalBytes = bytesTotal;
+                
+                // Calculate speed
+                QDateTime now = QDateTime::currentDateTime();
+                qint64 timeDiff = info.lastUpdateTime.msecsTo(now);
+                
+                if (timeDiff >= 500) { // Update speed every 500ms
+                    qint64 bytesDiff = bytesReceived - info.lastReceivedBytes;
+                    if (timeDiff > 0) {
+                        info.speed = (bytesDiff * 1000.0) / timeDiff; // bytes per second
+                    }
+                    info.lastReceivedBytes = bytesReceived;
+                    info.lastUpdateTime = now;
+                }
+                
+                if (bytesTotal > 0) {
+                    double progress = (double)bytesReceived / bytesTotal * 100.0;
+                    emit downloadProgress(modelName, progress);
+                    
+                    if (info.speed > 0) {
+                        qDebug() << "REAL Download:" << modelName 
+                                 << QString::number(progress, 'f', 1) << "%" 
+                                 << "(" << bytesReceived / (1024*1024) << "MB /"
+                                 << bytesTotal / (1024*1024) << "MB)"
+                                 << "@" << QString::number(info.speed / (1024*1024), 'f', 2) << "MB/s";
+                    }
+                }
+            }
+        });
+        
+        // Connect finished signal for ACTUAL download
+        connect(fileReply, &QNetworkReply::finished, [this, modelName, modelPath, fileReply]() {
+            fileReply->deleteLater();
+            
+            if (fileReply->error() == QNetworkReply::NoError) {
+                // Save the REAL downloaded data
+                QString filename = modelPath + "/model.gguf";
+                QFile file(filename);
+                
+                if (file.open(QIODevice::WriteOnly)) {
+                    // Write in chunks to avoid memory issues with large files
+                    qint64 totalWritten = 0;
+                    QByteArray chunk;
+                    
+                    // For finished reply, we can read all at once
+                    QByteArray allData = fileReply->readAll();
+                    file.write(allData);
+                    file.close();
+                    
+                    qDebug() << "✅ REAL Download complete:" << modelName;
+                    qDebug() << "   Saved to:" << file.fileName();
+                    qDebug() << "   Size:" << (file.size() / (1024.0*1024)) << "MB";
+                    
+                    m_activeDownloads.remove(modelName);
+                    emit downloadComplete(modelName);
+                } else {
+                    qWarning() << "❌ Failed to save file:" << file.fileName();
+                    m_activeDownloads.remove(modelName);
+                    emit downloadError(modelName, "Failed to save file");
+                }
+            } else {
+                QString errorMsg = fileReply->errorString();
+                qWarning() << "❌ REAL Download error for" << modelName << ":" << errorMsg;
+                m_activeDownloads.remove(modelName);
+                emit downloadError(modelName, errorMsg);
+            }
+        });
     });
     
     info.reply = reply;
     m_activeDownloads[modelName] = info;
     
-    return QString("Started REAL download: %1\nFrom: %2").arg(modelName, ggufUrl);
+    return QString("Started REAL download: %1\nQuerying Hugging Face API...").arg(modelName);
 }
 
 QString HuggingFaceClient::removeModel(const QString &modelName)
