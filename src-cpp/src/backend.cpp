@@ -2,7 +2,6 @@
 #include "huggingface_client.h"
 #include "model_manager.h"
 #include "system_info.h"
-#include "web_server.h"
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
@@ -16,7 +15,6 @@ Backend::Backend(QObject *parent)
     m_huggingFaceClient = std::make_unique<HuggingFaceClient>(this);
     m_modelManager = std::make_unique<ModelManager>(this);
     m_systemInfo = std::make_unique<SystemInfo>(this);
-    m_webServer = std::make_unique<WebServer>(this);
     
     // Connect signals
     connect(m_huggingFaceClient.get(), &HuggingFaceClient::downloadProgress,
@@ -25,9 +23,6 @@ Backend::Backend(QObject *parent)
             this, &Backend::onModelDownloadComplete);
     connect(m_huggingFaceClient.get(), &HuggingFaceClient::downloadError,
             this, &Backend::onModelDownloadError);
-    
-    // Set backend reference in web server
-    m_webServer->setBackend(this);
 }
 
 Backend::~Backend() = default;
@@ -75,23 +70,7 @@ QJsonObject Backend::chatWithHuggingFace(const QJsonObject &request)
     return response;
 }
 
-void Backend::startWebServer()
-{
-    m_webServer->startServer();
-}
-
-void Backend::stopWebServer()
-{
-    m_webServer->stopServer();
-}
-
-int Backend::getWebServerPort() const
-{
-    if (m_webServer) {
-        return static_cast<int>(m_webServer->port());
-    }
-    return 8080;  // Default fallback
-}
+// Web server methods removed - not needed for native UI
 
 void Backend::onModelDownloadProgress(const QString &modelName, double progress)
 {

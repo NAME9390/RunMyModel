@@ -13,7 +13,6 @@
 class HuggingFaceClient;
 class ModelManager;
 class SystemInfo;
-class WebServer;
 
 class Backend : public QObject
 {
@@ -35,12 +34,6 @@ public:
     // Chat functionality
     Q_INVOKABLE QJsonObject chatWithHuggingFace(const QJsonObject &request);
 
-    // Expose web server port to the UI
-    Q_INVOKABLE int getWebServerPort() const;
-
-public slots:
-    void startWebServer();
-    void stopWebServer();
 
 signals:
     void modelDownloadProgress(const QString &modelName, double progress);
@@ -56,7 +49,6 @@ private:
     std::unique_ptr<HuggingFaceClient> m_huggingFaceClient;
     std::unique_ptr<ModelManager> m_modelManager;
     std::unique_ptr<SystemInfo> m_systemInfo;
-    std::unique_ptr<WebServer> m_webServer;
     QNetworkAccessManager *m_networkManager;
 };
 
