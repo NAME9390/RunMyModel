@@ -8,6 +8,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QTimer>
+#include <QFile>
 #include <memory>
 
 class HuggingFaceClient : public QObject
@@ -42,6 +43,7 @@ private:
     struct DownloadInfo {
         QString modelName;
         QNetworkReply *reply;
+        QFile *outputFile;  // For streaming write
         qint64 totalBytes;
         qint64 receivedBytes;
         qint64 lastReceivedBytes;

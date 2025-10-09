@@ -20,9 +20,11 @@
 #include <QGridLayout>
 #include <QMap>
 #include <QDockWidget>
+#include <QCheckBox>
 #include "backend.h"
 #include "modelcard.h"
 #include "downloadpanel.h"
+#include "gpu_detector.h"
 
 class MainWindow : public QMainWindow
 {
@@ -112,6 +114,12 @@ private:
     // Download panel
     QDockWidget *m_downloadDock;
     DownloadPanel *m_downloadPanel;
+    
+    // GPU detection
+    GPUDetector *m_gpuDetector;
+    qint64 m_detectedVRAM;
+    QCheckBox *m_gpuFilterCheckbox;
+    QLabel *m_gpuInfoLabel;
     
     // Helper methods
     void setupUI();

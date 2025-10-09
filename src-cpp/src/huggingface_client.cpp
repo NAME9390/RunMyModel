@@ -159,6 +159,7 @@ QString HuggingFaceClient::downloadModel(const QString &modelName)
     info.totalBytes = 0;
     info.progressTimer = nullptr;
     info.reply = nullptr;
+    info.outputFile = nullptr;
     info.startTime = QDateTime::currentDateTime();
     info.lastUpdateTime = info.startTime;
     info.speed = 0;
@@ -258,11 +259,39 @@ QString HuggingFaceClient::downloadModel(const QString &modelName)
         
         QNetworkReply *fileReply = m_networkManager->get(fileRequest);
         
+        // Open output file for streaming write
+        QString filename = modelPath + "/model.gguf";
+        QFile *outputFile = new QFile(filename);
+        
+        if (!outputFile->open(QIODevice::WriteOnly)) {
+            qWarning() << "❌ Failed to open file for writing:" << filename;
+            m_activeDownloads.remove(modelName);
+            emit downloadError(modelName, "Failed to create output file");
+            delete outputFile;
+            fileReply->abort();
+            fileReply->deleteLater();
+            return;
+        }
+        
         // Update download info
         if (m_activeDownloads.contains(modelName)) {
             m_activeDownloads[modelName].reply = fileReply;
+            m_activeDownloads[modelName].outputFile = outputFile;
             m_activeDownloads[modelName].totalBytes = fileSize;
         }
+        
+        // Connect readyRead to write data as it arrives (STREAMING!)
+        connect(fileReply, &QNetworkReply::readyRead, [this, modelName, outputFile, fileReply]() {
+            if (m_activeDownloads.contains(modelName) && outputFile->isOpen()) {
+                QByteArray data = fileReply->readAll();
+                qint64 written = outputFile->write(data);
+                outputFile->flush(); // Ensure data is written to disk
+                
+                if (written != data.size()) {
+                    qWarning() << "⚠️ Write error: wrote" << written << "bytes, expected" << data.size();
+                }
+            }
+        });
         
         // Connect REAL download progress
         connect(fileReply, &QNetworkReply::downloadProgress, 
@@ -301,38 +330,37 @@ QString HuggingFaceClient::downloadModel(const QString &modelName)
         });
         
         // Connect finished signal for ACTUAL download
-        connect(fileReply, &QNetworkReply::finished, [this, modelName, modelPath, fileReply]() {
+        connect(fileReply, &QNetworkReply::finished, [this, modelName, modelPath, fileReply, outputFile]() {
             fileReply->deleteLater();
             
-            if (fileReply->error() == QNetworkReply::NoError) {
-                // Save the REAL downloaded data
-                QString filename = modelPath + "/model.gguf";
-                QFile file(filename);
-                
-                if (file.open(QIODevice::WriteOnly)) {
-                    // Write in chunks to avoid memory issues with large files
-                    qint64 totalWritten = 0;
-                    QByteArray chunk;
-                    
-                    // For finished reply, we can read all at once
-                    QByteArray allData = fileReply->readAll();
-                    file.write(allData);
-                    file.close();
-                    
-                    qDebug() << "✅ REAL Download complete:" << modelName;
-                    qDebug() << "   Saved to:" << file.fileName();
-                    qDebug() << "   Size:" << (file.size() / (1024.0*1024)) << "MB";
-                    
-                    m_activeDownloads.remove(modelName);
-                    emit downloadComplete(modelName);
-                } else {
-                    qWarning() << "❌ Failed to save file:" << file.fileName();
-                    m_activeDownloads.remove(modelName);
-                    emit downloadError(modelName, "Failed to save file");
+            // Write any remaining data
+            if (outputFile->isOpen()) {
+                QByteArray remaining = fileReply->readAll();
+                if (!remaining.isEmpty()) {
+                    outputFile->write(remaining);
                 }
+                outputFile->flush();
+                outputFile->close();
+            }
+            
+            qint64 fileSize = outputFile->size();
+            QString filename = outputFile->fileName();
+            delete outputFile;
+            
+            if (fileReply->error() == QNetworkReply::NoError) {
+                qDebug() << "✅ REAL Download complete:" << modelName;
+                qDebug() << "   Saved to:" << filename;
+                qDebug() << "   Size:" << (fileSize / (1024.0*1024)) << "MB";
+                
+                m_activeDownloads.remove(modelName);
+                emit downloadComplete(modelName);
             } else {
                 QString errorMsg = fileReply->errorString();
                 qWarning() << "❌ REAL Download error for" << modelName << ":" << errorMsg;
+                
+                // Clean up incomplete file
+                QFile::remove(filename);
+                
                 m_activeDownloads.remove(modelName);
                 emit downloadError(modelName, errorMsg);
             }
@@ -354,11 +382,24 @@ bool HuggingFaceClient::cancelDownload(const QString &modelName)
     
     DownloadInfo &info = m_activeDownloads[modelName];
     
+    // Abort network request
     if (info.reply) {
         qDebug() << "❌ Cancelling download:" << modelName;
         info.reply->abort();
         info.reply->deleteLater();
         info.reply = nullptr;
+    }
+    
+    // Close and delete incomplete file
+    if (info.outputFile) {
+        QString filename = info.outputFile->fileName();
+        info.outputFile->close();
+        delete info.outputFile;
+        info.outputFile = nullptr;
+        
+        // Remove incomplete file
+        QFile::remove(filename);
+        qDebug() << "   Removed incomplete file:" << filename;
     }
     
     m_activeDownloads.remove(modelName);

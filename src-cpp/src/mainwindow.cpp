@@ -11,9 +11,15 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , m_backend(new Backend(this))
+    , m_detectedVRAM(0)
 {
     setWindowTitle("RunMyModel Desktop - v0.2.0 ALPHA");
     resize(1400, 900);
+    
+    // Detect GPU
+    m_gpuDetector = new GPUDetector(this);
+    GPUDetector::GPUInfo gpuInfo = m_gpuDetector->detectGPU();
+    m_detectedVRAM = gpuInfo.vramMB;
     
     setupUI();
     applyModernStyling();
