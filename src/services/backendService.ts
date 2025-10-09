@@ -119,18 +119,22 @@ export class BackendService {
   }
 
   public async initialize(): Promise<void> {
+    console.log('[BackendService] 🚀 Initializing backend service...')
+    console.log('[BackendService] API Base URL:', this.API_BASE_URL)
     try {
       // Load cached models first
       await this.loadCachedModels()
+      console.log('[BackendService] Loaded', this.cachedModels.length, 'cached models')
       
       // Try to fetch fresh models from Hugging Face
       await this.fetchModelsFromHuggingFace()
       
-      console.log('Backend service initialized successfully')
+      console.log('[BackendService] ✅ Backend service initialized successfully with', this.availableModels.length, 'models')
     } catch (error) {
-      console.error('Failed to initialize backend service:', error)
+      console.error('[BackendService] ❌ Failed to initialize backend service:', error)
       // Fallback to cached models or static models
       await this.loadFallbackModels()
+      console.log('[BackendService] Using fallback models:', this.availableModels.length)
     }
   }
 
@@ -154,10 +158,13 @@ export class BackendService {
 
   private async fetchModelsFromHuggingFace(): Promise<void> {
     try {
-      console.log('Fetching models from Hugging Face...')
+      console.log('[BackendService] Fetching models from:', this.API_BASE_URL + '/models')
       
       const response = await this.makeRequest<{models: HuggingFaceModelInfo[]}>('/models')
+      console.log('[BackendService] Raw response:', response)
+      
       const models = response.models || []
+      console.log('[BackendService] Extracted models array length:', models.length)
       
       this.availableModels = models
       this.cachedModels = [...this.availableModels]
@@ -167,9 +174,10 @@ export class BackendService {
       localStorage.setItem('huggingface_models_cache', JSON.stringify(this.availableModels))
       localStorage.setItem('huggingface_models_cache_time', this.lastFetchTime.toString())
 
-      console.log('Successfully fetched', this.availableModels.length, 'models from Hugging Face')
+      console.log('[BackendService] ✅ Successfully fetched', this.availableModels.length, 'models')
+      console.log('[BackendService] First 3 models:', this.availableModels.slice(0, 3).map(m => m.name))
     } catch (error) {
-      console.error('Error fetching models from Hugging Face:', error)
+      console.error('[BackendService] ❌ Error fetching models:', error)
       throw error
     }
   }
@@ -218,6 +226,7 @@ export class BackendService {
   }
 
   public getAvailableModels(): HuggingFaceModelInfo[] {
+    console.log('[BackendService] getAvailableModels() called, returning', this.availableModels.length, 'models')
     return this.availableModels
   }
 

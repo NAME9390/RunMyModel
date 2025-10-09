@@ -13,6 +13,9 @@
 
 int main(int argc, char *argv[])
 {
+    // Enable remote debugging on port 9222
+    qputenv("QTWEBENGINE_REMOTE_DEBUGGING", "9222");
+    
     QApplication app(argc, argv);
     
     // Set application properties
