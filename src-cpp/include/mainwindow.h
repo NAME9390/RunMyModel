@@ -53,6 +53,17 @@ private slots:
     void onModelDownloadComplete(const QString &modelName);
     void onModelDownloadError(const QString &modelName, const QString &error);
     void onAddCustomModel();
+    void onBrowseCustomModelPath();
+    void onTaskTypeFilterChanged(const QString &filterText);
+    void onSortByChanged(const QString &sortByText);
+    void onGpuFilterCheckboxToggled(bool checked);
+    
+    // Python backend streaming inference slots
+    void onStreamToken(const QString &token);
+    void onStreamComplete();
+    void onStreamError(const QString &error);
+    void onBackendModelsListed(const QJsonArray &models);
+    void onBackendModelLoaded(const QString &modelName);
 
 private:
     // Backend
@@ -144,6 +155,7 @@ private:
     
     // Current state
     QString m_currentModel;
+    QString m_currentStreamingResponse; // Buffer for streaming tokens
     QList<QJsonObject> m_availableModels;
     QList<QJsonObject> m_installedModels;
 };

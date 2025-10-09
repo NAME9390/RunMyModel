@@ -32,6 +32,15 @@ MainWindow::MainWindow(BackendClient *backendClient, QWidget *parent)
     connect(m_backend, &Backend::modelDownloadProgress, this, &MainWindow::onModelDownloadProgress);
     connect(m_backend, &Backend::modelDownloadComplete, this, &MainWindow::onModelDownloadComplete);
     connect(m_backend, &Backend::modelDownloadError, this, &MainWindow::onModelDownloadError);
+    
+    // Connect Python backend signals for real inference
+    if (m_backendClient) {
+        connect(m_backendClient, &BackendClient::streamToken, this, &MainWindow::onStreamToken);
+        connect(m_backendClient, &BackendClient::streamComplete, this, &MainWindow::onStreamComplete);
+        connect(m_backendClient, &BackendClient::streamError, this, &MainWindow::onStreamError);
+        connect(m_backendClient, &BackendClient::modelsListed, this, &MainWindow::onBackendModelsListed);
+        connect(m_backendClient, &BackendClient::modelLoaded, this, &MainWindow::onBackendModelLoaded);
+    }
 }
 
 MainWindow::~MainWindow()
@@ -1044,65 +1053,140 @@ void MainWindow::onSendMessage()
     QString message = m_chatInput->text().trimmed();
     if (message.isEmpty()) return;
     
-    QString currentModel = m_modelSelector->currentData().toString();
-    if (currentModel.isEmpty()) {
+    QString currentModelName = m_modelSelector->currentText();
+    QString currentModelPath = m_modelSelector->currentData().toString();
+    
+    if (currentModelPath.isEmpty()) {
         QMessageBox::warning(this, "No Model Selected", 
             "Please select a model from the dropdown first.");
         return;
     }
     
-    // Check if model is installed
-    bool isInstalled = false;
-    QString modelPath = currentModel;
-    
-    // Check if it's a custom model (has full path)
-    if (QFile::exists(modelPath)) {
-        isInstalled = true;
-    } else {
-        // Check if it's a downloaded Hugging Face model
-        // TODO: Get actual installed models from backend
-        // For now, we'll allow the message but show a warning
-        QMessageBox msgBox(this);
-        msgBox.setWindowTitle("Model Not Installed");
-        msgBox.setIcon(QMessageBox::Warning);
-        msgBox.setText(QString("<h3>%1 is not installed</h3>").arg(currentModel));
-        msgBox.setInformativeText(
-            "This model needs to be downloaded before you can use it.\n\n"
-            "📥 Go to 'Browse Models' to download it.\n"
-            "⚙️ Or add it as a custom model if you have it locally.\n\n"
-            "Inference is not available for uninstalled models."
-        );
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.exec();
-        return;
-    }
+    // Remove emoji prefixes for model name
+    QString cleanModelName = currentModelName;
+    cleanModelName.remove(QRegularExpression("^[🔧📦]\\s+"));
     
     appendChatMessage("You", message);
     m_chatInput->clear();
     
-    QJsonObject request;
-    request["model"] = currentModel;
+    // Start streaming response - prepare assistant message
+    m_currentStreamingResponse.clear();
+    appendChatMessage("Assistant", ""); // Empty message, will be filled by streaming
     
+    m_statusLabel->setText("🧠 Generating...");
+    m_statusLabel->setStyleSheet("color: #f59e0b; font-weight: bold;");
+    m_sendButton->setEnabled(false);
+    
+    // Build messages array for chat completion
     QJsonArray messages;
     QJsonObject userMsg;
     userMsg["role"] = "user";
     userMsg["content"] = message;
     messages.append(userMsg);
-    request["messages"] = messages;
     
-    m_statusLabel->setText("🤔 Thinking...");
-    m_statusLabel->setStyleSheet("color: #f59e0b; font-weight: bold;");
+    // Call Python backend for REAL INFERENCE
+    if (m_backendClient) {
+        m_backendClient->chatCompletion(cleanModelName, messages, 0.7, 512);
+    } else {
+        // Fallback to old backend (placeholder)
+        QJsonObject request;
+        request["model"] = currentModelName;
+        request["messages"] = messages;
+        
+        QJsonObject response = m_backend->chatWithHuggingFace(request);
+        
+        m_statusLabel->setText("✓ Ready");
+        m_statusLabel->setStyleSheet("color: #10b981; font-weight: bold;");
+        m_sendButton->setEnabled(true);
+        
+        QString responseText = response["content"].toString();
+        if (responseText.isEmpty()) {
+            responseText = "⚠️ Backend not available. Make sure Python backend is running.";
+        }
+        
+        // Update the last message
+        QString html = m_chatDisplay->toHtml();
+        int lastIndex = html.lastIndexOf("<div style='margin-bottom: 20px;");
+        if (lastIndex >= 0) {
+            QString newHtml = html.left(lastIndex);
+            m_chatDisplay->setHtml(newHtml);
+        }
+        appendChatMessage("Assistant", responseText);
+    }
+}
+
+void MainWindow::onStreamToken(const QString &token)
+{
+    // Append token to current streaming response
+    m_currentStreamingResponse += token;
     
-    QJsonObject response = m_backend->chatWithHuggingFace(request);
+    // Update the last assistant message in chat display
+    QString html = m_chatDisplay->toHtml();
     
+    // Find and replace the last assistant message
+    int lastAssistantIndex = html.lastIndexOf("<div style='margin-bottom: 20px; padding: 15px; background-color: #f0fdf4;");
+    
+    if (lastAssistantIndex >= 0) {
+        QString beforeLastMessage = html.left(lastAssistantIndex);
+        
+        QString roleColor = "#10b981";
+        QString icon = "🤖";
+        
+        QString msgHtml = QString(
+            "<div style='margin-bottom: 20px; padding: 15px; background-color: #f0fdf4; border-radius: 8px;'>"
+            "<b style='color: %1; font-size: 14px;'>%2 Assistant</b><br><br>"
+            "<span style='color: #1f2937;'>%3</span>"
+            "</div>")
+            .arg(roleColor)
+            .arg(icon)
+            .arg(m_currentStreamingResponse.toHtmlEscaped());
+        
+        m_chatDisplay->setHtml(beforeLastMessage + msgHtml);
+        
+        // Auto-scroll to bottom
+        QScrollBar *scrollBar = m_chatDisplay->verticalScrollBar();
+        scrollBar->setValue(scrollBar->maximum());
+    }
+}
+
+void MainWindow::onStreamComplete()
+{
     m_statusLabel->setText("✓ Ready");
     m_statusLabel->setStyleSheet("color: #10b981; font-weight: bold;");
+    m_sendButton->setEnabled(true);
+    m_currentStreamingResponse.clear();
     
-    QString responseText = response["content"].toString();
-    if (responseText.isEmpty()) {
-        responseText = "⚠️ Model inference not yet implemented. This is v0.2.0 ALPHA - inference coming soon!";
+    qDebug() << "✅ Streaming complete!";
+}
+
+void MainWindow::onStreamError(const QString &error)
+{
+    m_statusLabel->setText("❌ Error");
+    m_statusLabel->setStyleSheet("color: #ef4444; font-weight: bold;");
+    m_sendButton->setEnabled(true);
+    
+    qWarning() << "Streaming error:" << error;
+    
+    // Update last message with error
+    QString html = m_chatDisplay->toHtml();
+    int lastIndex = html.lastIndexOf("<div style='margin-bottom: 20px;");
+    if (lastIndex >= 0) {
+        QString newHtml = html.left(lastIndex);
+        m_chatDisplay->setHtml(newHtml);
     }
-    appendChatMessage("Assistant", responseText);
+    appendChatMessage("Error", "⚠️ " + error);
+}
+
+void MainWindow::onBackendModelsListed(const QJsonArray &models)
+{
+    qDebug() << "Backend models listed:" << models.size();
+    // Could update UI with loaded models status
+}
+
+void MainWindow::onBackendModelLoaded(const QString &modelName)
+{
+    qDebug() << "Backend model loaded:" << modelName;
+    m_statusLabel->setText(QString("✅ %1 loaded!").arg(modelName));
 }
 
 void MainWindow::appendChatMessage(const QString &role, const QString &message)
@@ -1182,6 +1266,41 @@ void MainWindow::onNewChatClicked()
     m_chatDisplay->clear();
     m_chatInput->clear();
     appendChatMessage("System", "New chat started. Select a model and start chatting!");
+}
+
+void MainWindow::onBrowseCustomModelPath()
+{
+    QString filePath = QFileDialog::getOpenFileName(
+        this,
+        "Select Model File",
+        QDir::homePath(),
+        "Model Files (*.gguf *.ggml);;All Files (*)"
+    );
+    
+    if (!filePath.isEmpty()) {
+        m_customModelPath->setText(filePath);
+    }
+}
+
+void MainWindow::onTaskTypeFilterChanged(const QString &filterText)
+{
+    Q_UNUSED(filterText)
+    // TODO: Filter models by task type
+    loadAvailableModels();
+}
+
+void MainWindow::onSortByChanged(const QString &sortByText)
+{
+    Q_UNUSED(sortByText)
+    // TODO: Sort models
+    loadAvailableModels();
+}
+
+void MainWindow::onGpuFilterCheckboxToggled(bool checked)
+{
+    Q_UNUSED(checked)
+    // Reload models with GPU filtering
+    loadAvailableModels();
 }
 
 void MainWindow::onAboutClicked()
