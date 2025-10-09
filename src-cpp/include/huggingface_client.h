@@ -34,11 +34,6 @@ signals:
     void downloadComplete(const QString &modelName);
     void downloadError(const QString &modelName, const QString &error);
 
-private slots:
-    void onDownloadProgress(qint64 bytesReceived, qint64 bytesTotal);
-    void onDownloadFinished();
-    void onDownloadError(QNetworkReply::NetworkError error);
-
 private:
     struct DownloadInfo {
         QString modelName;

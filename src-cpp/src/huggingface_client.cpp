@@ -461,23 +461,7 @@ QJsonObject HuggingFaceClient::getDownloadProgress(const QString &modelName)
     return progress;
 }
 
-void HuggingFaceClient::onDownloadProgress(qint64 bytesReceived, qint64 bytesTotal)
-{
-    // This would be called by QNetworkReply in a real implementation
-    Q_UNUSED(bytesReceived)
-    Q_UNUSED(bytesTotal)
-}
-
-void HuggingFaceClient::onDownloadFinished()
-{
-    // This would be called by QNetworkReply in a real implementation
-}
-
-void HuggingFaceClient::onDownloadError(QNetworkReply::NetworkError error)
-{
-    Q_UNUSED(error)
-    // This would be called by QNetworkReply in a real implementation
-}
+// These methods are legacy stubs - real download tracking happens via lambda connections in downloadModel()
 
 QString HuggingFaceClient::getCacheDir() const
 {
@@ -525,21 +509,4 @@ QJsonObject HuggingFaceClient::parseModelInfo(const QString &modelName, const QS
     return model;
 }
 
-void HuggingFaceClient::startProgressTracking(const QString &modelName, QNetworkReply *reply)
-{
-    Q_UNUSED(modelName)
-    Q_UNUSED(reply)
-    // This would be implemented for real downloads
-}
-
-void HuggingFaceClient::stopProgressTracking(const QString &modelName)
-{
-    if (m_activeDownloads.contains(modelName)) {
-        DownloadInfo &info = m_activeDownloads[modelName];
-        if (info.progressTimer) {
-            info.progressTimer->stop();
-            info.progressTimer->deleteLater();
-        }
-        m_activeDownloads.remove(modelName);
-    }
-}
+// Legacy methods - progress tracking now happens inline in downloadModel()

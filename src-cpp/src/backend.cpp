@@ -54,18 +54,27 @@ QJsonObject Backend::getModelDownloadProgress(const QString &modelName)
 
 QJsonObject Backend::chatWithHuggingFace(const QJsonObject &request)
 {
-    // For now, return a placeholder response
-    // In a real implementation, this would load and run the model
+    // Real model inference using llama.cpp would go here
+    // For now, return an informative message that this requires model loading
     QJsonObject response;
-    response["content"] = QString("This is a placeholder response from Hugging Face model: %1. The actual model inference would be implemented here.")
-                         .arg(request["model"].toString());
+    QString modelName = request["model"].toString();
+    
+    response["content"] = QString(
+        "⚠️ Model inference not yet implemented.\n\n"
+        "To enable chat with %1:\n"
+        "1. Integrate llama.cpp library\n"
+        "2. Load model from ~/Documents/rmm/%2/model.gguf\n"
+        "3. Run inference with your message\n\n"
+        "This would require linking against llama.cpp and implementing model loading/inference logic."
+    ).arg(modelName, QString(modelName).replace("/", "_"));
     
     QJsonObject usage;
-    usage["prompt_tokens"] = request["messages"].toArray().size();
-    usage["completion_tokens"] = 50; // Placeholder
-    usage["total_tokens"] = usage["prompt_tokens"].toInt() + usage["completion_tokens"].toInt();
+    usage["prompt_tokens"] = 0;
+    usage["completion_tokens"] = 0;
+    usage["total_tokens"] = 0;
     
     response["usage"] = usage;
+    response["error"] = "Inference not implemented yet";
     
     return response;
 }

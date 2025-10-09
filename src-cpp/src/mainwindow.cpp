@@ -30,6 +30,7 @@ MainWindow::MainWindow(QWidget *parent)
     // Connect backend signals for download progress
     connect(m_backend, &Backend::modelDownloadProgress, this, &MainWindow::onModelDownloadProgress);
     connect(m_backend, &Backend::modelDownloadComplete, this, &MainWindow::onModelDownloadComplete);
+    connect(m_backend, &Backend::modelDownloadError, this, &MainWindow::onModelDownloadError);
 }
 
 MainWindow::~MainWindow()
@@ -860,8 +861,36 @@ void MainWindow::loadAvailableModels()
     int row = 0, col = 0;
     const int columnsPerRow = 2; // 2 cards per row for better layout
     
+    int totalModels = 0;
+    int filteredCount = 0;
+    
+    // Check if GPU filtering is enabled
+    bool filterByGPU = (m_gpuFilterCheckbox && m_gpuFilterCheckbox->isChecked() && m_detectedVRAM > 0);
+    
     for (const QJsonValue &value : models) {
         QJsonObject model = value.toObject();
+        totalModels++;
+        
+        // Apply GPU filtering if enabled
+        if (filterByGPU) {
+            QString sizeStr = model["size"].toString();
+            // Parse size (e.g., "3B" -> 3000MB, "7B" -> 7000MB)
+            QString numPart = sizeStr;
+            numPart.remove(QRegularExpression("[^0-9.]"));
+            double sizeFactor = numPart.toDouble();
+            
+            if (sizeStr.contains("B", Qt::CaseInsensitive)) {
+                // Rough estimate: B parameters * 1GB per B for Q4 quantization
+                sizeFactor *= 1000; // MB
+            }
+            
+            // Skip if model is too large for GPU
+            if (sizeFactor > m_detectedVRAM) {
+                continue;
+            }
+        }
+        
+        filteredCount++;
         m_availableModels.append(model);
         
         QString task = model["task_type"].toString();
@@ -897,14 +926,37 @@ void MainWindow::loadAvailableModels()
         m_taskTypeFilter->addItem(task);
     }
     
-    m_downloadCountLabel->setText(QString("%1 models").arg(models.size()));
-    qDebug() << "Loaded" << models.size() << "models with Steam-style cards";
+    QString countText = QString("%1 models").arg(filteredCount);
+    if (filterByGPU && filteredCount < totalModels) {
+        countText += QString(" (%1 hidden by GPU filter)").arg(totalModels - filteredCount);
+    }
+    m_downloadCountLabel->setText(countText);
+    qDebug() << "Loaded" << filteredCount << "/" << totalModels << "models (GPU filtering:" << filterByGPU << ")";
 }
 
 void MainWindow::loadInstalledModels()
 {
-    // TODO: Load from backend
-    m_installedCountLabel->setText("0 models installed");
+    // Scan ~/Documents/rmm/ for downloaded models
+    QString rmmPath = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/rmm";
+    QDir rmmDir(rmmPath);
+    
+    if (!rmmDir.exists()) {
+        m_installedCountLabel->setText("0 models installed");
+        return;
+    }
+    
+    QStringList modelDirs = rmmDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+    int installedCount = 0;
+    
+    for (const QString &dirName : modelDirs) {
+        QString modelPath = rmmPath + "/" + dirName + "/model.gguf";
+        if (QFile::exists(modelPath)) {
+            installedCount++;
+        }
+    }
+    
+    m_installedCountLabel->setText(QString("%1 models installed").arg(installedCount));
+    qDebug() << "Found" << installedCount << "installed models in" << rmmPath;
 }
 
 void MainWindow::updateModelSelector()
@@ -1187,6 +1239,22 @@ void MainWindow::onModelDownloadComplete(const QString &modelName)
     updateModelSelector();
     
     qDebug() << "Download complete:" << modelName;
+}
+
+void MainWindow::onModelDownloadError(const QString &modelName, const QString &error)
+{
+    if (m_modelCards.contains(modelName)) {
+        m_modelCards[modelName]->setDownloading(false);
+    }
+    
+    // Update download panel
+    m_downloadPanel->errorDownload(modelName, error);
+    
+    // Show error in status
+    m_statusLabel->setText(QString("❌ Error: %1").arg(error));
+    m_statusLabel->setStyleSheet("color: #ef4444; font-weight: bold;");
+    
+    qDebug() << "Download error:" << modelName << error;
 }
 
 void MainWindow::onDownloadModelRequested(const QString &modelName)

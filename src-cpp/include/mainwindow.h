@@ -21,6 +21,8 @@
 #include <QMap>
 #include <QDockWidget>
 #include <QCheckBox>
+#include <QRegularExpression>
+#include <QStandardPaths>
 #include "backend.h"
 #include "modelcard.h"
 #include "downloadpanel.h"
@@ -48,6 +50,7 @@ private slots:
     void showModelDetails(QListWidgetItem *item);
     void onModelDownloadProgress(const QString &modelName, double progress);
     void onModelDownloadComplete(const QString &modelName);
+    void onModelDownloadError(const QString &modelName, const QString &error);
     void onAddCustomModel();
 
 private:
