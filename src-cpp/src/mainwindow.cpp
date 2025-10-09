@@ -873,20 +873,45 @@ void MainWindow::loadAvailableModels()
         
         // Apply GPU filtering if enabled
         if (filterByGPU) {
-            QString sizeStr = model["size"].toString();
-            // Parse size (e.g., "3B" -> 3000MB, "7B" -> 7000MB)
-            QString numPart = sizeStr;
-            numPart.remove(QRegularExpression("[^0-9.]"));
-            double sizeFactor = numPart.toDouble();
+            QString sizeStr = model["size"].toString().toUpper();
             
-            if (sizeStr.contains("B", Qt::CaseInsensitive)) {
-                // Rough estimate: B parameters * 1GB per B for Q4 quantization
-                sizeFactor *= 1000; // MB
-            }
+            // Parse size: "3B" -> 3GB, "357B" -> 357GB, "1000B" -> 1TB
+            QRegularExpression re("([0-9.]+)\\s*([KMGT]?B)");
+            QRegularExpressionMatch match = re.match(sizeStr);
             
-            // Skip if model is too large for GPU
-            if (sizeFactor > m_detectedVRAM) {
-                continue;
+            if (match.hasMatch()) {
+                double size = match.captured(1).toDouble();
+                QString unit = match.captured(2).toUpper();
+                
+                // Convert to MB
+                double sizeInMB = 0;
+                if (unit == "KB") {
+                    sizeInMB = size / 1024.0;
+                } else if (unit == "MB") {
+                    sizeInMB = size;
+                } else if (unit == "GB" || unit == "B") {
+                    // "B" usually means billions of parameters (GB of VRAM)
+                    sizeInMB = size * 1024.0;
+                } else if (unit == "TB") {
+                    sizeInMB = size * 1024.0 * 1024.0;
+                }
+                
+                // For parameter count (e.g., "3B"), estimate VRAM:
+                // Q4_K_M quantization: ~0.5-0.6 bytes per parameter
+                // So 3B params ≈ 1.8GB, 7B ≈ 4.2GB, 13B ≈ 7.8GB
+                if (unit == "B" && size < 10000) { // Likely parameter count, not file size
+                    sizeInMB = size * 600; // MB (0.6 bytes per param)
+                }
+                
+                // Skip if model needs more VRAM than available
+                qDebug() << "Model:" << model["name"].toString() 
+                         << "Size:" << sizeStr << "→" << sizeInMB << "MB"
+                         << "GPU:" << m_detectedVRAM << "MB" 
+                         << "Skip:" << (sizeInMB > m_detectedVRAM);
+                
+                if (sizeInMB > m_detectedVRAM) {
+                    continue;
+                }
             }
         }
         

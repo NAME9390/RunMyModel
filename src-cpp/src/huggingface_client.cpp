@@ -217,8 +217,9 @@ QString HuggingFaceClient::downloadModel(const QString &modelName)
         qint64 fileSize = 0;
         
         // Look for siblings (files in the model)
+        QJsonArray siblings;
         if (obj.contains("siblings")) {
-            QJsonArray siblings = obj["siblings"].toArray();
+            siblings = obj["siblings"].toArray();
             
             qDebug() << "Found" << siblings.size() << "files in model";
             
@@ -244,9 +245,23 @@ QString HuggingFaceClient::downloadModel(const QString &modelName)
         }
         
         if (actualDownloadUrl.isEmpty()) {
-            qWarning() << "❌ No GGUF file found in model repository";
+            qWarning() << "❌ No GGUF file found in model repository:" << modelName;
+            qDebug() << "   Available files in repository:" << siblings.size();
+            
+            // List available files for debugging
+            for (const QJsonValue &sibling : siblings) {
+                QJsonObject file = sibling.toObject();
+                QString filename = file["rfilename"].toString();
+                if (filename.contains("gguf", Qt::CaseInsensitive) || 
+                    filename.contains("ggml", Qt::CaseInsensitive)) {
+                    qDebug() << "   Found potential file:" << filename;
+                }
+            }
+            
             m_activeDownloads.remove(modelName);
-            emit downloadError(modelName, "No GGUF file found");
+            emit downloadError(modelName, 
+                QString("No GGUF file found. This model may not have quantized versions available. "
+                        "Try downloading from the Hugging Face website manually."));
             return;
         }
         
