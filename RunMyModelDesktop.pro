@@ -8,6 +8,7 @@ TEMPLATE = app
 # Source files
 SOURCES += src-cpp/src/main.cpp \
            src-cpp/src/mainwindow.cpp \
+           src-cpp/src/modelcard.cpp \
            src-cpp/src/backend.cpp \
            src-cpp/src/huggingface_client.cpp \
            src-cpp/src/model_manager.cpp \
@@ -15,6 +16,7 @@ SOURCES += src-cpp/src/main.cpp \
 
 # Header files  
 HEADERS += src-cpp/include/mainwindow.h \
+           src-cpp/include/modelcard.h \
            src-cpp/include/backend.h \
            src-cpp/include/huggingface_client.h \
            src-cpp/include/model_manager.h \

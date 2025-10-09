@@ -9,13 +9,7 @@ echo ""
 
 # Clean build
 echo "Cleaning old build..."
-rm -rf build
-mkdir -p build
-cd build
-
-# Build with qmake instead of cmake
-echo "Building with qmake..."
-cd ..
+rm -rf build Makefile .qmake.stash
 
 # Create .pro file
 cat > RunMyModelDesktop.pro << 'EOF'
@@ -29,6 +23,7 @@ TEMPLATE = app
 # Source files
 SOURCES += src-cpp/src/main.cpp \
            src-cpp/src/mainwindow.cpp \
+           src-cpp/src/modelcard.cpp \
            src-cpp/src/backend.cpp \
            src-cpp/src/huggingface_client.cpp \
            src-cpp/src/model_manager.cpp \
@@ -36,6 +31,7 @@ SOURCES += src-cpp/src/main.cpp \
 
 # Header files  
 HEADERS += src-cpp/include/mainwindow.h \
+           src-cpp/include/modelcard.h \
            src-cpp/include/backend.h \
            src-cpp/include/huggingface_client.h \
            src-cpp/include/model_manager.h \
@@ -52,7 +48,10 @@ MOC_DIR = build/moc
 EOF
 
 # Build
+echo "Running qmake..."
 qmake6 RunMyModelDesktop.pro
+
+echo "Compiling..."
 make -j$(nproc)
 
 # Copy llms.txt
@@ -62,4 +61,3 @@ echo ""
 echo "✅ Build successful!"
 echo "📊 Models available: $(wc -l < llms.txt | xargs)"
 echo "🚀 Run the app: ./build/RunMyModelDesktop"
-

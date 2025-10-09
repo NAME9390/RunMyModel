@@ -16,7 +16,11 @@
 #include <QStackedWidget>
 #include <QToolButton>
 #include <QFrame>
+#include <QScrollArea>
+#include <QGridLayout>
+#include <QMap>
 #include "backend.h"
+#include "modelcard.h"
 
 class MainWindow : public QMainWindow
 {
@@ -30,7 +34,7 @@ private slots:
     void onSendMessage();
     void onModelSelected(const QString &modelName);
     void onRefreshModels();
-    void onDownloadModel();
+    void onDownloadModelRequested(const QString &modelName);
     void onRemoveModel();
     void onModelSearchChanged(const QString &text);
     void onPageChanged(const QString &page);
@@ -38,6 +42,9 @@ private slots:
     void onNewChatClicked();
     void onAboutClicked();
     void showModelDetails(QListWidgetItem *item);
+    void onModelDownloadProgress(const QString &modelName, double progress);
+    void onModelDownloadComplete(const QString &modelName);
+    void onAddCustomModel();
 
 private:
     // Backend
@@ -75,11 +82,11 @@ private:
     QLineEdit *m_downloadSearch;
     QComboBox *m_taskTypeFilter;
     QComboBox *m_sortByCombo;
-    QListWidget *m_availableModelsList;
-    QTextEdit *m_downloadModelDetails;
-    QPushButton *m_downloadModelBtn;
-    QProgressBar *m_downloadProgress;
+    QScrollArea *m_modelsScrollArea;
+    QWidget *m_modelsContainer;
+    QGridLayout *m_modelsGrid;
     QLabel *m_downloadCountLabel;
+    QMap<QString, ModelCard*> m_modelCards;
     
     // Installed models page
     QWidget *m_installedPage;

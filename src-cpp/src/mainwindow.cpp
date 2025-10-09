@@ -4,6 +4,8 @@
 #include <QMessageBox>
 #include <QScrollBar>
 #include <QFileDialog>
+#include <QFileInfo>
+#include <QDir>
 #include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent)
@@ -18,6 +20,10 @@ MainWindow::MainWindow(QWidget *parent)
     loadAvailableModels();
     loadInstalledModels();
     updateModelSelector();
+    
+    // Connect backend signals for download progress
+    connect(m_backend, &Backend::modelDownloadProgress, this, &MainWindow::onModelDownloadProgress);
+    connect(m_backend, &Backend::modelDownloadComplete, this, &MainWindow::onModelDownloadComplete);
 }
 
 MainWindow::~MainWindow()
@@ -203,22 +209,28 @@ void MainWindow::setupDownloadPage()
     titleLabel->setFont(titleFont);
     layout->addWidget(titleLabel);
     
+    QLabel *subtitleLabel = new QLabel("Explore 361+ AI models - Steam-style cards");
+    subtitleLabel->setStyleSheet("color: #6b7280;");
+    layout->addWidget(subtitleLabel);
+    
     // Search and filters
     QHBoxLayout *filterBar = new QHBoxLayout();
     
     m_downloadSearch = new QLineEdit();
-    m_downloadSearch->setPlaceholderText("🔍 Search models...");
-    m_downloadSearch->setMinimumHeight(35);
+    m_downloadSearch->setPlaceholderText("🔍 Search models by name, task, or size...");
+    m_downloadSearch->setMinimumHeight(40);
     filterBar->addWidget(m_downloadSearch);
     
     m_taskTypeFilter = new QComboBox();
     m_taskTypeFilter->addItem("All Tasks");
-    m_taskTypeFilter->setMinimumHeight(35);
+    m_taskTypeFilter->setMinimumHeight(40);
+    m_taskTypeFilter->setMinimumWidth(200);
     filterBar->addWidget(m_taskTypeFilter);
     
     m_sortByCombo = new QComboBox();
     m_sortByCombo->addItems({"Sort by Rating", "Sort by Name", "Sort by Size"});
-    m_sortByCombo->setMinimumHeight(35);
+    m_sortByCombo->setMinimumHeight(40);
+    m_sortByCombo->setMinimumWidth(180);
     filterBar->addWidget(m_sortByCombo);
     
     m_downloadCountLabel = new QLabel("0 models");
@@ -227,62 +239,22 @@ void MainWindow::setupDownloadPage()
     
     layout->addLayout(filterBar);
     
-    // Splitter for list and details
-    QSplitter *splitter = new QSplitter(Qt::Horizontal);
+    // Steam-style grid of model cards
+    m_modelsScrollArea = new QScrollArea();
+    m_modelsScrollArea->setWidgetResizable(true);
+    m_modelsScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    m_modelsScrollArea->setObjectName("modelsScroll");
     
-    // Models list
-    QWidget *listWidget = new QWidget();
-    QVBoxLayout *listLayout = new QVBoxLayout(listWidget);
-    listLayout->setContentsMargins(0, 0, 0, 0);
+    m_modelsContainer = new QWidget();
+    m_modelsGrid = new QGridLayout(m_modelsContainer);
+    m_modelsGrid->setSpacing(15);
+    m_modelsGrid->setContentsMargins(0, 0, 0, 0);
     
-    m_availableModelsList = new QListWidget();
-    m_availableModelsList->setObjectName("modelsList");
-    listLayout->addWidget(m_availableModelsList);
-    
-    splitter->addWidget(listWidget);
-    
-    // Model details
-    QWidget *detailsWidget = new QWidget();
-    QVBoxLayout *detailsLayout = new QVBoxLayout(detailsWidget);
-    detailsLayout->setContentsMargins(0, 0, 0, 0);
-    
-    QLabel *detailsTitle = new QLabel("Model Details");
-    QFont detailsFont = detailsTitle->font();
-    detailsFont.setPointSize(14);
-    detailsFont.setBold(true);
-    detailsTitle->setFont(detailsFont);
-    detailsLayout->addWidget(detailsTitle);
-    
-    m_downloadModelDetails = new QTextEdit();
-    m_downloadModelDetails->setReadOnly(true);
-    m_downloadModelDetails->setObjectName("detailsBox");
-    detailsLayout->addWidget(m_downloadModelDetails);
-    
-    // Action buttons
-    QHBoxLayout *buttonLayout = new QHBoxLayout();
-    m_downloadModelBtn = new QPushButton("⬇️ Download Model");
-    m_downloadModelBtn->setObjectName("downloadBtn");
-    m_downloadModelBtn->setMinimumHeight(40);
-    buttonLayout->addWidget(m_downloadModelBtn);
-    buttonLayout->addStretch();
-    detailsLayout->addLayout(buttonLayout);
-    
-    // Progress bar
-    m_downloadProgress = new QProgressBar();
-    m_downloadProgress->setVisible(false);
-    m_downloadProgress->setMinimumHeight(25);
-    detailsLayout->addWidget(m_downloadProgress);
-    
-    splitter->addWidget(detailsWidget);
-    splitter->setStretchFactor(0, 2);
-    splitter->setStretchFactor(1, 1);
-    
-    layout->addWidget(splitter);
+    m_modelsScrollArea->setWidget(m_modelsContainer);
+    layout->addWidget(m_modelsScrollArea);
     
     // Connect signals
     connect(m_downloadSearch, &QLineEdit::textChanged, this, &MainWindow::onModelSearchChanged);
-    connect(m_availableModelsList, &QListWidget::itemClicked, this, &MainWindow::showModelDetails);
-    connect(m_downloadModelBtn, &QPushButton::clicked, this, &MainWindow::onDownloadModel);
 }
 
 void MainWindow::setupInstalledPage()
@@ -389,73 +361,91 @@ void MainWindow::setupCustomPage()
     titleLabel->setFont(titleFont);
     layout->addWidget(titleLabel);
     
-    QLabel *descLabel = new QLabel("Load custom GGUF models from your filesystem");
+    QLabel *descLabel = new QLabel("Load custom GGUF/GGML models from your filesystem");
+    descLabel->setStyleSheet("color: #6b7280;");
     layout->addWidget(descLabel);
     
     layout->addSpacing(20);
     
-    // Model path
-    QHBoxLayout *pathLayout = new QHBoxLayout();
-    pathLayout->addWidget(new QLabel("Model File:"));
+    // Create a nice form card
+    QFrame *formCard = new QFrame();
+    formCard->setObjectName("formCard");
+    QVBoxLayout *formLayout = new QVBoxLayout(formCard);
+    formLayout->setContentsMargins(20, 20, 20, 20);
+    formLayout->setSpacing(15);
     
+    // Model path
+    QLabel *pathLabel = new QLabel("<b>Model File:</b>");
+    formLayout->addWidget(pathLabel);
+    
+    QHBoxLayout *pathRow = new QHBoxLayout();
     m_customModelPath = new QLineEdit();
-    m_customModelPath->setPlaceholderText("Select a .gguf file...");
-    m_customModelPath->setMinimumHeight(35);
-    pathLayout->addWidget(m_customModelPath);
+    m_customModelPath->setPlaceholderText("Select a .gguf or .ggml file...");
+    m_customModelPath->setMinimumHeight(40);
+    pathRow->addWidget(m_customModelPath);
     
     m_browseCustomBtn = new QPushButton("📁 Browse...");
-    m_browseCustomBtn->setMinimumHeight(35);
+    m_browseCustomBtn->setMinimumHeight(40);
+    m_browseCustomBtn->setMinimumWidth(120);
     connect(m_browseCustomBtn, &QPushButton::clicked, [this]() {
         QString fileName = QFileDialog::getOpenFileName(this, "Select Model File", 
-                                                        QString(), "GGUF Files (*.gguf);;All Files (*)");
+                                                        QDir::homePath(), 
+                                                        "Model Files (*.gguf *.ggml);;All Files (*)");
         if (!fileName.isEmpty()) {
             m_customModelPath->setText(fileName);
+            // Auto-fill model name from filename
+            QFileInfo fileInfo(fileName);
+            m_customModelName->setText(fileInfo.baseName());
         }
     });
-    pathLayout->addWidget(m_browseCustomBtn);
-    
-    layout->addLayout(pathLayout);
+    pathRow->addWidget(m_browseCustomBtn);
+    formLayout->addLayout(pathRow);
     
     // Model name
-    QHBoxLayout *nameLayout = new QHBoxLayout();
-    nameLayout->addWidget(new QLabel("Model Name:"));
+    QLabel *nameLabel = new QLabel("<b>Model Name:</b>");
+    formLayout->addWidget(nameLabel);
     
     m_customModelName = new QLineEdit();
-    m_customModelName->setPlaceholderText("e.g., my-custom-model-7b");
-    m_customModelName->setMinimumHeight(35);
-    nameLayout->addWidget(m_customModelName);
-    
-    layout->addLayout(nameLayout);
+    m_customModelName->setPlaceholderText("e.g., my-custom-llama-7b");
+    m_customModelName->setMinimumHeight(40);
+    formLayout->addWidget(m_customModelName);
     
     // Model format
-    QHBoxLayout *formatLayout = new QHBoxLayout();
-    formatLayout->addWidget(new QLabel("Format:"));
+    QLabel *formatLabel = new QLabel("<b>Format:</b>");
+    formLayout->addWidget(formatLabel);
     
     m_customModelFormat = new QComboBox();
-    m_customModelFormat->addItems({"GGUF", "GGML", "Other"});
-    m_customModelFormat->setMinimumHeight(35);
-    formatLayout->addWidget(m_customModelFormat);
-    formatLayout->addStretch();
-    
-    layout->addLayout(formatLayout);
+    m_customModelFormat->addItems({"GGUF", "GGML", "PyTorch", "TensorFlow", "Other"});
+    m_customModelFormat->setMinimumHeight(40);
+    formLayout->addWidget(m_customModelFormat);
     
     // Configuration (optional)
-    layout->addWidget(new QLabel("Configuration (JSON, optional):"));
+    QLabel *configLabel = new QLabel("<b>Configuration (Optional JSON):</b>");
+    formLayout->addWidget(configLabel);
+    
     m_customModelConfig = new QTextEdit();
-    m_customModelConfig->setPlaceholderText("{\n  \"context_length\": 2048,\n  \"temperature\": 0.7\n}");
-    m_customModelConfig->setMaximumHeight(150);
-    layout->addWidget(m_customModelConfig);
+    m_customModelConfig->setPlaceholderText("{\n  \"context_length\": 4096,\n  \"temperature\": 0.7,\n  \"max_tokens\": 2048\n}");
+    m_customModelConfig->setMaximumHeight(120);
+    formLayout->addWidget(m_customModelConfig);
     
     // Add button
     m_addCustomModelBtn = new QPushButton("➕ Add Custom Model");
     m_addCustomModelBtn->setObjectName("addBtn");
-    m_addCustomModelBtn->setMinimumHeight(45);
-    layout->addWidget(m_addCustomModelBtn);
+    m_addCustomModelBtn->setMinimumHeight(50);
+    connect(m_addCustomModelBtn, &QPushButton::clicked, this, &MainWindow::onAddCustomModel);
+    formLayout->addWidget(m_addCustomModelBtn);
+    
+    layout->addWidget(formCard);
     
     layout->addSpacing(20);
     
     // List of custom models
-    layout->addWidget(new QLabel("Your Custom Models:"));
+    QLabel *listLabel = new QLabel("<b>Your Custom Models:</b>");
+    QFont listFont = listLabel->font();
+    listFont.setPointSize(14);
+    listLabel->setFont(listFont);
+    layout->addWidget(listLabel);
+    
     m_customModelsList = new QListWidget();
     m_customModelsList->setObjectName("modelsList");
     layout->addWidget(m_customModelsList);
@@ -652,6 +642,81 @@ void MainWindow::applyModernStyling()
                 stop:0 #667eea, stop:1 #764ba2);
             border-radius: 6px;
         }
+        
+        /* Steam-style Model Cards */
+        #modelCard {
+            background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                stop:0 #ffffff, stop:1 #f8f9fa);
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 0px;
+        }
+        
+        #modelCard:hover {
+            border-color: #667eea;
+            background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                stop:0 #f8f9ff, stop:1 #f0f4ff);
+        }
+        
+        #modelCardName {
+            color: #1f2937;
+            font-weight: bold;
+        }
+        
+        #modelStat {
+            color: #6b7280;
+            font-size: 12px;
+        }
+        
+        #statusBadge {
+            background-color: #6b7280;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        
+        #modelCardButton {
+            background-color: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 16px;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        
+        #modelCardButton:hover {
+            background-color: #5568d3;
+        }
+        
+        #modelCardButton:disabled {
+            background-color: #9ca3af;
+        }
+        
+        #modelProgress {
+            border: none;
+            background-color: #e5e7eb;
+            border-radius: 3px;
+        }
+        
+        #modelProgress::chunk {
+            background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                stop:0 #10b981, stop:1 #059669);
+            border-radius: 3px;
+        }
+        
+        #modelsScroll {
+            background-color: transparent;
+            border: none;
+        }
+        
+        #formCard {
+            background-color: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+        }
     )";
     
     setStyleSheet(styleSheet);
@@ -662,31 +727,48 @@ void MainWindow::loadAvailableModels()
     QJsonArray models = m_backend->getAllHuggingFaceModels();
     
     m_availableModels.clear();
-    m_availableModelsList->clear();
+    
+    // Clear existing cards
+    for (ModelCard *card : m_modelCards) {
+        m_modelsGrid->removeWidget(card);
+        card->deleteLater();
+    }
+    m_modelCards.clear();
     
     QSet<QString> taskTypes;
+    
+    int row = 0, col = 0;
+    const int columnsPerRow = 2; // 2 cards per row for better layout
     
     for (const QJsonValue &value : models) {
         QJsonObject model = value.toObject();
         m_availableModels.append(model);
         
-        QString name = model["name"].toString();
-        QString size = model["size"].toString();
         QString task = model["task_type"].toString();
-        QString rating = model["rating"].toString();
-        
         taskTypes.insert(task);
         
-        // Create nice formatted item
-        QString displayText = QString("📦 %1\n   Size: %2 | Task: %3").arg(name, size, task);
-        if (rating != "N/A") {
-            displayText += QString(" | ⭐ %1").arg(rating);
-        }
+        // Create Steam-style model card
+        ModelCard *card = new ModelCard(model, m_modelsContainer);
         
-        QListWidgetItem *item = new QListWidgetItem(displayText);
-        item->setData(Qt::UserRole, QVariant::fromValue(model));
-        m_availableModelsList->addItem(item);
+        // Connect card signals
+        connect(card, &ModelCard::downloadRequested, this, &MainWindow::onDownloadModelRequested);
+        connect(card, &ModelCard::useRequested, [this](const QString &modelName) {
+            m_modelSelector->setCurrentText(modelName);
+            switchToPage(0); // Switch to chat
+        });
+        
+        m_modelsGrid->addWidget(card, row, col);
+        m_modelCards[model["name"].toString()] = card;
+        
+        col++;
+        if (col >= columnsPerRow) {
+            col = 0;
+            row++;
+        }
     }
+    
+    // Add spacer at the end
+    m_modelsGrid->setRowStretch(row + 1, 1);
     
     // Update task filter
     m_taskTypeFilter->clear();
@@ -695,8 +777,8 @@ void MainWindow::loadAvailableModels()
         m_taskTypeFilter->addItem(task);
     }
     
-    m_downloadCountLabel->setText(QString("%1 models available").arg(models.size()));
-    qDebug() << "Loaded" << models.size() << "available models";
+    m_downloadCountLabel->setText(QString("%1 models").arg(models.size()));
+    qDebug() << "Loaded" << models.size() << "models with Steam-style cards";
 }
 
 void MainWindow::loadInstalledModels()
@@ -742,11 +824,8 @@ void MainWindow::showModelDetails(QListWidgetItem *item)
                    .arg(model["downloaded"].toBool() ? "✓ Yes" : "✗ No");
     details += "</table>";
     
-    // Update the appropriate details widget
-    if (sender() == m_availableModelsList) {
-        m_downloadModelDetails->setHtml(details);
-        m_downloadModelBtn->setEnabled(!model["downloaded"].toBool());
-    } else if (sender() == m_installedModelsList) {
+    // Update installed models details
+    if (sender() == m_installedModelsList) {
         m_installedModelDetails->setHtml(details);
     }
 }
@@ -828,45 +907,7 @@ void MainWindow::onRefreshModels()
     m_statusLabel->setText("✓ Refreshed");
 }
 
-void MainWindow::onDownloadModel()
-{
-    QListWidgetItem *currentItem = m_availableModelsList->currentItem();
-    if (!currentItem) {
-        QMessageBox::warning(this, "No Selection", "Please select a model to download.");
-        return;
-    }
-    
-    QJsonObject model = currentItem->data(Qt::UserRole).toJsonObject();
-    QString modelName = model["name"].toString();
-    
-    QMessageBox::StandardButton reply = QMessageBox::question(
-        this,
-        "Download Model",
-        QString("Download %1?\n\nThis may take some time depending on model size and your internet connection.").arg(modelName),
-        QMessageBox::Yes | QMessageBox::No
-    );
-    
-    if (reply == QMessageBox::Yes) {
-        m_downloadProgress->setVisible(true);
-        m_downloadProgress->setValue(0);
-        m_downloadModelBtn->setEnabled(false);
-        
-        QString result = m_backend->downloadHuggingFaceModel(modelName);
-        
-        // Simulate progress
-        for (int i = 0; i <= 100; i += 5) {
-            m_downloadProgress->setValue(i);
-            QApplication::processEvents();
-        }
-        
-        m_downloadProgress->setVisible(false);
-        m_downloadModelBtn->setEnabled(true);
-        
-        QMessageBox::information(this, "Download", result);
-        loadAvailableModels();
-        loadInstalledModels();
-    }
-}
+// onDownloadModel removed - using onDownloadModelRequested with cards instead
 
 void MainWindow::onRemoveModel()
 {
@@ -892,10 +933,11 @@ void MainWindow::onRemoveModel()
 
 void MainWindow::onModelSearchChanged(const QString &text)
 {
-    for (int i = 0; i < m_availableModelsList->count(); ++i) {
-        QListWidgetItem *item = m_availableModelsList->item(i);
-        bool matches = item->text().contains(text, Qt::CaseInsensitive);
-        item->setHidden(!matches);
+    // Filter model cards based on search text
+    for (auto it = m_modelCards.begin(); it != m_modelCards.end(); ++it) {
+        QString modelName = it.key();
+        bool matches = modelName.contains(text, Qt::CaseInsensitive);
+        it.value()->setVisible(matches);
     }
 }
 
@@ -952,3 +994,91 @@ void MainWindow::onBrowseModelsClicked()
     switchToPage(1);
 }
 
+
+void MainWindow::onModelDownloadProgress(const QString &modelName, double progress)
+{
+    if (m_modelCards.contains(modelName)) {
+        m_modelCards[modelName]->setDownloadProgress(static_cast<int>(progress));
+    }
+    qDebug() << "Download progress:" << modelName << progress << "%";
+}
+
+void MainWindow::onModelDownloadComplete(const QString &modelName)
+{
+    if (m_modelCards.contains(modelName)) {
+        m_modelCards[modelName]->setInstalled(true);
+    }
+    
+    QMessageBox::information(this, "Download Complete", 
+        QString("✅ Model '%1' has been downloaded successfully!").arg(modelName));
+    
+    loadInstalledModels();
+    updateModelSelector();
+    
+    qDebug() << "Download complete:" << modelName;
+}
+
+void MainWindow::onDownloadModelRequested(const QString &modelName)
+{
+    qDebug() << "Download requested for:" << modelName;
+    
+    if (m_modelCards.contains(modelName)) {
+        m_modelCards[modelName]->setDownloading(true);
+    }
+    
+    QString result = m_backend->downloadHuggingFaceModel(modelName);
+    qDebug() << "Download started:" << result;
+}
+
+void MainWindow::onAddCustomModel()
+{
+    QString modelPath = m_customModelPath->text().trimmed();
+    QString modelName = m_customModelName->text().trimmed();
+    QString format = m_customModelFormat->currentText();
+    QString config = m_customModelConfig->toPlainText().trimmed();
+    
+    // Validation
+    if (modelPath.isEmpty()) {
+        QMessageBox::warning(this, "Missing Information", "Please select a model file.");
+        return;
+    }
+    
+    if (modelName.isEmpty()) {
+        QMessageBox::warning(this, "Missing Information", "Please enter a model name.");
+        return;
+    }
+    
+    QFileInfo fileInfo(modelPath);
+    if (!fileInfo.exists()) {
+        QMessageBox::warning(this, "File Not Found", 
+            QString("The file '%1' does not exist.").arg(modelPath));
+        return;
+    }
+    
+    // Create custom model entry
+    QString displayText = QString("%1\n  Format: %2 | Size: %3 MB\n  Path: %4")
+        .arg(modelName)
+        .arg(format)
+        .arg(fileInfo.size() / (1024 * 1024))
+        .arg(modelPath);
+    
+    QListWidgetItem *item = new QListWidgetItem(displayText);
+    item->setData(Qt::UserRole, modelPath);
+    m_customModelsList->addItem(item);
+    
+    // Add to model selector
+    m_modelSelector->addItem(QString("%1 (Custom - %2)").arg(modelName, format), modelPath);
+    
+    // Show success message
+    QMessageBox::information(this, "Custom Model Added",
+        QString("✅ Custom model '%1' has been added successfully!\n\n"
+                "You can now select it from the Chat page.").arg(modelName));
+    
+    // Clear form
+    m_customModelPath->clear();
+    m_customModelName->clear();
+    m_customModelConfig->clear();
+    m_customModelFormat->setCurrentIndex(0);
+    
+    qDebug() << "Custom model added:" << modelName << "at" << modelPath;
+}
