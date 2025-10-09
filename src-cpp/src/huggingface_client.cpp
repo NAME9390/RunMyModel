@@ -121,38 +121,117 @@ QString HuggingFaceClient::downloadModel(const QString &modelName)
         return QString("Model %1 is already being downloaded").arg(modelName);
     }
     
-    QString modelPath = getModelPath(modelName);
-    QDir().mkpath(QFileInfo(modelPath).absolutePath());
+    // Get model URL from available models
+    QString modelUrl;
+    QJsonArray models = getAvailableModels();
+    for (const QJsonValue &value : models) {
+        QJsonObject model = value.toObject();
+        if (model["name"].toString() == modelName) {
+            modelUrl = model["url"].toString();
+            break;
+        }
+    }
+    
+    if (modelUrl.isEmpty()) {
+        return QString("Error: Model %1 not found in available models").arg(modelName);
+    }
+    
+    // Create cache directory  
+    QString cachePath = QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + "/RunMyModelDesktop/models";
+    QDir cacheDir(cachePath);
+    if (!cacheDir.exists()) {
+        cacheDir.mkpath(".");
+    }
+    
+    QString safeModelName = QString(modelName).replace("/", "_");
+    QString modelPath = cachePath + "/" + safeModelName;
+    QDir().mkpath(modelPath);
+    
+    qDebug() << "Starting REAL download for:" << modelName;
+    qDebug() << "Hugging Face URL:" << modelUrl;
+    qDebug() << "Save to:" << modelPath;
     
     // Create download info
     DownloadInfo info;
     info.modelName = modelName;
-    info.totalBytes = 0;
     info.receivedBytes = 0;
+    info.totalBytes = 0;
+    info.progressTimer = nullptr;
+    info.reply = nullptr;
     
-    // For now, simulate download progress
-    // In a real implementation, this would download from Hugging Face Hub
-    QTimer *timer = new QTimer(this);
-    connect(timer, &QTimer::timeout, [this, modelName, timer]() {
-        static int progress = 0;
-        progress += 10;
-        
-        if (progress >= 100) {
-            progress = 100;
-            timer->stop();
-            timer->deleteLater();
-            emit downloadComplete(modelName);
-        } else {
-            emit downloadProgress(modelName, progress);
+    // REAL DOWNLOAD using QNetworkAccessManager
+    // First, we need to get the actual GGUF file URL from Hugging Face
+    // Format: https://huggingface.co/{model}/resolve/main/{filename}.gguf
+    
+    QString ggufUrl = modelUrl + "/resolve/main/model.gguf"; // Default filename
+    
+    QNetworkRequest request(ggufUrl);
+    request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+    request.setRawHeader("User-Agent", "RunMyModel-Desktop/0.2.0");
+    
+    QNetworkReply *reply = m_networkManager->get(request);
+    
+    // Connect download progress
+    connect(reply, &QNetworkReply::downloadProgress, 
+            [this, modelName](qint64 bytesReceived, qint64 bytesTotal) {
+        if (m_activeDownloads.contains(modelName)) {
+            DownloadInfo &info = m_activeDownloads[modelName];
+            info.receivedBytes = bytesReceived;
+            info.totalBytes = bytesTotal;
+            
+            if (bytesTotal > 0) {
+                double progress = (double)bytesReceived / bytesTotal * 100.0;
+                emit downloadProgress(modelName, progress);
+                
+                qDebug() << "Download progress:" << modelName 
+                         << QString::number(progress, 'f', 1) << "%" 
+                         << "(" << bytesReceived / (1024*1024) << "MB /"
+                         << bytesTotal / (1024*1024) << "MB)";
+            }
         }
     });
     
-    info.progressTimer = timer;
-    timer->start(100); // Update every 100ms
+    // Connect finished signal
+    connect(reply, &QNetworkReply::finished, [this, modelName, modelPath, reply]() {
+        reply->deleteLater();
+        
+        if (reply->error() == QNetworkReply::NoError) {
+            // Save the downloaded data
+            QFile file(modelPath + "/model.gguf");
+            if (file.open(QIODevice::WriteOnly)) {
+                file.write(reply->readAll());
+                file.close();
+                
+                qDebug() << "✅ Download complete:" << modelName;
+                qDebug() << "   Saved to:" << file.fileName();
+                qDebug() << "   Size:" << file.size() / (1024*1024) << "MB";
+                
+                m_activeDownloads.remove(modelName);
+                emit downloadComplete(modelName);
+            } else {
+                qWarning() << "❌ Failed to save file:" << file.fileName();
+                m_activeDownloads.remove(modelName);
+                emit downloadError(modelName, "Failed to save file");
+            }
+        } else {
+            QString errorMsg = reply->errorString();
+            qWarning() << "❌ Download error for" << modelName << ":" << errorMsg;
+            
+            // If 404, try alternate filename patterns
+            if (reply->error() == QNetworkReply::ContentNotFoundError) {
+                qDebug() << "   Trying alternate URL patterns...";
+                // TODO: Implement file discovery from Hugging Face API
+            }
+            
+            m_activeDownloads.remove(modelName);
+            emit downloadError(modelName, errorMsg);
+        }
+    });
     
+    info.reply = reply;
     m_activeDownloads[modelName] = info;
     
-    return QString("Started downloading model: %1").arg(modelName);
+    return QString("Started REAL download: %1\nFrom: %2").arg(modelName, ggufUrl);
 }
 
 QString HuggingFaceClient::removeModel(const QString &modelName)
