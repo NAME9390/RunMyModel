@@ -41,6 +41,10 @@ config = Config()
 # Include API routes
 app.include_router(routes.router, prefix="/api")
 
+# Import and include prompt routes
+from api import prompt_routes
+app.include_router(prompt_routes.router, prefix="/api")
+
 @app.on_event("startup")
 async def startup_event():
     """Initialize backend on startup"""
