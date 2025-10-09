@@ -71,6 +71,13 @@ export const ModelsPage: React.FC<ModelsPageProps> = ({ onClose }) => {
       )
     }
 
+    // Parse rating: handle "N/A", numeric strings, and strings with 'k' suffix
+    const parseRating = (rating?: string) => {
+      if (!rating || rating === "N/A") return 0
+      const cleanRating = rating.toLowerCase().replace('k', '000')
+      return parseFloat(cleanRating) || 0
+    }
+
     // Sort models
     models.sort((a, b) => {
       let aValue: any, bValue: any
@@ -81,8 +88,8 @@ export const ModelsPage: React.FC<ModelsPageProps> = ({ onClose }) => {
           bValue = b.name.toLowerCase()
           break
         case 'rating':
-          aValue = a.rating || 0
-          bValue = b.rating || 0
+          aValue = parseRating(a.rating)
+          bValue = parseRating(b.rating)
           break
         case 'size':
           aValue = parseFloat(a.size || '0')
@@ -93,8 +100,8 @@ export const ModelsPage: React.FC<ModelsPageProps> = ({ onClose }) => {
           bValue = b.task_type || ''
           break
         default:
-          aValue = a.rating || 0
-          bValue = b.rating || 0
+          aValue = parseRating(a.rating)
+          bValue = parseRating(b.rating)
       }
 
       if (sortOrder === 'asc') {
@@ -177,7 +184,7 @@ export const ModelsPage: React.FC<ModelsPageProps> = ({ onClose }) => {
     const displayName = getModelDisplayName(model.name)
     const author = getModelAuthor(model.name)
     const taskType = model.task_type || 'Unknown'
-    const rating = model.rating || 0
+    const rating = (model.rating && model.rating !== "N/A") ? model.rating : null
     const downloaded = model.downloaded
 
     if (isList) {
@@ -191,10 +198,12 @@ export const ModelsPage: React.FC<ModelsPageProps> = ({ onClose }) => {
               <h3 className="font-semibold text-gray-900 dark:text-white">
                 {displayName}
               </h3>
-              <div className="flex items-center gap-1 text-yellow-500">
-                <Star className="w-4 h-4 fill-current" />
-                <span className="text-sm font-medium">{rating}/5</span>
-              </div>
+              {rating && (
+                <div className="flex items-center gap-1 text-yellow-500">
+                  <Star className="w-4 h-4 fill-current" />
+                  <span className="text-sm font-medium">{rating}</span>
+                </div>
+              )}
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
               by {author} • {taskType}
@@ -279,10 +288,12 @@ export const ModelsPage: React.FC<ModelsPageProps> = ({ onClose }) => {
               {taskType}
             </p>
           </div>
-          <div className="flex items-center gap-1 text-yellow-500 ml-4">
-            <Star className="w-4 h-4 fill-current" />
-            <span className="text-sm font-medium">{rating}/5</span>
-          </div>
+          {rating && (
+            <div className="flex items-center gap-1 text-yellow-500 ml-4">
+              <Star className="w-4 h-4 fill-current" />
+              <span className="text-sm font-medium">{rating}</span>
+            </div>
+          )}
         </div>
 
         <div className="flex flex-wrap gap-1 mb-4">

@@ -103,7 +103,7 @@ export const ModelManager: React.FC<ModelManagerProps> = ({ onClose }) => {
             <span className="text-sm text-gray-500 dark:text-gray-400">
               by {author}
             </span>
-            {rating > 0 && (
+            {rating && rating !== "N/A" && (
               <span className="px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 text-xs rounded">
                 ⭐ {rating}
               </span>

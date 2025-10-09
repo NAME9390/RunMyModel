@@ -261,10 +261,10 @@ export const ModelBrowser: React.FC<ModelBrowserProps> = ({ onClose }) => {
                       <Zap className="w-3 h-3 mr-1" />
                       {model.task_type || 'Unknown task'}
                     </div>
-                    {model.rating && (
+                    {model.rating && model.rating !== "N/A" && (
                       <div className="flex items-center text-xs text-gray-600 dark:text-gray-400">
                         <span className="mr-1">⭐</span>
-                        Rating: {model.rating}/5
+                        {model.rating}
                       </div>
                     )}
                   </div>

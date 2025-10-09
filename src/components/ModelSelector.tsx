@@ -89,10 +89,17 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
     }
 
     // Sort models
+    // Helper to parse rating strings
+    const parseRating = (rating?: string) => {
+      if (!rating || rating === "N/A") return 0
+      const cleanRating = rating.toLowerCase().replace('k', '000')
+      return parseFloat(cleanRating) || 0
+    }
+
     models.sort((a, b) => {
       switch (sortBy) {
         case 'rating':
-          return (b.rating || 0) - (a.rating || 0)
+          return parseRating(b.rating) - parseRating(a.rating)
         case 'name':
           return a.name.localeCompare(b.name)
         case 'size':
@@ -100,7 +107,7 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
         case 'task':
           return (a.task_type || '').localeCompare(b.task_type || '')
         default:
-          return (b.rating || 0) - (a.rating || 0)
+          return parseRating(b.rating) - parseRating(a.rating)
       }
     })
 
@@ -154,7 +161,9 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
   }
 
   const getModelRating = (model: HuggingFaceModelInfo) => {
-    return model.rating || 0
+    if (!model.rating || model.rating === "N/A") return 0
+    const cleanRating = model.rating.toLowerCase().replace('k', '000')
+    return Math.min(5, Math.round(parseFloat(cleanRating) / 1000)) // Convert to 0-5 scale
   }
 
   const getModelTaskType = (model: HuggingFaceModelInfo) => {

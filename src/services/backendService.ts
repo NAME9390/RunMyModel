@@ -12,7 +12,7 @@ export interface HuggingFaceModelInfo {
   name: string
   size?: string
   task_type?: string
-  rating?: number
+  rating?: string  // Can be "N/A", numeric string, or string with 'k' suffix like "1.92k"
   url?: string
   downloaded: boolean
   local_path?: string
@@ -181,7 +181,7 @@ export class BackendService {
         name: 'Qwen/Qwen2.5-7B-Instruct',
         size: '7B',
         task_type: 'Text Generation',
-        rating: 12,
+        rating: '12',
         url: 'https://huggingface.co/Qwen/Qwen2.5-7B-Instruct',
         downloaded: false,
         local_path: undefined
@@ -190,7 +190,7 @@ export class BackendService {
         name: 'meta-llama/Llama-3.1-8B-Instruct',
         size: '8B',
         task_type: 'Text Generation',
-        rating: 12,
+        rating: '12',
         url: 'https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct',
         downloaded: false,
         local_path: undefined
@@ -199,7 +199,7 @@ export class BackendService {
         name: 'microsoft/CodeLlama-7b-Instruct-hf',
         size: '7B',
         task_type: 'Code Generation',
-        rating: 12,
+        rating: '12',
         url: 'https://huggingface.co/microsoft/CodeLlama-7b-Instruct-hf',
         downloaded: false,
         local_path: undefined
@@ -378,8 +378,8 @@ export class BackendService {
     return this.formatBytes(bytes)
   }
 
-  public getModelRating(model: HuggingFaceModelInfo): number {
-    return model.rating || 0
+  public getModelRating(model: HuggingFaceModelInfo): string {
+    return model.rating || "N/A"
   }
 
   public getModelTaskType(model: HuggingFaceModelInfo): string {
