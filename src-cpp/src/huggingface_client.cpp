@@ -155,9 +155,13 @@ QString HuggingFaceClient::downloadModel(const QString &modelName)
     DownloadInfo info;
     info.modelName = modelName;
     info.receivedBytes = 0;
+    info.lastReceivedBytes = 0;
     info.totalBytes = 0;
     info.progressTimer = nullptr;
     info.reply = nullptr;
+    info.startTime = QDateTime::currentDateTime();
+    info.lastUpdateTime = info.startTime;
+    info.speed = 0;
     
     // REAL DOWNLOAD using QNetworkAccessManager
     // First, we need to get the actual GGUF file URL from Hugging Face
@@ -179,14 +183,30 @@ QString HuggingFaceClient::downloadModel(const QString &modelName)
             info.receivedBytes = bytesReceived;
             info.totalBytes = bytesTotal;
             
+            // Calculate speed
+            QDateTime now = QDateTime::currentDateTime();
+            qint64 timeDiff = info.lastUpdateTime.msecsTo(now);
+            
+            if (timeDiff >= 500) { // Update speed every 500ms
+                qint64 bytesDiff = bytesReceived - info.lastReceivedBytes;
+                if (timeDiff > 0) {
+                    info.speed = (bytesDiff * 1000.0) / timeDiff; // bytes per second
+                }
+                info.lastReceivedBytes = bytesReceived;
+                info.lastUpdateTime = now;
+            }
+            
             if (bytesTotal > 0) {
                 double progress = (double)bytesReceived / bytesTotal * 100.0;
                 emit downloadProgress(modelName, progress);
                 
-                qDebug() << "Download progress:" << modelName 
-                         << QString::number(progress, 'f', 1) << "%" 
-                         << "(" << bytesReceived / (1024*1024) << "MB /"
-                         << bytesTotal / (1024*1024) << "MB)";
+                if (info.speed > 0) {
+                    qDebug() << "Download progress:" << modelName 
+                             << QString::number(progress, 'f', 1) << "%" 
+                             << "(" << bytesReceived / (1024*1024) << "MB /"
+                             << bytesTotal / (1024*1024) << "MB)"
+                             << "@" << (info.speed / (1024*1024)) << "MB/s";
+                }
             }
         }
     });
@@ -274,12 +294,14 @@ QJsonObject HuggingFaceClient::getDownloadProgress(const QString &modelName)
         progress["status"] = "downloading";
         progress["downloaded_bytes"] = info.receivedBytes;
         progress["total_bytes"] = info.totalBytes;
+        progress["speed"] = info.speed; // bytes per second
     } else {
         progress["model_name"] = modelName;
         progress["progress"] = 0.0;
         progress["status"] = "not_started";
         progress["downloaded_bytes"] = 0;
         progress["total_bytes"] = 0;
+        progress["speed"] = 0.0;
     }
     
     return progress;

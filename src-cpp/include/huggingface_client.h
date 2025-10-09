@@ -43,7 +43,11 @@ private:
         QNetworkReply *reply;
         qint64 totalBytes;
         qint64 receivedBytes;
+        qint64 lastReceivedBytes;
         QTimer *progressTimer;
+        QDateTime startTime;
+        QDateTime lastUpdateTime;
+        double speed; // bytes per second
     };
 
     QNetworkAccessManager *m_networkManager;

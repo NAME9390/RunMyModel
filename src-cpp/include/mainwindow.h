@@ -19,8 +19,10 @@
 #include <QScrollArea>
 #include <QGridLayout>
 #include <QMap>
+#include <QDockWidget>
 #include "backend.h"
 #include "modelcard.h"
+#include "downloadpanel.h"
 
 class MainWindow : public QMainWindow
 {
@@ -107,6 +109,10 @@ private:
     QPushButton *m_addCustomModelBtn;
     QListWidget *m_customModelsList;
     
+    // Download panel
+    QDockWidget *m_downloadDock;
+    DownloadPanel *m_downloadPanel;
+    
     // Helper methods
     void setupUI();
     void setupSidebar();
@@ -114,6 +120,7 @@ private:
     void setupDownloadPage();
     void setupInstalledPage();
     void setupCustomPage();
+    void setupDownloadDock();
     void applyModernStyling();
     void loadAvailableModels();
     void loadInstalledModels();

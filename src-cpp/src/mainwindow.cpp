@@ -49,6 +49,7 @@ void MainWindow::setupUI()
     setupDownloadPage();
     setupInstalledPage();
     setupCustomPage();
+    setupDownloadDock();
     
     // Add pages to stack
     m_contentStack->addWidget(m_chatPage);
@@ -58,6 +59,30 @@ void MainWindow::setupUI()
     
     // Show chat page by default
     switchToPage(0);
+}
+
+void MainWindow::setupDownloadDock()
+{
+    m_downloadPanel = new DownloadPanel();
+    
+    m_downloadDock = new QDockWidget("Downloads", this);
+    m_downloadDock->setObjectName("downloadDock");
+    m_downloadDock->setWidget(m_downloadPanel);
+    m_downloadDock->setAllowedAreas(Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
+    m_downloadDock->setFeatures(QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable);
+    
+    addDockWidget(Qt::RightDockWidgetArea, m_downloadDock);
+    m_downloadDock->hide(); // Hide by default
+    
+    // Connect signals
+    connect(m_downloadPanel, &DownloadPanel::cancelDownloadRequested, [this](const QString &modelName) {
+        // TODO: Implement cancel
+        qDebug() << "Cancel requested for:" << modelName;
+    });
+    
+    connect(m_downloadPanel, &DownloadPanel::allDownloadsComplete, [this]() {
+        m_downloadDock->hide();
+    });
 }
 
 void MainWindow::setupSidebar()
@@ -717,6 +742,65 @@ void MainWindow::applyModernStyling()
             border: 1px solid #e0e0e0;
             border-radius: 12px;
         }
+        
+        /* Download Panel */
+        #downloadDock {
+            background-color: #f9fafb;
+        }
+        
+        #downloadPanel {
+            background-color: #f9fafb;
+        }
+        
+        #downloadItem {
+            background-color: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+        }
+        
+        #downloadItemName {
+            color: #1f2937;
+        }
+        
+        #downloadStatus {
+            color: #6b7280;
+            font-size: 12px;
+        }
+        
+        #downloadDetails {
+            color: #9ca3af;
+            font-size: 11px;
+        }
+        
+        #downloadProgressBar {
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            background-color: #f3f4f6;
+            text-align: center;
+        }
+        
+        #downloadProgressBar::chunk {
+            background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                stop:0 #3b82f6, stop:1 #2563eb);
+            border-radius: 4px;
+        }
+        
+        #cancelBtn {
+            background-color: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-weight: bold;
+        }
+        
+        #cancelBtn:hover {
+            background-color: #dc2626;
+        }
+        
+        #emptyLabel {
+            color: #9ca3af;
+            font-style: italic;
+        }
     )";
     
     setStyleSheet(styleSheet);
@@ -1038,6 +1122,15 @@ void MainWindow::onModelDownloadProgress(const QString &modelName, double progre
     if (m_modelCards.contains(modelName)) {
         m_modelCards[modelName]->setDownloadProgress(static_cast<int>(progress));
     }
+    
+    // Update download panel - get detailed info from backend
+    QJsonObject progressInfo = m_backend->getModelDownloadProgress(modelName);
+    qint64 downloaded = progressInfo["downloaded_bytes"].toInteger();
+    qint64 total = progressInfo["total_bytes"].toInteger();
+    double speed = progressInfo["speed"].toDouble(0);
+    
+    m_downloadPanel->updateDownload(modelName, progress, downloaded, total, speed);
+    
     qDebug() << "Download progress:" << modelName << progress << "%";
 }
 
@@ -1047,8 +1140,12 @@ void MainWindow::onModelDownloadComplete(const QString &modelName)
         m_modelCards[modelName]->setInstalled(true);
     }
     
-    QMessageBox::information(this, "Download Complete", 
-        QString("✅ Model '%1' has been downloaded successfully!").arg(modelName));
+    // Update download panel
+    m_downloadPanel->completeDownload(modelName);
+    
+    // Show toast notification instead of blocking dialog
+    m_statusLabel->setText(QString("✅ Downloaded: %1").arg(modelName));
+    m_statusLabel->setStyleSheet("color: #10b981; font-weight: bold;");
     
     loadInstalledModels();
     updateModelSelector();
@@ -1068,7 +1165,8 @@ void MainWindow::onDownloadModelRequested(const QString &modelName)
     msgBox.setInformativeText(
         "This will download the model from Hugging Face.\n\n"
         "⚠️ Large models may take significant time and bandwidth.\n"
-        "📁 Models are saved to your cache directory.\n\n"
+        "📁 Models are saved to your cache directory.\n"
+        "📊 Progress will be shown in the download panel.\n\n"
         "Do you want to proceed?"
     );
     msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
@@ -1077,10 +1175,16 @@ void MainWindow::onDownloadModelRequested(const QString &modelName)
     int ret = msgBox.exec();
     
     if (ret == QMessageBox::Yes) {
+        // Update card status
         if (m_modelCards.contains(modelName)) {
             m_modelCards[modelName]->setDownloading(true);
         }
         
+        // Add to download panel
+        m_downloadPanel->addDownload(modelName);
+        m_downloadDock->show();
+        
+        // Start download
         QString result = m_backend->downloadHuggingFaceModel(modelName);
         qDebug() << "Download started:" << result;
     } else {
