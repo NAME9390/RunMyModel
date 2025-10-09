@@ -24,6 +24,7 @@
 #include <QRegularExpression>
 #include <QStandardPaths>
 #include "backend.h"
+#include "backend_client.h"
 #include "modelcard.h"
 #include "downloadpanel.h"
 #include "gpu_detector.h"
@@ -33,7 +34,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = nullptr);
+    explicit MainWindow(BackendClient *backendClient, QWidget *parent = nullptr);
     ~MainWindow();
 
 private slots:
@@ -56,6 +57,7 @@ private slots:
 private:
     // Backend
     Backend *m_backend;
+    BackendClient *m_backendClient; // NEW: Python backend client
     
     // Main layout
     QWidget *m_centralWidget;

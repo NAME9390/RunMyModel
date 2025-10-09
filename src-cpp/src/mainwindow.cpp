@@ -8,12 +8,13 @@
 #include <QDir>
 #include <QDebug>
 
-MainWindow::MainWindow(QWidget *parent)
+MainWindow::MainWindow(BackendClient *backendClient, QWidget *parent)
     : QMainWindow(parent)
     , m_backend(new Backend(this))
+    , m_backendClient(backendClient)
     , m_detectedVRAM(0)
 {
-    setWindowTitle("RunMyModel Desktop - v0.2.0 ALPHA");
+    setWindowTitle("RunMyModel Desktop - v0.3.0 BETA");
     resize(1400, 900);
     
     // Detect GPU
