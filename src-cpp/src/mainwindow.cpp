@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "prompt_architect_widget.h"
 #include <QApplication>
 #include <QGroupBox>
 #include <QMessageBox>
@@ -63,13 +64,15 @@ void MainWindow::setupUI()
     m_mainLayout->addWidget(m_contentStack);
     
     setupChatPage();
+    setupPromptArchitectPage();
     setupDownloadPage();
     setupInstalledPage();
     setupCustomPage();
     setupDownloadDock();
-    
+
     // Add pages to stack
     m_contentStack->addWidget(m_chatPage);
+    m_contentStack->addWidget(m_promptArchitectPage);
     m_contentStack->addWidget(m_downloadPage);
     m_contentStack->addWidget(m_installedPage);
     m_contentStack->addWidget(m_customPage);
@@ -147,16 +150,20 @@ void MainWindow::setupSidebar()
     connect(m_chatPageBtn, &QPushButton::clicked, [this]() { switchToPage(0); });
     m_sidebarLayout->addWidget(m_chatPageBtn);
     
+    m_promptArchitectBtn = createSidebarButton("🧠", "Prompt Architect");
+    connect(m_promptArchitectBtn, &QPushButton::clicked, [this]() { switchToPage(1); });
+    m_sidebarLayout->addWidget(m_promptArchitectBtn);
+    
     m_downloadPageBtn = createSidebarButton("🌐", "Browse Models");
-    connect(m_downloadPageBtn, &QPushButton::clicked, [this]() { switchToPage(1); });
+    connect(m_downloadPageBtn, &QPushButton::clicked, [this]() { switchToPage(2); });
     m_sidebarLayout->addWidget(m_downloadPageBtn);
     
     m_installedPageBtn = createSidebarButton("📦", "My Models");
-    connect(m_installedPageBtn, &QPushButton::clicked, [this]() { switchToPage(2); });
+    connect(m_installedPageBtn, &QPushButton::clicked, [this]() { switchToPage(3); });
     m_sidebarLayout->addWidget(m_installedPageBtn);
     
     m_customPageBtn = createSidebarButton("⚙️", "Custom Models");
-    connect(m_customPageBtn, &QPushButton::clicked, [this]() { switchToPage(3); });
+    connect(m_customPageBtn, &QPushButton::clicked, [this]() { switchToPage(4); });
     m_sidebarLayout->addWidget(m_customPageBtn);
     
     m_sidebarLayout->addStretch();
@@ -240,6 +247,23 @@ void MainWindow::setupChatPage()
     connect(m_sendButton, &QPushButton::clicked, this, &MainWindow::onSendMessage);
     connect(m_chatInput, &QLineEdit::returnPressed, this, &MainWindow::onSendMessage);
     connect(m_modelSelector, &QComboBox::currentTextChanged, this, &MainWindow::onModelSelected);
+}
+
+void MainWindow::setupPromptArchitectPage()
+{
+    // Create Prompt Architect widget
+    m_promptArchitectPage = new PromptArchitectWidget(m_backendClient, this);
+    
+    // Connect signal to send prompt to chat
+    connect(qobject_cast<PromptArchitectWidget*>(m_promptArchitectPage),
+            &PromptArchitectWidget::promptBuilt,
+            [this](const QString &prompt) {
+        // Switch to chat page
+        switchToPage(0);
+        
+        // Set the prompt in chat input
+        m_chatInput->setText(prompt);
+    });
 }
 
 void MainWindow::setupDownloadPage()

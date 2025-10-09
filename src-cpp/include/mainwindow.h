@@ -80,6 +80,7 @@ private:
     QLabel *m_brandingLabel;
     QPushButton *m_newChatBtn;
     QPushButton *m_chatPageBtn;
+    QPushButton *m_promptArchitectBtn;
     QPushButton *m_downloadPageBtn;
     QPushButton *m_installedPageBtn;
     QPushButton *m_customPageBtn;
@@ -90,6 +91,9 @@ private:
     
     // Chat page
     QWidget *m_chatPage;
+    
+    // Prompt Architect page
+    QWidget *m_promptArchitectPage;
     QTextEdit *m_chatDisplay;
     QLineEdit *m_chatInput;
     QPushButton *m_sendButton;
@@ -141,6 +145,7 @@ private:
     void setupUI();
     void setupSidebar();
     void setupChatPage();
+    void setupPromptArchitectPage();
     void setupDownloadPage();
     void setupInstalledPage();
     void setupCustomPage();

@@ -15,7 +15,8 @@ SOURCES += src-cpp/src/main.cpp \
            src-cpp/src/backend_client.cpp \
            src-cpp/src/huggingface_client.cpp \
            src-cpp/src/model_manager.cpp \
-           src-cpp/src/system_info.cpp
+           src-cpp/src/system_info.cpp \
+           src-cpp/src/prompt_architect_widget.cpp
 
 # Header files  
 HEADERS += src-cpp/include/mainwindow.h \
@@ -26,7 +27,8 @@ HEADERS += src-cpp/include/mainwindow.h \
            src-cpp/include/backend_client.h \
            src-cpp/include/huggingface_client.h \
            src-cpp/include/model_manager.h \
-           src-cpp/include/system_info.h
+           src-cpp/include/system_info.h \
+           src-cpp/include/prompt_architect_widget.h
 
 # Include path
 INCLUDEPATH += src-cpp/include
