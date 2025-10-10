@@ -11,17 +11,30 @@
 #include <QTimer>
 #include <QEventLoop>
 #include <QDebug>
+#include <QDateTime>
+
+// Debug macro for consistent logging
+#define LOG_DEBUG(msg) qDebug() << "[DEBUG]" << QDateTime::currentDateTime().toString("hh:mm:ss.zzz") << msg
+#define LOG_INFO(msg) qDebug() << "[INFO ]" << QDateTime::currentDateTime().toString("hh:mm:ss.zzz") << msg
+#define LOG_WARN(msg) qWarning() << "[WARN ]" << QDateTime::currentDateTime().toString("hh:mm:ss.zzz") << msg
+#define LOG_ERROR(msg) qCritical() << "[ERROR]" << QDateTime::currentDateTime().toString("hh:mm:ss.zzz") << msg
 
 BackendClient::BackendClient(QObject *parent)
     : QObject(parent)
     , m_backendProcess(new QProcess(this))
     , m_networkManager(new QNetworkAccessManager(this))
-    , m_baseUrl("http://127.0.0.1:5000")
+    , m_baseUrl("http://127.0.0.1:8000")  // Changed to port 8000 for FastAPI
     , m_backendRunning(false)
 {
+    LOG_INFO("🔧 BackendClient initialized");
+    LOG_DEBUG("   Base URL:" << m_baseUrl);
+    
     // Find Python executable
     m_pythonPath = findPythonExecutable();
     m_backendScriptPath = findBackendScript();
+
+    LOG_DEBUG("   Python path:" << m_pythonPath);
+    LOG_DEBUG("   Backend script:" << m_backendScriptPath);
 
     // Connect process signals
     connect(m_backendProcess.get(), &QProcess::readyReadStandardOutput,
@@ -195,11 +208,18 @@ void BackendClient::listLoadedModels()
 
 void BackendClient::loadModel(const QString &modelName, int nCtx, int nGpuLayers)
 {
+    LOG_INFO("🔄 Loading model:" << modelName);
+    LOG_DEBUG("   Context length:" << nCtx);
+    LOG_DEBUG("   GPU layers:" << nGpuLayers);
+    
+    // Backend expects: model_path, context_length, n_threads
+    // Map frontend parameters to backend parameters
     QJsonObject data;
-    data["model_name"] = modelName;
-    data["n_ctx"] = nCtx;
-    data["n_gpu_layers"] = nGpuLayers;
+    data["model_path"] = modelName;  // Changed from model_name
+    data["context_length"] = nCtx;    // Changed from n_ctx
+    data["n_threads"] = qMax(4, QThread::idealThreadCount());  // Use CPU threads instead of GPU layers
 
+    LOG_DEBUG("   Request data:" << QJsonDocument(data).toJson(QJsonDocument::Compact));
     makeRequest("POST", "/api/models/load", data);
 }
 
@@ -259,7 +279,13 @@ void BackendClient::checkHealth()
 void BackendClient::makeRequest(const QString &method, const QString &endpoint,
                                 const QJsonObject &data)
 {
-    QNetworkRequest request(m_baseUrl + endpoint);
+    QString fullUrl = m_baseUrl + endpoint;
+    LOG_DEBUG("📤 Making request:" << method << fullUrl);
+    if (!data.isEmpty()) {
+        LOG_DEBUG("   Data:" << QJsonDocument(data).toJson(QJsonDocument::Compact));
+    }
+    
+    QNetworkRequest request(fullUrl);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
     QNetworkReply *reply = nullptr;
@@ -281,24 +307,35 @@ void BackendClient::makeRequest(const QString &method, const QString &endpoint,
 
 void BackendClient::handleResponse(QNetworkReply *reply, const QString &requestType)
 {
+    QByteArray responseData = reply->readAll();
+    int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+    
+    LOG_DEBUG("📥 Response received for:" << requestType);
+    LOG_DEBUG("   HTTP Status:" << statusCode);
+    LOG_DEBUG("   Response size:" << responseData.size() << "bytes");
+    
     reply->deleteLater();
 
     if (reply->error() != QNetworkReply::NoError) {
         QString error = QString("Network error: %1").arg(reply->errorString());
-        qWarning() << error;
+        LOG_ERROR("❌ Network error:" << error);
+        LOG_ERROR("   Request type:" << requestType);
+        LOG_ERROR("   Response data:" << responseData);
         emit backendError(error);
         return;
     }
 
-    QByteArray responseData = reply->readAll();
     QJsonDocument doc = QJsonDocument::fromJson(responseData);
 
     if (doc.isNull()) {
-        qWarning() << "Invalid JSON response";
+        LOG_WARN("⚠️ Invalid JSON response");
+        LOG_WARN("   Request type:" << requestType);
+        LOG_WARN("   Response data:" << responseData);
         return;
     }
 
     QJsonObject obj = doc.object();
+    LOG_DEBUG("   JSON:" << QJsonDocument(obj).toJson(QJsonDocument::Compact));
 
     // Route response based on endpoint
     if (requestType.contains("/models/loaded")) {
@@ -412,3 +449,138 @@ void BackendClient::onBackendFinished(int exitCode, QProcess::ExitStatus exitSta
     emit backendStopped();
 }
 
+// ============================================================================
+// Knowledge Management Methods (New for 0.3.0)
+// ============================================================================
+
+void BackendClient::chatCompletion(const QString &message, float temperature, int maxTokens)
+{
+    QJsonObject data;
+    data["message"] = message;
+    data["use_rag"] = true; // Enable RAG retrieval
+    data["temperature"] = temperature;
+    data["max_tokens"] = maxTokens;
+
+    makeRequest("POST", "/api/chat/completion", data);
+}
+
+void BackendClient::ingestKnowledge(const QString &sourceName, const QString &content)
+{
+    QJsonObject data;
+    data["source_name"] = sourceName;
+    data["content"] = content;
+    data["tags"] = QJsonArray(); // Optional tags
+
+    QUrl url(m_baseUrl + "/api/knowledge/ingest");
+    QNetworkRequest request(url);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QNetworkReply *reply = m_networkManager->post(request, QJsonDocument(data).toJson());
+
+    connect(reply, &QNetworkReply::finished, [this, reply, sourceName]() {
+        if (reply->error() == QNetworkReply::NoError) {
+            QJsonObject response = QJsonDocument::fromJson(reply->readAll()).object();
+            int chunkCount = response["message"].toString().contains("chunks") ?
+                            response["message"].toString().split(" ")[1].toInt() : 0;
+
+            qDebug() << "✅ Knowledge ingested:" << sourceName << "(" << chunkCount << "chunks)";
+            emit knowledgeIngested(sourceName, chunkCount);
+        } else {
+            QString error = reply->errorString();
+            qWarning() << "Knowledge ingestion error:" << error;
+            emit knowledgeError(error);
+        }
+        reply->deleteLater();
+    });
+}
+
+void BackendClient::listKnowledge()
+{
+    QUrl url(m_baseUrl + "/api/knowledge/list");
+    QNetworkRequest request(url);
+
+    QNetworkReply *reply = m_networkManager->get(request);
+
+    connect(reply, &QNetworkReply::finished, [this, reply]() {
+        if (reply->error() == QNetworkReply::NoError) {
+            QJsonObject response = QJsonDocument::fromJson(reply->readAll()).object();
+            QJsonArray sources = response["sources"].toArray();
+
+            qDebug() << "📚 Knowledge sources listed:" << sources.size();
+            emit knowledgeListed(sources);
+        } else {
+            QString error = reply->errorString();
+            qWarning() << "List knowledge error:" << error;
+            emit knowledgeError(error);
+        }
+        reply->deleteLater();
+    });
+}
+
+void BackendClient::searchKnowledge(const QString &query, int topK)
+{
+    QJsonObject data;
+    data["query"] = query;
+    data["top_k"] = topK;
+
+    QUrl url(m_baseUrl + "/api/knowledge/search");
+    QNetworkRequest request(url);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QNetworkReply *reply = m_networkManager->post(request, QJsonDocument(data).toJson());
+
+    connect(reply, &QNetworkReply::finished, [this, reply]() {
+        if (reply->error() == QNetworkReply::NoError) {
+            QJsonObject response = QJsonDocument::fromJson(reply->readAll()).object();
+            QJsonArray results = response["results"].toArray();
+
+            qDebug() << "🔍 Search results:" << results.size();
+            emit knowledgeSearchResults(results);
+        } else {
+            QString error = reply->errorString();
+            qWarning() << "Search knowledge error:" << error;
+            emit knowledgeError(error);
+        }
+        reply->deleteLater();
+    });
+}
+
+void BackendClient::deleteKnowledge(int sourceId)
+{
+    QUrl url(m_baseUrl + QString("/api/knowledge/%1").arg(sourceId));
+    QNetworkRequest request(url);
+
+    QNetworkReply *reply = m_networkManager->deleteResource(request);
+
+    connect(reply, &QNetworkReply::finished, [this, reply, sourceId]() {
+        if (reply->error() == QNetworkReply::NoError) {
+            qDebug() << "🗑️ Knowledge deleted:" << sourceId;
+            emit knowledgeDeleted(sourceId);
+        } else {
+            QString error = reply->errorString();
+            qWarning() << "Delete knowledge error:" << error;
+            emit knowledgeError(error);
+        }
+        reply->deleteLater();
+    });
+}
+
+void BackendClient::getSystemStats()
+{
+    QUrl url(m_baseUrl + "/api/system/stats");
+    QNetworkRequest request(url);
+
+    QNetworkReply *reply = m_networkManager->get(request);
+
+    connect(reply, &QNetworkReply::finished, [this, reply]() {
+        if (reply->error() == QNetworkReply::NoError) {
+            QJsonObject stats = QJsonDocument::fromJson(reply->readAll()).object();
+
+            qDebug() << "📊 System stats received";
+            emit systemStatsReceived(stats);
+        } else {
+            qWarning() << "System stats error:" << reply->errorString();
+        }
+        reply->deleteLater();
+    });
+}

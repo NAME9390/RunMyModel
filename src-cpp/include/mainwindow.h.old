@@ -1,0 +1,96 @@
+/**
+ * RunMyModel Desktop - Modern GUI Header
+ */
+
+#ifndef MAINWINDOW_H
+#define MAINWINDOW_H
+
+#include <QMainWindow>
+#include <QTextEdit>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QLabel>
+#include <QListWidget>
+#include <QStackedWidget>
+#include <QComboBox>
+#include <QJsonArray>
+#include <QScrollBar>
+
+class BackendClient;
+
+class MainWindow : public QMainWindow
+{
+    Q_OBJECT
+
+public:
+    explicit MainWindow(BackendClient *backendClient, QWidget *parent = nullptr);
+    ~MainWindow();
+
+private slots:
+    // Navigation
+    void switchPage(int index);
+    
+    // Chat
+    void sendMessage();
+    void onStreamToken(const QString &token);
+    void onStreamComplete();
+    void onStreamError(const QString &error);
+    
+    // Backend
+    void onBackendReady();
+    void onBackendError(const QString &error);
+    void autoLoadDialoGPT();
+    
+    // Models
+    void loadSelectedModel();
+    void onModelLoaded(const QString &modelPath);
+    
+    // Knowledge
+    void addKnowledge();
+    void refreshKnowledge();
+    void onKnowledgeIngested(const QString &sourceName, int chunkCount);
+    void onKnowledgeListed(const QJsonArray &sources);
+    
+    // UI
+    void showAbout();
+
+private:
+    void setupUI();
+    void setupConnections();
+    void applyModernStyle();
+    
+    QPushButton* createNavButton(const QString &text, bool active);
+    QWidget* createChatPage();
+    QWidget* createKnowledgePage();
+    QWidget* createSettingsPage();
+    
+    // Backend client
+    BackendClient *m_backendClient;
+    
+    // Navigation
+    QPushButton *m_chatBtn;
+    QPushButton *m_memoryBtn;
+    QPushButton *m_settingsBtn;
+    QStackedWidget *m_contentStack;
+    int m_currentPage;
+    
+    // Status
+    QLabel *m_modelStatusLabel;
+    QLabel *m_backendStatusLabel;
+    
+    // Chat Page
+    QTextEdit *m_chatDisplay;
+    QLineEdit *m_messageInput;
+    QPushButton *m_sendBtn;
+    QString m_currentResponse;
+    
+    // Knowledge Page
+    QListWidget *m_knowledgeList;
+    QLabel *m_knowledgeStats;
+    
+    // Settings Page
+    QLabel *m_modelNameLabel;
+    QComboBox *m_modelSelector;
+};
+
+#endif // MAINWINDOW_H

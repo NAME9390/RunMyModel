@@ -1,0 +1,909 @@
+/**
+ * RunMyModel Desktop - Modern GUI
+ * Self-Learning LLM Platform with DialoGPT
+ */
+
+#include "mainwindow.h"
+#include "backend_client.h"
+#include <QApplication>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QPushButton>
+#include <QTextEdit>
+#include <QLineEdit>
+#include <QListWidget>
+#include <QComboBox>
+#include <QGroupBox>
+#include <QScrollArea>
+#include <QStackedWidget>
+#include <QMessageBox>
+#include <QFileDialog>
+#include <QTimer>
+#include <QMovie>
+#include <QGraphicsDropShadowEffect>
+#include <QDebug>
+#include <QFile>
+#include <QFileInfo>
+
+MainWindow::MainWindow(BackendClient *backendClient, QWidget *parent)
+    : QMainWindow(parent)
+    , m_backendClient(backendClient)
+    , m_currentPage(0)
+{
+    qDebug() << "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━";
+    qDebug() << "🚀 MainWindow Constructor";
+    qDebug() << "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━";
+    qDebug() << "   Version: RunMyModel 0.3.0 BETA";
+    qDebug() << "   Backend client:" << (m_backendClient ? "Connected" : "NULL");
+    
+    setWindowTitle("RunMyModel - AI Companion");
+    setMinimumSize(1400, 900);
+    resize(1400, 900);
+    
+    qDebug() << "   Setting up UI...";
+    setupUI();
+    
+    qDebug() << "   Setting up connections...";
+    setupConnections();
+    
+    // DON'T start backend - run.sh already started it!
+    // Just wait for it to be ready
+    if (m_backendClient) {
+        qDebug() << "   Backend should be started by run.sh";
+        qDebug() << "   Waiting for backend to be ready...";
+    } else {
+        qDebug() << "   Backend client is NULL";
+    }
+    
+    // Auto-load DialoGPT
+    qDebug() << "   Scheduling DialoGPT auto-load in 2000ms...";
+    QTimer::singleShot(2000, this, &MainWindow::autoLoadDialoGPT);
+    
+    qDebug() << "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━";
+    qDebug() << "✅ MainWindow initialization complete";
+    qDebug() << "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━";
+}
+
+MainWindow::~MainWindow()
+{
+}
+
+void MainWindow::setupUI()
+{
+    // Main widget and layout
+    QWidget *centralWidget = new QWidget(this);
+    QHBoxLayout *mainLayout = new QHBoxLayout(centralWidget);
+    mainLayout->setContentsMargins(0, 0, 0, 0);
+    mainLayout->setSpacing(0);
+    
+    // ========================================
+    // LEFT SIDEBAR - Modern Design
+    // ========================================
+    
+    QWidget *sidebar = new QWidget();
+    sidebar->setObjectName("sidebar");
+    sidebar->setFixedWidth(280);
+    
+    QVBoxLayout *sidebarLayout = new QVBoxLayout(sidebar);
+    sidebarLayout->setContentsMargins(20, 30, 20, 30);
+    sidebarLayout->setSpacing(15);
+    
+    // Logo/Branding
+    QLabel *logo = new QLabel("🧠 RunMyModel");
+    logo->setObjectName("logo");
+    logo->setAlignment(Qt::AlignCenter);
+    sidebarLayout->addWidget(logo);
+    
+    QLabel *subtitle = new QLabel("AI Learning Platform");
+    subtitle->setObjectName("subtitle");
+    subtitle->setAlignment(Qt::AlignCenter);
+    sidebarLayout->addWidget(subtitle);
+    
+    sidebarLayout->addSpacing(20);
+    
+    // Model Status Card
+    QWidget *statusCard = new QWidget();
+    statusCard->setObjectName("statusCard");
+    QVBoxLayout *statusLayout = new QVBoxLayout(statusCard);
+    statusLayout->setContentsMargins(15, 15, 15, 15);
+    
+    m_modelStatusLabel = new QLabel("● DialoGPT Ready");
+    m_modelStatusLabel->setObjectName("modelStatus");
+    statusLayout->addWidget(m_modelStatusLabel);
+    
+    m_backendStatusLabel = new QLabel("⚡ Backend: Connecting...");
+    m_backendStatusLabel->setObjectName("backendStatus");
+    statusLayout->addWidget(m_backendStatusLabel);
+    
+    sidebarLayout->addWidget(statusCard);
+    
+    sidebarLayout->addSpacing(20);
+    
+    // Navigation Buttons
+    m_chatBtn = createNavButton("💬 Chat", true);
+    m_memoryBtn = createNavButton("🧠 Knowledge", false);
+    m_settingsBtn = createNavButton("⚙️ Settings", false);
+    
+    sidebarLayout->addWidget(m_chatBtn);
+    sidebarLayout->addWidget(m_memoryBtn);
+    sidebarLayout->addWidget(m_settingsBtn);
+    
+    sidebarLayout->addStretch();
+    
+    // About button at bottom
+    QPushButton *aboutBtn = new QPushButton("ℹ️ About");
+    aboutBtn->setObjectName("aboutBtn");
+    connect(aboutBtn, &QPushButton::clicked, this, &MainWindow::showAbout);
+    sidebarLayout->addWidget(aboutBtn);
+    
+    // ========================================
+    // RIGHT CONTENT AREA
+    // ========================================
+    
+    m_contentStack = new QStackedWidget();
+    m_contentStack->setObjectName("contentArea");
+    
+    // Add pages
+    m_contentStack->addWidget(createChatPage());
+    m_contentStack->addWidget(createKnowledgePage());
+    m_contentStack->addWidget(createSettingsPage());
+    
+    // Add to main layout
+    mainLayout->addWidget(sidebar);
+    mainLayout->addWidget(m_contentStack, 1);
+    
+    setCentralWidget(centralWidget);
+    
+    // Apply modern stylesheet
+    applyModernStyle();
+}
+
+QPushButton* MainWindow::createNavButton(const QString &text, bool active)
+{
+    QPushButton *btn = new QPushButton(text);
+    btn->setObjectName(active ? "navBtnActive" : "navBtn");
+    btn->setCheckable(true);
+    btn->setChecked(active);
+    btn->setCursor(Qt::PointingHandCursor);
+    return btn;
+}
+
+QWidget* MainWindow::createChatPage()
+{
+    QWidget *page = new QWidget();
+    QVBoxLayout *layout = new QVBoxLayout(page);
+    layout->setContentsMargins(40, 40, 40, 40);
+    layout->setSpacing(20);
+    
+    // Header
+    QLabel *header = new QLabel("💬 Chat with AI");
+    header->setObjectName("pageHeader");
+    layout->addWidget(header);
+    
+    // Chat display
+    m_chatDisplay = new QTextEdit();
+    m_chatDisplay->setObjectName("chatDisplay");
+    m_chatDisplay->setReadOnly(true);
+    m_chatDisplay->setPlaceholderText("Start chatting with DialoGPT...");
+    layout->addWidget(m_chatDisplay, 1);
+    
+    // Input area
+    QWidget *inputArea = new QWidget();
+    inputArea->setObjectName("inputArea");
+    QHBoxLayout *inputLayout = new QHBoxLayout(inputArea);
+    inputLayout->setContentsMargins(15, 15, 15, 15);
+    
+    m_messageInput = new QLineEdit();
+    m_messageInput->setObjectName("messageInput");
+    m_messageInput->setPlaceholderText("Type your message here...");
+    m_messageInput->setMinimumHeight(50);
+    
+    m_sendBtn = new QPushButton("Send");
+    m_sendBtn->setObjectName("sendBtn");
+    m_sendBtn->setMinimumSize(100, 50);
+    m_sendBtn->setCursor(Qt::PointingHandCursor);
+    
+    inputLayout->addWidget(m_messageInput, 1);
+    inputLayout->addWidget(m_sendBtn);
+    
+    layout->addWidget(inputArea);
+    
+    // Welcome message
+    m_chatDisplay->setHtml(
+        "<div style='padding: 20px; background: rgba(99, 102, 241, 0.1); border-radius: 10px; margin: 10px;'>"
+        "<h2 style='color: #6366F1; margin: 0 0 10px 0;'>👋 Welcome to RunMyModel!</h2>"
+        "<p style='color: #94A3B8; margin: 5px 0;'>DialoGPT is ready to chat. Ask me anything!</p>"
+        "<p style='color: #64748B; font-size: 12px; margin: 10px 0 0 0;'>"
+        "💡 Tip: Add knowledge files to teach me about specific topics"
+        "</p>"
+        "</div>"
+    );
+    
+    return page;
+}
+
+QWidget* MainWindow::createKnowledgePage()
+{
+    QWidget *page = new QWidget();
+    QVBoxLayout *layout = new QVBoxLayout(page);
+    layout->setContentsMargins(40, 40, 40, 40);
+    layout->setSpacing(20);
+    
+    // Header
+    QLabel *header = new QLabel("🧠 Knowledge Base");
+    header->setObjectName("pageHeader");
+    layout->addWidget(header);
+    
+    // Action buttons
+    QHBoxLayout *btnLayout = new QHBoxLayout();
+    
+    QPushButton *addBtn = new QPushButton("+ Add Knowledge");
+    addBtn->setObjectName("actionBtn");
+    addBtn->setCursor(Qt::PointingHandCursor);
+    connect(addBtn, &QPushButton::clicked, this, &MainWindow::addKnowledge);
+    
+    QPushButton *refreshBtn = new QPushButton("🔄 Refresh");
+    refreshBtn->setObjectName("secondaryBtn");
+    refreshBtn->setCursor(Qt::PointingHandCursor);
+    connect(refreshBtn, &QPushButton::clicked, this, &MainWindow::refreshKnowledge);
+    
+    btnLayout->addWidget(addBtn);
+    btnLayout->addWidget(refreshBtn);
+    btnLayout->addStretch();
+    
+    layout->addLayout(btnLayout);
+    
+    // Knowledge list
+    m_knowledgeList = new QListWidget();
+    m_knowledgeList->setObjectName("knowledgeList");
+    layout->addWidget(m_knowledgeList, 1);
+    
+    // Stats
+    m_knowledgeStats = new QLabel("No knowledge files yet");
+    m_knowledgeStats->setObjectName("statsLabel");
+    layout->addWidget(m_knowledgeStats);
+    
+    return page;
+}
+
+QWidget* MainWindow::createSettingsPage()
+{
+    QWidget *page = new QWidget();
+    QVBoxLayout *layout = new QVBoxLayout(page);
+    layout->setContentsMargins(40, 40, 40, 40);
+    layout->setSpacing(20);
+    
+    // Header
+    QLabel *header = new QLabel("⚙️ Settings");
+    header->setObjectName("pageHeader");
+    layout->addWidget(header);
+    
+    // Model Settings
+    QGroupBox *modelGroup = new QGroupBox("AI Model");
+    modelGroup->setObjectName("settingsGroup");
+    QVBoxLayout *modelLayout = new QVBoxLayout(modelGroup);
+    
+    QLabel *modelLabel = new QLabel("Current Model:");
+    m_modelNameLabel = new QLabel("DialoGPT-Medium (345M params)");
+    m_modelNameLabel->setObjectName("valueLabel");
+    
+    modelLayout->addWidget(modelLabel);
+    modelLayout->addWidget(m_modelNameLabel);
+    modelLayout->addSpacing(10);
+    
+    // Model selector
+    QLabel *selectLabel = new QLabel("Switch Model:");
+    m_modelSelector = new QComboBox();
+    m_modelSelector->setObjectName("comboBox");
+    m_modelSelector->addItem("DialoGPT-Small (117M) - Fastest");
+    m_modelSelector->addItem("DialoGPT-Medium (345M) - Balanced");
+    m_modelSelector->addItem("DialoGPT-Large (762M) - Best Quality");
+    m_modelSelector->setCurrentIndex(1);
+    
+    QPushButton *loadModelBtn = new QPushButton("Load Selected Model");
+    loadModelBtn->setObjectName("actionBtn");
+    loadModelBtn->setCursor(Qt::PointingHandCursor);
+    connect(loadModelBtn, &QPushButton::clicked, this, &MainWindow::loadSelectedModel);
+    
+    modelLayout->addWidget(selectLabel);
+    modelLayout->addWidget(m_modelSelector);
+    modelLayout->addWidget(loadModelBtn);
+    
+    layout->addWidget(modelGroup);
+    
+    // Generation Settings
+    QGroupBox *genGroup = new QGroupBox("Response Generation");
+    genGroup->setObjectName("settingsGroup");
+    QVBoxLayout *genLayout = new QVBoxLayout(genGroup);
+    
+    QLabel *tempLabel = new QLabel("Temperature: 0.7 (Creativity)");
+    QLabel *ragLabel = new QLabel("RAG: Enabled ✓");
+    ragLabel->setObjectName("valueLabel");
+    
+    genLayout->addWidget(tempLabel);
+    genLayout->addWidget(ragLabel);
+    
+    layout->addWidget(genGroup);
+    
+    layout->addStretch();
+    
+    return page;
+}
+
+void MainWindow::setupConnections()
+{
+    // Navigation
+    connect(m_chatBtn, &QPushButton::clicked, this, [this]() { switchPage(0); });
+    connect(m_memoryBtn, &QPushButton::clicked, this, [this]() { switchPage(1); });
+    connect(m_settingsBtn, &QPushButton::clicked, this, [this]() { switchPage(2); });
+    
+    // Chat
+    connect(m_sendBtn, &QPushButton::clicked, this, &MainWindow::sendMessage);
+    connect(m_messageInput, &QLineEdit::returnPressed, this, &MainWindow::sendMessage);
+    
+    // Backend client signals
+    if (m_backendClient) {
+        connect(m_backendClient, &BackendClient::backendReady, this, &MainWindow::onBackendReady);
+        connect(m_backendClient, &BackendClient::backendError, this, &MainWindow::onBackendError);
+        connect(m_backendClient, &BackendClient::streamToken, this, &MainWindow::onStreamToken);
+        connect(m_backendClient, &BackendClient::streamComplete, this, &MainWindow::onStreamComplete);
+        connect(m_backendClient, &BackendClient::streamError, this, &MainWindow::onStreamError);
+        connect(m_backendClient, &BackendClient::modelLoaded, this, &MainWindow::onModelLoaded);
+        connect(m_backendClient, &BackendClient::knowledgeListed, this, &MainWindow::onKnowledgeListed);
+        connect(m_backendClient, &BackendClient::knowledgeIngested, this, &MainWindow::onKnowledgeIngested);
+    }
+}
+
+void MainWindow::switchPage(int index)
+{
+    m_currentPage = index;
+    m_contentStack->setCurrentIndex(index);
+    
+    // Update nav buttons
+    m_chatBtn->setObjectName(index == 0 ? "navBtnActive" : "navBtn");
+    m_memoryBtn->setObjectName(index == 1 ? "navBtnActive" : "navBtn");
+    m_settingsBtn->setObjectName(index == 2 ? "navBtnActive" : "navBtn");
+    
+    // Reapply styles
+    m_chatBtn->style()->unpolish(m_chatBtn);
+    m_chatBtn->style()->polish(m_chatBtn);
+    m_memoryBtn->style()->unpolish(m_memoryBtn);
+    m_memoryBtn->style()->polish(m_memoryBtn);
+    m_settingsBtn->style()->unpolish(m_settingsBtn);
+    m_settingsBtn->style()->polish(m_settingsBtn);
+}
+
+void MainWindow::sendMessage()
+{
+    QString message = m_messageInput->text().trimmed();
+    if (message.isEmpty()) return;
+    
+    // Add user message to chat
+    m_chatDisplay->append(QString(
+        "<div style='background: rgba(99, 102, 241, 0.1); padding: 15px; border-radius: 10px; margin: 10px 0;'>"
+        "<b style='color: #6366F1;'>You:</b><br>"
+        "<span style='color: #E2E8F0;'>%1</span>"
+        "</div>"
+    ).arg(message.toHtmlEscaped()));
+    
+    m_messageInput->clear();
+    m_currentResponse.clear();
+    
+    // Check if backend is ready
+    if (!m_backendClient || !m_backendClient->isBackendRunning()) {
+        m_chatDisplay->append(
+            "<div style='background: rgba(239, 68, 68, 0.1); padding: 15px; border-radius: 10px; margin: 10px 0;'>"
+            "<b style='color: #EF4444;'>Error:</b><br>"
+            "<span style='color: #E2E8F0;'>Backend is not connected. Please wait for connection...</span>"
+            "</div>"
+        );
+        return;
+    }
+    
+    // Start AI response
+    m_chatDisplay->append(
+        "<div id='ai-response' style='background: rgba(16, 185, 129, 0.1); padding: 15px; border-radius: 10px; margin: 10px 0;'>"
+        "<b style='color: #10B981;'>DialoGPT:</b><br>"
+        "<span style='color: #E2E8F0;'>"
+    );
+    
+    // Send to backend
+    m_backendClient->chatCompletion(message, 0.7, 500);
+}
+
+void MainWindow::onStreamToken(const QString &token)
+{
+    m_currentResponse += token;
+    
+    // Update the last AI message
+    QString html = m_chatDisplay->toHtml();
+    int lastDivStart = html.lastIndexOf("<div id='ai-response'");
+    if (lastDivStart != -1) {
+        int contentStart = html.indexOf("<span style='color: #E2E8F0;'>", lastDivStart) + 30;
+        html = html.left(contentStart) + m_currentResponse.toHtmlEscaped() + "</span></div>";
+        m_chatDisplay->setHtml(html);
+        m_chatDisplay->verticalScrollBar()->setValue(m_chatDisplay->verticalScrollBar()->maximum());
+    }
+}
+
+void MainWindow::onStreamComplete()
+{
+    m_chatDisplay->append("</span></div>");
+    m_chatDisplay->verticalScrollBar()->setValue(m_chatDisplay->verticalScrollBar()->maximum());
+}
+
+void MainWindow::onStreamError(const QString &error)
+{
+    // Check if it's "No model loaded" error
+    if (error.contains("No model loaded")) {
+        m_chatDisplay->append(
+            "</span></div>"
+            "<div style='background: rgba(251, 191, 36, 0.1); padding: 15px; border-radius: 10px; margin: 10px 0;'>"
+            "<b style='color: #FBBF24;'>⚠️ No Model Loaded</b><br>"
+            "<span style='color: #E2E8F0;'>"
+            "DialoGPT is still loading or failed to load.<br><br>"
+            "Please wait a moment, or go to Settings → Load Selected Model to manually load it."
+            "</span>"
+            "</div>"
+        );
+    } else {
+        m_chatDisplay->append(QString("</span><br><span style='color: #EF4444;'>Error: %1</span></div>").arg(error.toHtmlEscaped()));
+    }
+    
+    m_chatDisplay->verticalScrollBar()->setValue(m_chatDisplay->verticalScrollBar()->maximum());
+}
+
+void MainWindow::autoLoadDialoGPT()
+{
+    static int retryCount = 0;
+    const int maxRetries = 5;
+    
+    if (!m_backendClient || !m_backendClient->isBackendRunning()) {
+        if (retryCount < maxRetries) {
+            retryCount++;
+            qDebug() << "Backend not ready, retry" << retryCount << "of" << maxRetries;
+            QTimer::singleShot(3000, this, &MainWindow::autoLoadDialoGPT);
+        } else {
+            qDebug() << "❌ Backend failed to start after" << maxRetries << "retries";
+            if (m_modelStatusLabel) {
+                m_modelStatusLabel->setText("❌ Backend connection failed");
+            }
+            if (m_chatDisplay) {
+                m_chatDisplay->append(
+                    "<div style='background: rgba(239, 68, 68, 0.1); padding: 15px; border-radius: 10px; margin: 10px 0;'>"
+                    "<b style='color: #EF4444;'>Backend Error:</b><br>"
+                    "<span style='color: #E2E8F0;'>Failed to connect to Python backend. "
+                    "Please check backend.log for details.</span>"
+                    "</div>"
+                );
+            }
+        }
+        return;
+    }
+    
+    qDebug() << "✅ Backend ready, loading DialoGPT...";
+    if (m_modelStatusLabel) {
+        m_modelStatusLabel->setText("⏳ Loading DialoGPT... (downloading if first time)");
+    }
+    
+    m_backendClient->loadModel("dialogpt-medium", 4096, 4);
+    retryCount = 0; // Reset for future use
+}
+
+void MainWindow::loadSelectedModel()
+{
+    int index = m_modelSelector->currentIndex();
+    QString modelSize = index == 0 ? "small" : (index == 1 ? "medium" : "large");
+    
+    m_modelStatusLabel->setText(QString("⏳ Loading DialoGPT-%1...").arg(modelSize));
+    m_backendClient->loadModel(QString("dialogpt-%1").arg(modelSize), 4096, 4);
+}
+
+void MainWindow::onModelLoaded(const QString &modelPath)
+{
+    QString modelName = "DialoGPT-Medium";
+    if (modelPath.contains("small")) modelName = "DialoGPT-Small";
+    else if (modelPath.contains("large")) modelName = "DialoGPT-Large";
+    
+    if (m_modelStatusLabel) {
+        m_modelStatusLabel->setText("● " + modelName + " Ready");
+    }
+    
+    if (m_modelNameLabel) {
+        m_modelNameLabel->setText(modelName + " (Loaded)");
+    }
+    
+    // Don't show message box - it was causing crashes
+    qDebug() << "✅ Model loaded successfully:" << modelName;
+}
+
+void MainWindow::onBackendReady()
+{
+    m_backendStatusLabel->setText("⚡ Backend: Connected");
+}
+
+void MainWindow::onBackendError(const QString &error)
+{
+    if (m_backendStatusLabel) {
+        m_backendStatusLabel->setText("⚠️ Backend: Error");
+    }
+    
+    qDebug() << "❌ Backend error:" << error;
+    
+    // Show error in chat instead of message box
+    if (m_chatDisplay) {
+        m_chatDisplay->append(QString(
+            "<div style='background: rgba(239, 68, 68, 0.1); padding: 15px; border-radius: 10px; margin: 10px 0;'>"
+            "<b style='color: #EF4444;'>Error:</b><br>"
+            "<span style='color: #E2E8F0;'>%1</span>"
+            "</div>"
+        ).arg(error.toHtmlEscaped()));
+    }
+}
+
+void MainWindow::addKnowledge()
+{
+    QString filePath = QFileDialog::getOpenFileName(
+        this,
+        "Select Knowledge File",
+        "",
+        "Text Files (*.txt *.md);;All Files (*)"
+    );
+    
+    if (filePath.isEmpty()) return;
+    
+    QFile file(filePath);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qDebug() << "❌ Could not read file:" << filePath;
+        if (m_knowledgeStats) {
+            m_knowledgeStats->setText("❌ Could not read file");
+        }
+        return;
+    }
+    
+    QString content = QString::fromUtf8(file.readAll());
+    file.close();
+    
+    QFileInfo fileInfo(filePath);
+    
+    if (m_backendClient) {
+        if (m_knowledgeStats) {
+            m_knowledgeStats->setText("⏳ Uploading " + fileInfo.fileName() + "...");
+        }
+        m_backendClient->ingestKnowledge(fileInfo.fileName(), content);
+    }
+}
+
+void MainWindow::refreshKnowledge()
+{
+    if (m_backendClient) {
+        m_backendClient->listKnowledge();
+    }
+}
+
+void MainWindow::onKnowledgeIngested(const QString &sourceName, int chunkCount)
+{
+    // Update stats instead of showing message box
+    if (m_knowledgeStats) {
+        m_knowledgeStats->setText(QString("✅ Added '%1' with %2 chunks").arg(sourceName).arg(chunkCount));
+    }
+    
+    qDebug() << "✅ Knowledge ingested:" << sourceName << "(" << chunkCount << "chunks)";
+    refreshKnowledge();
+}
+
+void MainWindow::onKnowledgeListed(const QJsonArray &sources)
+{
+    m_knowledgeList->clear();
+    
+    for (const QJsonValue &value : sources) {
+        QJsonObject source = value.toObject();
+        QString name = source["source_name"].toString();
+        int chunks = source["chunk_count"].toInt();
+        
+        m_knowledgeList->addItem(QString("📄 %1 (%2 chunks)").arg(name).arg(chunks));
+    }
+    
+    m_knowledgeStats->setText(QString("%1 knowledge files loaded").arg(sources.size()));
+}
+
+void MainWindow::showAbout()
+{
+    QMessageBox::about(
+        this,
+        "About RunMyModel",
+        "<h2>RunMyModel v0.3.0 BETA</h2>"
+        "<p><b>Self-Learning LLM Platform</b></p>"
+        "<p>Powered by:</p>"
+        "<ul>"
+        "<li>DialoGPT (Microsoft Research)</li>"
+        "<li>FAISS Vector Database</li>"
+        "<li>Python FastAPI Backend</li>"
+        "<li>Qt6 C++ Frontend</li>"
+        "</ul>"
+        "<p>© 2024 RunMyModel Project</p>"
+    );
+}
+
+void MainWindow::applyModernStyle()
+{
+    setStyleSheet(R"(
+        /* Main Window */
+        QMainWindow {
+            background: #0F172A;
+        }
+        
+        /* Sidebar */
+        #sidebar {
+            background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                stop:0 #1E293B, stop:1 #0F172A);
+            border-right: 1px solid #334155;
+        }
+        
+        /* Logo */
+        #logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #6366F1;
+            padding: 10px;
+        }
+        
+        #subtitle {
+            font-size: 12px;
+            color: #94A3B8;
+            padding-bottom: 10px;
+        }
+        
+        /* Status Card */
+        #statusCard {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+        }
+        
+        #modelStatus, #backendStatus {
+            color: #E2E8F0;
+            font-size: 13px;
+            padding: 5px 0;
+        }
+        
+        /* Navigation Buttons */
+        #navBtn, #navBtnActive {
+            background: transparent;
+            color: #94A3B8;
+            border: none;
+            padding: 15px 20px;
+            text-align: left;
+            font-size: 15px;
+            border-radius: 10px;
+            margin: 5px 0;
+        }
+        
+        #navBtn:hover {
+            background: rgba(99, 102, 241, 0.1);
+            color: #E2E8F0;
+        }
+        
+        #navBtnActive {
+            background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                stop:0 #6366F1, stop:1 #8B5CF6);
+            color: white;
+            font-weight: bold;
+        }
+        
+        #aboutBtn {
+            background: transparent;
+            color: #64748B;
+            border: 1px solid #334155;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+        
+        #aboutBtn:hover {
+            background: rgba(100, 116, 139, 0.1);
+            color: #94A3B8;
+        }
+        
+        /* Content Area */
+        #contentArea {
+            background: #0F172A;
+        }
+        
+        #pageHeader {
+            font-size: 32px;
+            font-weight: bold;
+            color: #E2E8F0;
+            padding-bottom: 10px;
+        }
+        
+        /* Chat Display */
+        #chatDisplay {
+            background: #1E293B;
+            border: 1px solid #334155;
+            border-radius: 15px;
+            padding: 20px;
+            color: #E2E8F0;
+            font-size: 14px;
+        }
+        
+        /* Input Area */
+        #inputArea {
+            background: #1E293B;
+            border: 1px solid #334155;
+            border-radius: 15px;
+        }
+        
+        #messageInput {
+            background: transparent;
+            border: none;
+            color: #E2E8F0;
+            font-size: 15px;
+            padding: 10px;
+        }
+        
+        #sendBtn {
+            background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                stop:0 #6366F1, stop:1 #8B5CF6);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: bold;
+        }
+        
+        #sendBtn:hover {
+            background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                stop:0 #4F46E5, stop:1 #7C3AED);
+        }
+        
+        #sendBtn:pressed {
+            background: #4338CA;
+        }
+        
+        /* Action Buttons */
+        #actionBtn {
+            background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                stop:0 #10B981, stop:1 #059669);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        #actionBtn:hover {
+            background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                stop:0 #059669, stop:1 #047857);
+        }
+        
+        #secondaryBtn {
+            background: #334155;
+            color: #E2E8F0;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+        
+        #secondaryBtn:hover {
+            background: #475569;
+        }
+        
+        /* Knowledge List */
+        #knowledgeList {
+            background: #1E293B;
+            border: 1px solid #334155;
+            border-radius: 15px;
+            color: #E2E8F0;
+            font-size: 14px;
+            padding: 10px;
+        }
+        
+        #knowledgeList::item {
+            padding: 10px;
+            border-radius: 8px;
+            margin: 5px;
+        }
+        
+        #knowledgeList::item:hover {
+            background: rgba(99, 102, 241, 0.1);
+        }
+        
+        #statsLabel {
+            color: #94A3B8;
+            font-size: 13px;
+            font-style: italic;
+            padding: 10px;
+        }
+        
+        /* Settings Groups */
+        QGroupBox {
+            border: 1px solid #334155;
+            border-radius: 10px;
+            margin-top: 10px;
+            padding-top: 20px;
+            color: #E2E8F0;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        QGroupBox::title {
+            subcontrol-origin: margin;
+            subcontrol-position: top left;
+            padding: 5px 10px;
+            color: #6366F1;
+        }
+        
+        #settingsGroup {
+            background: rgba(30, 41, 59, 0.5);
+        }
+        
+        #valueLabel {
+            color: #10B981;
+            font-weight: bold;
+            padding: 5px 0;
+        }
+        
+        #comboBox {
+            background: #1E293B;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 10px;
+            color: #E2E8F0;
+            font-size: 14px;
+        }
+        
+        #comboBox:hover {
+            border: 1px solid #6366F1;
+        }
+        
+        #comboBox::drop-down {
+            border: none;
+            padding-right: 10px;
+        }
+        
+        #comboBox QAbstractItemView {
+            background: #1E293B;
+            border: 1px solid #334155;
+            color: #E2E8F0;
+            selection-background-color: #6366F1;
+        }
+        
+        /* Labels */
+        QLabel {
+            color: #CBD5E1;
+            font-size: 14px;
+        }
+        
+        /* Scrollbars */
+        QScrollBar:vertical {
+            background: #1E293B;
+            width: 12px;
+            border-radius: 6px;
+        }
+        
+        QScrollBar::handle:vertical {
+            background: #475569;
+            border-radius: 6px;
+        }
+        
+        QScrollBar::handle:vertical:hover {
+            background: #64748B;
+        }
+        
+        QScrollBar:horizontal {
+            background: #1E293B;
+            height: 12px;
+            border-radius: 6px;
+        }
+        
+        QScrollBar::handle:horizontal {
+            background: #475569;
+            border-radius: 6px;
+        }
+    )");
+}

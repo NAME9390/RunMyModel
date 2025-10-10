@@ -1,237 +1,304 @@
-# RunMyModel Desktop
+# RunMyModel 0.3.0 - Self-Learning LLM Platform
 
-A modern Qt desktop application for running Large Language Models (LLMs) locally using Hugging Face models. Built with Qt6, C++, React, and TypeScript, featuring a clean, Open WebUI-inspired interface.
+**A local, offline-first AI platform with RAG (Retrieval Augmented Generation) capabilities.**
 
-**Version**: 0.2.0 ALPHA
+## ✨ Features
 
-## 🚀 Features
+- 🤖 **Local LLM Inference** - Run TinyLlama-1.1B locally with llama.cpp
+- 🧠 **Knowledge Management** - Ingest `.txt` and `.md` files into a vector database
+- 🔍 **RAG System** - Semantic search with FAISS + retrieval-augmented generation
+- 💾 **Persistent Memory** - SQLite metadata + FAISS vector storage
+- 🎨 **Modern Qt6 GUI** - Tabbed interface (Chat / Knowledge / Models)
+- ⚡ **Real-time Streaming** - Token-by-token response generation
+- 🔒 **100% Offline** - No cloud dependencies, all processing local
 
-- **Native Desktop App**: Built with Qt6 for true native performance
-- **Modern UI**: Clean, responsive React interface inspired by Open WebUI
-- **Local AI**: Run LLMs locally on your machine using Hugging Face models
-- **Privacy-Focused**: All processing happens locally - no data sent to external servers
-- **Cross-Platform**: Works on Linux and Windows
-- **360+ Models**: Access to hundreds of pre-configured models from Hugging Face
-- **Dark Mode**: Built-in dark/light theme support
-- **Markdown Support**: Rich text rendering with syntax highlighting
-- **Model Management**: Easy model selection, download, and management
+## 🚀 Quick Start
 
-## 📋 Prerequisites
+### Requirements
 
-### For Users
-- **Linux**: Qt6 runtime libraries
-- **Windows**: Bundled dependencies (no installation required)
+- **Linux** (tested on Arch/CachyOS, Ubuntu, Fedora)
+- **Python 3.9+** with pip
+- **Qt6** (Widgets, Core, Gui, Network, Concurrent)
+- **GCC/G++** with C++17 support
+- **curl** for health checks
 
-### For Developers
-- **Node.js**: Version 18 or higher
-- **npm**: Comes with Node.js
-- **Qt6**: Qt6 development packages (qt6-base-dev, qt6-webengine-dev)
-- **CMake**: Version 3.16 or higher
-- **C++ Compiler**: g++ or clang with C++17 support
+### Installation & Run
 
-## 🛠️ Installation
+#### Universal (Any Linux)
+```bash
+# Clone repository
+git clone <your-repo-url>
+cd runmymodel-desktop
 
-### Quick Start
+# Run with ONE command
+./run.sh
+```
 
-1. **Clone the repository**:
-   ```bash
-   git clone <repository-url>
-   cd runmymodel-desktop
-   ```
+#### Arch Linux / CachyOS (Optimized)
+```bash
+# Clone repository
+git clone <your-repo-url>
+cd runmymodel-desktop
 
-2. **Build the application**:
-   ```bash
-   ./proper_build.sh
-   ```
-   Or use the full build script for packaging:
-   ```bash
-   ./build.sh
-   ```
+# Run with Arch-optimized script
+./run_arch.sh
+```
 
-3. **Run the application**:
-   - **From build directory**: `./build/RunMyModelDesktop`
-   - **Linux package**: `./executables/linux/runmymodel-desktop.sh`
-   - **Windows package**: `executables\windows\runmymodel-desktop.bat`
+**What's the difference?**
+- `run.sh` - Universal script, works on any Linux distro
+- `run_arch.sh` - Arch-optimized with:
+  - Native compiler optimizations (`-march=native -O3`)
+  - Better linker flags for performance
+  - `systemd-run` for process isolation
+  - `fuser` for faster port cleanup
+  - Arch-specific package checks
 
-### Development Setup
+**Both scripts automatically:**
+1. ✅ Check all requirements
+2. ✅ Set up Python virtual environment
+3. ✅ Install dependencies (FAISS, sentence-transformers, FastAPI)
+4. ✅ Download embedding model (~90MB, first run only)
+5. ✅ Build C++ application
+6. ✅ Start knowledge service (port 8001)
+7. ✅ Launch GUI application
+8. ✅ Clean up on exit
 
-1. **Install dependencies**:
-   ```bash
-   npm install
-   ```
+## 📖 Usage
 
-2. **Start development server**:
-   ```bash
-   npm run dev
-   ```
+### 1. Chat Tab 💬
 
-3. **Build for production**:
-   ```bash
-   npm run build
-   ```
+- Type your message and press Enter or click "Send"
+- Toggle "Use RAG" to enable knowledge-enhanced responses
+- Real-time streaming of AI responses
 
-## 📦 Building
+### 2. Knowledge Tab 🧠
 
-The project includes a universal build script that creates executables for both Linux and Windows:
+**Upload Knowledge:**
+- Click "📁 Upload File"
+- Select `.txt` or `.md` files
+- Watch as the system chunks, embeds, and indexes your knowledge
+
+**Manage Knowledge:**
+- View all ingested sources
+- See statistics (chunks, vectors, sources)
+- Delete sources you no longer need
+
+**RAG Workflow:**
+1. Upload a document (e.g., `python_tutorial.md`)
+2. Enable "Use RAG" in Chat tab
+3. Ask a question related to the document
+4. The AI retrieves relevant chunks and generates an enhanced response!
+
+### 3. Models Tab ⚙️
+
+- View current model information
+- (Future: Switch models, add API keys)
+
+## 🧪 Testing RAG
+
+A test file is included to try the RAG system:
 
 ```bash
-# Build for both platforms
-./build.sh
+# 1. Start the application
+./run.sh  # or ./run_arch.sh on Arch
 
-# Build only for Linux
-./build.sh --linux-only
+# 2. In the GUI:
+#    - Go to "Knowledge" tab
+#    - Click "Upload File"
+#    - Select "test_knowledge.md"
+#    - Wait 5 seconds for ingestion
 
-# Build only for Windows
-./build.sh --windows-only
-
-# Skip creating distribution packages
-./build.sh --no-packages
+# 3. Test it:
+#    - Go to "Chat" tab
+#    - Enable "Use RAG"
+#    - Ask: "How do I print text in Python?"
+#    - Watch the AI use your knowledge! 🎯
 ```
 
-### Build Output
-
-After building, you'll find the executables in the `executables/` directory:
+## 🏗️ Architecture
 
 ```
-executables/
-├── linux/
-│   ├── runmymodel-desktop.sh
-│   ├── runmymodel-desktop.desktop
-│   └── dist/
-└── windows/
-    ├── runmymodel-desktop.bat
-    ├── install.bat
-    └── dist/
+┌─────────────────────────────────────────┐
+│         C++ Qt6 GUI Application         │
+│  ┌──────────┐ ┌──────────┐ ┌─────────┐ │
+│  │   Chat   │ │Knowledge │ │ Models  │ │
+│  └──────────┘ └──────────┘ └─────────┘ │
+└────────┬──────────────┬─────────────────┘
+         │              │ HTTP (port 8001)
+    ┌────▼────┐    ┌────▼────┐
+    │ Llama   │    │Knowledge│
+    │ Engine  │    │ Client  │
+    └────┬────┘    └────┬────┘
+         │              │
+    ┌────▼────┐    ┌────▼────┐
+    │llama.cpp│    │ FastAPI │
+    │(TinyLlama)    │ Service │
+    └─────────┘    └────┬────┘
+                        │
+                   ┌────▼────┐
+                   │Knowledge│
+                   │ Manager │
+                   └────┬────┘
+                        │
+              ┌─────────┴─────────┐
+              │                   │
+         ┌────▼────┐         ┌────▼────┐
+         │  FAISS  │         │ SQLite  │
+         │(vectors)│         │(metadata)│
+         └─────────┘         └─────────┘
 ```
 
-## 🎯 Usage
-
-### Linux
-
-1. **Run directly**:
-   ```bash
-   ./executables/linux/runmymodel-desktop.sh
-   ```
-
-2. **Install system-wide**:
-   ```bash
-   # Copy desktop file to applications directory
-   cp executables/linux/runmymodel-desktop.desktop ~/.local/share/applications/
-   
-   # Make executable
-   chmod +x ~/.local/share/applications/runmymodel-desktop.desktop
-   ```
-
-### Windows
-
-1. **Run directly**:
-   ```cmd
-   executables\windows\runmymodel-desktop.bat
-   ```
-
-2. **Install system-wide**:
-   ```cmd
-   executables\windows\install.bat
-   ```
-
-## 🏗️ Project Structure
+## 📁 Project Structure
 
 ```
 runmymodel-desktop/
-├── src/                    # Frontend source code (React/TypeScript)
-│   ├── components/         # React components
-│   │   ├── ui/            # Reusable UI components
-│   │   ├── ModernChatWindow.tsx
-│   │   └── ModernSidebar.tsx
-│   ├── store/             # State management (Zustand)
-│   ├── services/          # API services
-│   └── types/             # TypeScript types
-├── src-cpp/               # C++ backend source code
-│   ├── include/           # C++ header files
-│   │   ├── backend.h
-│   │   ├── web_server.h
-│   │   ├── model_manager.h
-│   │   └── huggingface_client.h
-│   └── src/               # C++ implementation files
-├── build/                 # CMake build output (gitignored)
-├── executables/           # Packaged executables (gitignored)
-├── dist/                  # Frontend build output
-├── llms.txt              # Model definitions (360+ models)
-├── CMakeLists.txt        # CMake configuration
-├── proper_build.sh       # Quick build script
-├── build.sh              # Full build script with packaging
-├── package.json          # Frontend dependencies
-└── README.md             # This file
+├── run.sh                   # ⭐ Universal launcher
+├── run_arch.sh              # ⭐ Arch-optimized launcher
+├── build.sh                 # Build script
+├── src-cpp/                 # C++ source code
+│   ├── include/
+│   │   ├── mainwindow.h
+│   │   ├── llama_engine.h
+│   │   └── knowledge_client.h
+│   └── src/
+│       ├── main.cpp
+│       ├── mainwindow.cpp
+│       ├── llama_engine.cpp
+│       └── knowledge_client.cpp
+├── knowledge_service/       # Python FastAPI service
+│   ├── main.py              # FastAPI server
+│   ├── knowledge_manager.py # FAISS + SQLite manager
+│   └── requirements.txt     # Python dependencies
+├── models/                  # LLM models (.gguf)
+│   └── tinyllama.gguf
+├── memory/                  # Knowledge storage
+│   ├── faiss_index.bin      # Vector index
+│   └── metadata.db          # SQLite database
+├── config/                  # Configuration
+│   └── default_config.json
+├── test_knowledge.md        # ⭐ Test file for RAG
+└── lib/
+    └── llama.cpp/           # llama.cpp library
 ```
 
-## 🔧 Development
+## 🛠️ Development
 
-### Available Scripts
+### Manual Build
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint
-- `npm run type-check` - Run TypeScript type checking
+```bash
+# Build only
+./build.sh
 
-### Tech Stack
+# Start knowledge service manually
+cd knowledge_service
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python3 main.py
 
-- **Desktop Framework**: Qt6 (C++)
-- **Frontend**: React 18, TypeScript, Tailwind CSS
-- **Build Tool**: Vite (frontend), CMake (C++ backend)
-- **State Management**: Zustand
-- **UI Components**: Custom components with Radix UI primitives
-- **Styling**: Tailwind CSS with custom design system
-- **Backend**: C++ with Qt6 WebEngine, Network, and WebChannel
+# Run GUI (in another terminal)
+export LD_LIBRARY_PATH="$(pwd)/build/lib:$(pwd)/lib/llama.cpp/build/bin"
+./build/RunMyModelDesktop
+```
 
-## 📄 License
+### Rebuild Application
 
-This project is licensed under the Mozilla Public License 2.0 (MPL-2.0). See the [LICENSE](LICENSE) file for details.
+```bash
+# Force rebuild
+rm -rf build/
+./run.sh  # or ./run_arch.sh
+```
 
-## 🤝 Contributing
+### Testing Knowledge Service API
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature-name`
-3. Commit your changes: `git commit -am 'Add feature'`
-4. Push to the branch: `git push origin feature-name`
-5. Submit a pull request
+```bash
+# Health check
+curl http://127.0.0.1:8001/health
+
+# Upload knowledge
+curl -X POST http://127.0.0.1:8001/knowledge/ingest \
+  -H "Content-Type: application/json" \
+  -d '{"text": "Python is a programming language", "source": "test.txt"}'
+
+# Query knowledge
+curl -X POST http://127.0.0.1:8001/knowledge/query \
+  -H "Content-Type: application/json" \
+  -d '{"query": "What is Python?", "top_k": 3}'
+```
 
 ## 🐛 Troubleshooting
 
-### Common Issues
+**Port 8001 already in use:**
+```bash
+# Universal
+lsof -i:8001
+pkill -9 -f "knowledge_service"
 
-1. **Build fails**: 
-   - Ensure Node.js 18+ is installed
-   - Ensure Qt6 development packages are installed
-   - Ensure CMake 3.16+ is installed
-2. **App won't start**: 
-   - Check that Qt6 runtime libraries are installed
-   - Check that `llms.txt` is in the same directory as the executable
-3. **0 models available**: 
-   - Ensure `llms.txt` is in the build directory
-   - Check console output for parsing errors
-4. **Blank screen**: 
-   - Ensure `dist/` folder is next to the executable
-   - Check browser console for errors (Ctrl+Shift+I)
+# Arch (faster)
+fuser -k 8001/tcp
+```
 
-### Getting Help
+**Knowledge service logs:**
+```bash
+tail -f knowledge_service.log
+```
 
-- Check the [Issues](https://github.com/your-repo/issues) page
-- Create a new issue with detailed information about your problem
+**Build fails:**
+```bash
+# Check Qt6 installation
+pkg-config --modversion Qt6Core  # Universal
+pacman -Qi qt6-base              # Arch
 
-## 📈 Roadmap
+# Check GCC
+g++ --version
 
-- [x] Native Qt desktop application
-- [x] 360+ pre-configured models from Hugging Face
-- [ ] Actual model download implementation
-- [ ] Model inference engine (llama.cpp integration)
-- [ ] Chat export/import functionality
-- [ ] Plugin system for custom models
-- [ ] Voice input/output support
-- [ ] AppImage and Windows installer packaging
+# Rebuild llama.cpp if needed
+cd lib/llama.cpp
+rm -rf build
+mkdir build && cd build
+export CMAKE_ROOT=/usr/share/cmake
+cmake .. -DCMAKE_BUILD_TYPE=Release
+make -j$(nproc)
+```
 
-## 🙏 Acknowledgments
+**Model not found:**
+```bash
+# Download TinyLlama (638MB)
+wget https://huggingface.co/TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF/resolve/main/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf -O models/tinyllama.gguf
+```
 
-- Inspired by [Open WebUI](https://github.com/open-webui/open-webui) design patterns
-- Built with [Hugging Face](https://huggingface.co/) models
-- UI components based on [Radix UI](https://www.radix-ui.com/) primitives
+## 📊 Technical Details
+
+- **LLM Engine:** llama.cpp with GGUF models
+- **Embedding Model:** all-MiniLM-L6-v2 (384-dim, ~90MB)
+- **Vector DB:** FAISS (Facebook AI Similarity Search)
+- **Metadata DB:** SQLite
+- **Web Framework:** FastAPI (Python)
+- **GUI Framework:** Qt6 (C++)
+- **Chunking:** tiktoken (512 tokens, 50 overlap)
+- **Retrieval:** Cosine similarity (top-5 by default)
+
+## 🔮 Future Plans
+
+- [ ] Multiple model support
+- [ ] API key integration (OpenAI, HuggingFace)
+- [ ] Session persistence / chat history
+- [ ] Fine-tuning capabilities
+- [ ] Knowledge visualization (topic clusters)
+- [ ] Export/import knowledge base
+- [ ] Windows support
+- [ ] AppImage packaging
+
+## 📄 License
+
+MPL 2.0 - See LICENSE file
+
+## 🤝 Contributing
+
+See CONTRIBUTING.md for guidelines.
+
+---
+
+**Built with ❤️ for the local AI community**
+
+**Just run `./run.sh` (or `./run_arch.sh` on Arch) and you're ready to go!** 🚀

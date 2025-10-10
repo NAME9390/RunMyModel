@@ -40,13 +40,21 @@ public:
     void unloadModel(const QString &modelName);
 
     // Inference (streaming)
+    void chatCompletion(const QString &message, float temperature = 0.7, int maxTokens = 512);
     void chatCompletion(const QString &modelName, const QJsonArray &messages,
                        float temperature = 0.7, int maxTokens = 512);
     void completion(const QString &modelName, const QString &prompt,
                    float temperature = 0.7, int maxTokens = 512);
 
+    // Knowledge management
+    void ingestKnowledge(const QString &sourceName, const QString &content);
+    void listKnowledge();
+    void searchKnowledge(const QString &query, int topK = 5);
+    void deleteKnowledge(int sourceId);
+
     // System info
     void getSystemInfo();
+    void getSystemStats();
 
     // Health check
     void checkHealth();
@@ -70,8 +78,16 @@ signals:
     void streamComplete();
     void streamError(const QString &error);
 
+    // Knowledge management responses
+    void knowledgeIngested(const QString &sourceName, int chunkCount);
+    void knowledgeListed(const QJsonArray &sources);
+    void knowledgeSearchResults(const QJsonArray &results);
+    void knowledgeDeleted(int sourceId);
+    void knowledgeError(const QString &error);
+
     // System info response
     void systemInfoReceived(const QJsonObject &info);
+    void systemStatsReceived(const QJsonObject &stats);
 
     // Health check response
     void healthCheckResult(bool healthy, const QJsonObject &data);
