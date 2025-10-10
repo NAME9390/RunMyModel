@@ -55,3 +55,6 @@ cmake_install.cmake
 
 # Logs
 *.log
+
+#models
+/models/tinyllama.gguf
