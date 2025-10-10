@@ -131,22 +131,25 @@ wget https://huggingface.co/TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF/resolve/main/
 
 ```
 RunMyModel/
-├── run.sh                   # ⭐ Universal launcher
-├── run_arch.sh              # ⭐ Arch-optimized launcher
-├── build.sh                 # Build helper script
-├── src-cpp/                 # C++ source code
-│   ├── include/
-│   │   ├── mainwindow.h     # Main GUI window
-│   │   └── llama_engine.h   # LLM inference engine
-│   └── src/
-│       ├── main.cpp         # Application entry point
-│       ├── mainwindow.cpp   # GUI implementation
-│       └── llama_engine.cpp # llama.cpp integration
+├── run.sh                   # ⭐ Universal launcher (wrapper)
+├── run_arch.sh              # ⭐ Arch-optimized launcher (wrapper)
+├── app/                     # Application code
+│   ├── run.sh               # Actual run script
+│   ├── run_arch.sh          # Actual Arch run script
+│   ├── build.sh             # Build script
+│   └── src-cpp/             # C++ source code
+│       ├── include/
+│       │   ├── mainwindow.h     # Main GUI window
+│       │   └── llama_engine.h   # LLM inference engine
+│       └── src/
+│           ├── main.cpp         # Application entry point
+│           ├── mainwindow.cpp   # GUI implementation
+│           └── llama_engine.cpp # llama.cpp integration
 ├── models/                  # LLM models (.gguf)
 │   └── tinyllama.gguf       # Download separately (not in repo)
 ├── build/                   # Build artifacts (gitignored)
 │   └── RunMyModelDesktop    # Compiled executable
-└── lib/
+└── lib/                     # External libraries (gitignored)
     └── llama.cpp/           # llama.cpp library (auto-cloned)
 ```
 

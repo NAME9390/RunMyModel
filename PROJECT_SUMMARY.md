@@ -32,23 +32,26 @@
 
 ```
 RunMyModel/
-├── 📄 run.sh                   # Universal launcher script
-├── 📄 run_arch.sh              # Arch Linux optimized launcher
-├── 📄 build.sh                 # Build helper script
+├── 📄 run.sh                   # Universal launcher (wrapper)
+├── 📄 run_arch.sh              # Arch Linux launcher (wrapper)
 ├── 📄 README.md                # Main documentation
 ├── 📄 CONTRIBUTING.md          # Contribution guidelines
 ├── 📄 PROJECT_SUMMARY.md       # This file
 ├── 📄 LICENSE                  # MPL-2.0 license
 ├── 📄 .gitignore               # Git ignore patterns
 │
-├── 📁 src-cpp/                 # C++ source code
-│   ├── 📁 include/
-│   │   ├── mainwindow.h        # Main window header
-│   │   └── llama_engine.h      # LLM engine header
-│   └── 📁 src/
-│       ├── main.cpp            # Application entry point
-│       ├── mainwindow.cpp      # GUI implementation
-│       └── llama_engine.cpp    # llama.cpp integration
+├── 📁 app/                     # Application code
+│   ├── 📄 run.sh               # Actual run script
+│   ├── 📄 run_arch.sh          # Actual Arch run script
+│   ├── 📄 build.sh             # Build script
+│   └── 📁 src-cpp/             # C++ source code
+│       ├── 📁 include/
+│       │   ├── mainwindow.h    # Main window header
+│       │   └── llama_engine.h  # LLM engine header
+│       └── 📁 src/
+│           ├── main.cpp        # Application entry point
+│           ├── mainwindow.cpp  # GUI implementation
+│           └── llama_engine.cpp # llama.cpp integration
 │
 ├── 📁 models/                  # LLM models (gitignored)
 │   └── tinyllama.gguf          # Download separately

@@ -1,9 +1,11 @@
 #!/bin/bash
-# RunMyModel 0.3.0 - Build Script (called by run.sh)
+# RunMyModel 0.4.0 - Build Script (called by run.sh)
 
-cd "$(dirname "$0")"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+cd "$PROJECT_ROOT"
 
-echo "🔨 Building RunMyModel 0.3.0..."
+echo "🔨 Building RunMyModel 0.4.0..."
 echo ""
 
 # Create build directories
@@ -20,39 +22,39 @@ echo "📦 Compiling source files..."
 
 # Compile main.cpp
 g++ -c -std=c++17 -fPIC -O2 -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB \
-    -I. -Isrc-cpp/include \
+    -I. -Iapp/src-cpp/include \
     -I/usr/include/qt6 -I/usr/include/qt6/QtWidgets -I/usr/include/qt6/QtGui \
     -I/usr/include/qt6/QtCore \
-    -o build/obj/main.o src-cpp/src/main.cpp
+    -o build/obj/main.o app/src-cpp/src/main.cpp
 
 # Compile mainwindow.cpp
 g++ -c -std=c++17 -fPIC -O2 -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB \
-    -I. -Isrc-cpp/include \
+    -I. -Iapp/src-cpp/include \
     -I/usr/include/qt6 -I/usr/include/qt6/QtWidgets -I/usr/include/qt6/QtGui \
     -I/usr/include/qt6/QtCore \
-    -o build/obj/mainwindow.o src-cpp/src/mainwindow.cpp
+    -o build/obj/mainwindow.o app/src-cpp/src/mainwindow.cpp
 
 # Compile llama_engine.cpp
 g++ -c -std=c++17 -fPIC -O2 -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB \
-    -I. -Isrc-cpp/include -Ilib/llama.cpp/include -Ilib/llama.cpp/ggml/include \
+    -I. -Iapp/src-cpp/include -Ilib/llama.cpp/include -Ilib/llama.cpp/ggml/include \
     -I/usr/include/qt6 -I/usr/include/qt6/QtWidgets -I/usr/include/qt6/QtGui \
     -I/usr/include/qt6/QtCore -I/usr/include/qt6/QtConcurrent \
-    -o build/obj/llama_engine.o src-cpp/src/llama_engine.cpp
+    -o build/obj/llama_engine.o app/src-cpp/src/llama_engine.cpp
 
 
 echo "🔗 Generating MOC files..."
-"$MOC_EXECUTABLE" src-cpp/include/mainwindow.h -o build/moc/moc_mainwindow.cpp
-"$MOC_EXECUTABLE" src-cpp/include/llama_engine.h -o build/moc/moc_llama_engine.cpp
+"$MOC_EXECUTABLE" app/src-cpp/include/mainwindow.h -o build/moc/moc_mainwindow.cpp
+"$MOC_EXECUTABLE" app/src-cpp/include/llama_engine.h -o build/moc/moc_llama_engine.cpp
 
 # Compile MOC files
 g++ -c -std=c++17 -fPIC -O2 -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB \
-    -I. -Isrc-cpp/include \
+    -I. -Iapp/src-cpp/include \
     -I/usr/include/qt6 -I/usr/include/qt6/QtWidgets -I/usr/include/qt6/QtGui \
     -I/usr/include/qt6/QtCore \
     -o build/obj/moc_mainwindow.o build/moc/moc_mainwindow.cpp
 
 g++ -c -std=c++17 -fPIC -O2 -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB \
-    -I. -Isrc-cpp/include \
+    -I. -Iapp/src-cpp/include \
     -I/usr/include/qt6 -I/usr/include/qt6/QtWidgets -I/usr/include/qt6/QtGui \
     -I/usr/include/qt6/QtCore \
     -o build/obj/moc_llama_engine.o build/moc/moc_llama_engine.cpp
