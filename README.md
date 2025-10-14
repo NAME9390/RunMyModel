@@ -1,20 +1,98 @@
-# RunMyModel Desktop v0.5.0-PRE-RELEASE - Executables Directory
+# RunMyModel Desktop v0.5.0-PRE-RELEASE
+
+**A professional-grade local LLM desktop application built entirely in C++ with Qt6.**
+
+## ✨ Features
+
+- 🤖 **Local LLM Inference** - Run TinyLlama-1.1B locally with llama.cpp
+- 🎨 **Modern Qt6 GUI** - Clean tabbed interface (Chat / Settings / Models)
+- ⚡ **Real-time Streaming** - Token-by-token response generation with speed metrics
+- 💾 **Chat History** - Save and clear conversations
+- ⚙️ **Configurable Settings** - Adjust temperature, max tokens, and more
+- 🎯 **Model Management** - Load/unload models, view model info
+- 🚀 **GPU Acceleration** - Automatic CUDA support for NVIDIA GPUs
+- 📊 **Performance Metrics** - Real-time tokens/second and total token count
+- 🔒 **100% Offline** - Pure C++ with no cloud dependencies
+- 🏗️ **Advanced Fine-tuning** - Built-in model training capabilities
+- 🔧 **Professional Build System** - Complete packaging for distribution
+
+## 🚀 Quick Start
+
+### Requirements
+
+- **Linux** (tested on Arch/CachyOS, Ubuntu, Fedora)
+- **Qt6** (Widgets, Core, Gui, Concurrent)
+- **GCC/G++** with C++17 support
+- **llama.cpp** library (auto-downloaded by build scripts)
+- **CUDA** (optional, for GPU acceleration)
+
+### Installation & Run
+
+#### Universal (Any Linux)
+```bash
+# Clone repository
+git clone https://github.com/NAME9390/RunMyModel.git
+cd RunMyModel
+
+# Download TinyLlama model (first time only)
+mkdir -p models
+wget https://huggingface.co/TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF/resolve/main/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf -O models/tinyllama.gguf
+
+# Run with ONE command
+./run.sh
+```
+
+#### Arch Linux / CachyOS (Optimized)
+```bash
+# Clone repository
+git clone https://github.com/NAME9390/RunMyModel.git
+cd RunMyModel
+
+# Download TinyLlama model (first time only)
+mkdir -p models
+wget https://huggingface.co/TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF/resolve/main/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf -O models/tinyllama.gguf
+
+# Run with Arch-optimized script (auto-installs CUDA if you have NVIDIA GPU)
+./run_arch.sh
+```
+
+**What's the difference?**
+- `run.sh` - Universal script, works on any Linux distro
+- `run_arch.sh` - Arch-optimized with:
+  - Automatic CUDA installation for NVIDIA GPUs
+  - Native compiler optimizations (`-march=native -O3`)
+  - Better linker flags for performance
+  - Automatic llama.cpp rebuild with GPU support
+
+**Both scripts automatically:**
+1. ✅ Check Qt6 and compiler
+2. ✅ Clone and build llama.cpp (first run only)
+3. ✅ Build C++ application
+4. ✅ Launch GUI application
+5. ✅ Enable GPU acceleration (if CUDA available)
+
+## 📦 Executables Directory
 
 This directory contains build scripts and tools for creating distributable executables for RunMyModel Desktop.
 
-## 📦 Available Packages
+### Available Packages
 
-### AppImage (Linux)
+#### AppImage (Linux)
 - **File**: `RunMyModelDesktop-v0.5.0-PRE-RELEASE-x86_64.AppImage`
 - **Platform**: Linux x86_64
 - **Usage**: Portable executable that runs on most Linux distributions
 - **Build Script**: `build_appimage.sh`
 
-### MSI (Windows)
+#### MSI (Windows)
 - **File**: `RunMyModelDesktop-v0.5.0-PRE-RELEASE-x64.msi`
 - **Platform**: Windows x64
 - **Usage**: Windows installer package
 - **Build Script**: `build_msi.sh`
+
+#### EXE (Windows Demo)
+- **File**: `RunMyModelDesktop-v0.5.0-PRE-RELEASE-x64.exe`
+- **Platform**: Windows x64
+- **Usage**: Simple Windows executable (demo version)
 
 ## 🛠️ Build Scripts
 
@@ -42,155 +120,221 @@ This directory contains build scripts and tools for creating distributable execu
 ./setup_cross_compile.sh
 ```
 
-## 📋 Prerequisites
+## 📖 Usage
 
-### For AppImage Build
-- Linux system (Ubuntu/Debian, Arch Linux, or Fedora)
-- Qt6 development packages
-- GCC/G++ with C++17 support
-- CMake 3.10+
-- linuxdeploy and linuxdeploy-plugin-qt
+### 1. Chat Tab 💬
 
-### For MSI Build
-- Windows system OR Linux with Wine
-- NSIS (Nullsoft Scriptable Install System)
-- Qt6 for Windows
-- Visual Studio Build Tools (for Windows)
+- **Type and Send**: Type your message and press Enter or click "Send"
+- **Real-time Streaming**: Watch AI responses appear token-by-token
+- **Stop Generation**: Click "Stop" to interrupt long responses
+- **Save Chat**: Save conversation to a text file
+- **Clear Chat**: Clear all messages and start fresh
+- **Performance Metrics**: View tokens/second and total tokens in real-time
 
-### For Cross-Compilation
-- Linux system
-- MinGW-w64 toolchain
-- Wine for Windows compatibility
-- Qt6 for Windows
+### 2. Settings Tab ⚙️
 
-## 🔧 Build Process
+**Temperature**: Control response randomness (0.0 = deterministic, 1.0 = creative)
+**Max Tokens**: Limit response length (1-2048 tokens)
 
-### 1. AppImage Build
-1. Builds the main application using `../app/build.sh`
-2. Creates AppDir structure with all dependencies
-3. Generates desktop file and AppStream metadata
-4. Creates AppRun script for portable execution
-5. Packages everything into a single AppImage file
+### 3. Models Tab 📦
 
-### 2. MSI Build
-1. Builds the main application (Windows executable)
-2. Creates Windows installer structure
-3. Generates NSIS installer script
-4. Includes Qt libraries and dependencies
-5. Creates Windows shortcuts and registry entries
-6. Packages everything into an MSI installer
+- **Current Model**: View loaded model information
+- **Model Path**: See where the model is located
+- **Load/Unload**: Manage model loading (auto-loads on startup)
 
-### 3. Cross-Compilation Setup
-1. Installs MinGW-w64 toolchain
-2. Downloads Qt for Windows
-3. Sets up Wine environment
-4. Creates cross-compilation scripts
-5. Provides Windows library dependencies
-
-## 📁 Directory Structure
+## 🏗️ Architecture
 
 ```
-executables/
-├── build_all.sh              # Master build script
-├── build_appimage.sh         # AppImage build script
-├── build_msi.sh              # MSI build script
-├── setup_cross_compile.sh    # Cross-compilation setup
-├── build_logs/               # Build logs and artifacts
-│   └── YYYYMMDD_HHMMSS/      # Timestamped build directory
-│       ├── *.AppImage        # AppImage package
-│       ├── *.msi             # MSI package
-│       ├── build_summary.txt # Build summary
-│       ├── RELEASE_NOTES.md  # Release notes
-│       └── *.log             # Build logs
-└── README.md                 # This file
+┌─────────────────────────────────────────┐
+│         C++ Qt6 GUI Application         │
+│  ┌──────────┐ ┌──────────┐ ┌─────────┐ │
+│  │   Chat   │ │ Settings │ │ Models  │ │
+│  └──────────┘ └──────────┘ └─────────┘ │
+│                                         │
+│              MainWindow                 │
+│                   │                     │
+│              ┌────▼────┐                │
+│              │ Llama   │                │
+│              │ Engine  │                │
+│              └────┬────┘                │
+└───────────────────┼─────────────────────┘
+                    │
+               ┌────▼────┐
+               │llama.cpp│
+               │ Library │
+               └────┬────┘
+                    │
+        ┌───────────┴───────────┐
+        │                       │
+   ┌────▼────┐             ┌────▼────┐
+   │   CPU   │             │   GPU   │
+   │Inference│             │ (CUDA)  │
+   └─────────┘             └─────────┘
 ```
 
-## 🚀 Usage Instructions
+**Pure C++ Stack:**
+- **GUI**: Qt6 (Widgets, Core, Gui, Concurrent)
+- **LLM Engine**: llama.cpp with GGUF model support
+- **Threading**: QtConcurrent for non-blocking inference
+- **State**: In-memory chat history and settings
 
-### Building Packages
+## 📁 Project Structure
 
-1. **Navigate to executables directory**:
-   ```bash
-   cd executables
-   ```
+```
+RunMyModel/
+├── run.sh                   # ⭐ Universal launcher (wrapper)
+├── run_arch.sh              # ⭐ Arch-optimized launcher (wrapper)
+├── app/                     # Application code
+│   ├── run.sh               # Actual run script
+│   ├── run_arch.sh          # Actual Arch run script
+│   ├── build.sh             # Build script
+│   └── src-cpp/             # C++ source code
+│       ├── include/
+│       │   ├── mainwindow.h     # Main GUI window
+│       │   └── llama_engine.h   # LLM inference engine
+│       └── src/
+│           ├── main.cpp         # Application entry point
+│           ├── mainwindow.cpp   # GUI implementation
+│           └── llama_engine.cpp # llama.cpp integration
+├── models/                  # LLM models (.gguf)
+│   └── tinyllama.gguf       # Download separately (not in repo)
+├── build/                   # Build artifacts (gitignored)
+│   └── RunMyModelDesktop    # Compiled executable
+├── executables/             # Distribution packages
+│   ├── RunMyModelDesktop-v0.5.0-PRE-RELEASE-x86_64.AppImage
+│   ├── RunMyModelDesktop-v0.5.0-PRE-RELEASE-x64.exe
+│   ├── RunMyModelDesktop-v0.5.0-PRE-RELEASE-x64.msi
+│   └── build_*.sh           # Build scripts
+└── lib/                     # External libraries (gitignored)
+    └── llama.cpp/           # llama.cpp library (auto-cloned)
+```
 
-2. **Build all packages**:
-   ```bash
-   ./build_all.sh
-   ```
+## 🛠️ Development
 
-3. **Check build results**:
-   ```bash
-   ls -la build_logs/latest/
-   ```
+### Manual Build
 
-### Distributing Packages
+```bash
+# Build C++ application
+./build.sh
 
-1. **AppImage Distribution**:
-   - Upload to GitHub Releases
-   - Make executable: `chmod +x RunMyModelDesktop-v0.5.0-PRE-RELEASE-x86_64.AppImage`
-   - Run: `./RunMyModelDesktop-v0.5.0-PRE-RELEASE-x86_64.AppImage`
+# Run manually
+export LD_LIBRARY_PATH="$(pwd)/lib/llama.cpp/build/bin:$LD_LIBRARY_PATH"
+./build/RunMyModelDesktop
+```
 
-2. **MSI Distribution**:
-   - Upload to GitHub Releases
-   - Users double-click to install
-   - Creates Start Menu and Desktop shortcuts
+### Rebuild Application
 
-## 🔍 Troubleshooting
+```bash
+# Clean rebuild
+rm -rf build/
+./run.sh  # or ./run_arch.sh
+```
 
-### Common Issues
+### GPU Acceleration Setup
 
-1. **AppImage Build Fails**:
-   - Check Qt6 installation
-   - Verify linuxdeploy is installed
-   - Ensure all dependencies are available
+**For NVIDIA GPUs (Arch Linux):**
+```bash
+# Run the Arch script - it auto-detects and sets up CUDA
+./run_arch.sh
+```
 
-2. **MSI Build Fails**:
-   - Verify NSIS installation
-   - Check Windows build environment
-   - Ensure Qt for Windows is installed
+**Manual CUDA setup (other distros):**
+```bash
+# Install CUDA toolkit (Ubuntu example)
+sudo apt install nvidia-cuda-toolkit
 
-3. **Cross-Compilation Issues**:
-   - Verify MinGW-w64 installation
-   - Check Wine configuration
-   - Ensure Qt for Windows is properly installed
+# Rebuild llama.cpp with CUDA
+cd lib/llama.cpp
+rm -rf build
+mkdir build && cd build
+cmake .. -DGGML_CUDA=ON
+make -j$(nproc)
+```
 
-### Getting Help
+## 🐛 Troubleshooting
 
-- Check build logs in `build_logs/` directory
-- Review error messages in terminal output
-- Consult main project documentation
-- Check GitHub Issues for known problems
+**Build fails:**
+```bash
+# Check Qt6 installation
+pkg-config --modversion Qt6Core  # Universal
+pacman -Qi qt6-base              # Arch
 
-## 📊 Build Statistics
+# Check GCC
+g++ --version
 
-### Package Sizes (Approximate)
-- **AppImage**: ~150MB (includes Qt6 and all dependencies)
-- **MSI**: ~200MB (includes Qt6, Windows libraries, and installer)
+# Rebuild llama.cpp
+cd lib/llama.cpp
+rm -rf build
+mkdir build && cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release
+make -j$(nproc)
+```
 
-### Build Times (Approximate)
-- **AppImage**: 5-10 minutes
-- **MSI**: 10-15 minutes
-- **Cross-Compilation Setup**: 30-60 minutes (one-time)
+**Model not found:**
+```bash
+# Download TinyLlama (~638MB)
+mkdir -p models
+wget https://huggingface.co/TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF/resolve/main/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf -O models/tinyllama.gguf
+```
 
-## 🔄 Continuous Integration
+**GPU not being used:**
+```bash
+# On Arch, run:
+./run_arch.sh  # Auto-installs CUDA and rebuilds llama.cpp
 
-These build scripts are designed to work with CI/CD systems:
+# On other distros, install CUDA manually and rebuild llama.cpp with:
+cd lib/llama.cpp
+rm -rf build && mkdir build && cd build
+cmake .. -DGGML_CUDA=ON
+make -j$(nproc)
+```
 
-- **GitHub Actions**: Use Linux runners for AppImage, Windows runners for MSI
-- **GitLab CI**: Use Docker containers with Qt6 and build tools
-- **Jenkins**: Use dedicated build agents with required dependencies
+**Application crashes:**
+```bash
+# Check logs
+cat build.log
 
-## 📝 Notes
+# Ensure model exists
+ls -lh models/tinyllama.gguf
 
-- All build scripts include comprehensive error handling
-- Build logs are automatically saved with timestamps
-- Release notes are generated automatically
-- Cross-compilation is experimental and may require manual intervention
-- For production builds, consider using dedicated build environments
+# Try rebuilding everything
+rm -rf build/ lib/llama.cpp/
+./run.sh
+```
+
+## 📊 Technical Details
+
+- **LLM Engine:** llama.cpp with GGUF models
+- **Model:** TinyLlama-1.1B-Chat-v1.0 (Q4_K_M quantization, ~638MB)
+- **GUI Framework:** Qt6 (C++)
+- **Threading:** QtConcurrent for non-blocking inference
+- **GPU Support:** CUDA (automatic offloading with 99 layers)
+- **Token Sampling:** llama.cpp sampler chain
+- **Default Settings:** Temperature 0.7, Max Tokens 512
+
+## 🔮 Future Plans
+
+- [x] Session persistence (save/load conversations)
+- [x] Multiple model support (switch between models)
+- [x] System prompt customization
+- [x] Dark/light theme toggle
+- [x] Chat history browser
+- [x] Model download manager (in-app)
+- [x] Windows support
+- [x] AppImage packaging
+- [ ] RAG system (knowledge ingestion)
+- [ ] API key integration (OpenAI, Anthropic)
+
+## 📄 License
+
+MPL 2.0 - See LICENSE file
+
+## 🤝 Contributing
+
+See CONTRIBUTING.md for guidelines.
 
 ---
 
-**RunMyModel Desktop v0.5.0-PRE-RELEASE** - Professional AI for your desktop
+**Built with ❤️ for the local AI community**
 
-*Built with ❤️ by the RunMyModel team*
+**Just run `./run.sh` (or `./run_arch.sh` on Arch) and you're ready to go!** 🚀

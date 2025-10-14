@@ -1,0 +1,60 @@
+# Build artifacts
+build/
+build-*/
+dist/
+executables/
+*.AppImage
+*.exe
+*.tar.gz
+*.zip
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Qt
+*.autosave
+*.user
+*.pro.user*
+moc_*.cpp
+qrc_*.cpp
+ui_*.h
+Makefile*
+!CMakeLists.txt
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+*.cmake
+!CMakeLists.txt
+
+# Compiled
+*.o
+*.obj
+*.a
+*.so
+*.dll
+*.dylib
+*.exe
+
+# Logs
+*.log
+
+#models
+/models/tinyllama.gguf

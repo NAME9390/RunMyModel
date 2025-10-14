@@ -1,0 +1,361 @@
+zai-org/GLM-4.6, 357B, text, https://huggingface.co/zai-org/GLM-4.6
+deepseek-ai/DeepSeek-V3.2-Exp, 685B, text, https://huggingface.co/deepseek-ai/DeepSeek-V3.2-Exp
+ibm-granite/granite-4.0-h-small, 32B, text, https://huggingface.co/ibm-granite/granite-4.0-h-small
+ibm-granite/granite-4.0-micro, 3B, text, https://huggingface.co/ibm-granite/granite-4.0-micro
+inclusionAI/Ring-1T-preview, 1000B, text, https://huggingface.co/inclusionAI/Ring-1T-preview
+ibm-granite/granite-4.0-h-tiny, 7B, text, https://huggingface.co/ibm-granite/granite-4.0-h-tiny
+ibm-granite/granite-4.0-h-micro, 3B, text, https://huggingface.co/ibm-granite/granite-4.0-h-micro
+unsloth/GLM-4.6-GGUF, 357B, text, https://huggingface.co/unsloth/GLM-4.6-GGUF
+openai/gpt-oss-120b, 120B, text, https://huggingface.co/openai/gpt-oss-120b
+openai/gpt-oss-20b, 22B, text, https://huggingface.co/openai/gpt-oss-20b
+Qwen/Qwen3-0.6B, 0.8B, text, https://huggingface.co/Qwen/Qwen3-0.6B
+zai-org/GLM-4.6-FP8, 353B, text, https://huggingface.co/zai-org/GLM-4.6-FP8
+Kwaipilot/KAT-Dev, 33B, text, https://huggingface.co/Kwaipilot/KAT-Dev
+unsloth/Apriel-1.5-15b-Thinker-GGUF, 14B, text, https://huggingface.co/unsloth/Apriel-1.5-15b-Thinker-GGUF
+meta-llama/Llama-3.1-8B-Instruct, 8B, text, https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct
+Qwen/Qwen3-4B-Instruct-2507, 4B, text, https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507
+ibm-granite/granite-4.0-micro-base, 3B, text, https://huggingface.co/ibm-granite/granite-4.0-micro-base
+Qwen/Qwen3-Next-80B-A3B-Instruct, 81B, text, https://huggingface.co/Qwen/Qwen3-Next-80B-A3B-Instruct
+jet-ai/Jet-Nemotron-4B, 4B, text, https://huggingface.co/jet-ai/Jet-Nemotron-4B
+LiquidAI/LFM2-1.2B-Extract, 1B, text, https://huggingface.co/LiquidAI/LFM2-1.2B-Extract
+ibm-granite/granite-4.0-h-micro-base, 3B, text, https://huggingface.co/ibm-granite/granite-4.0-h-micro-base
+Salesforce/CoDA-v0-Instruct, 2B, text, https://huggingface.co/Salesforce/CoDA-v0-Instruct
+ibm-granite/granite-4.0-h-tiny-base, 7B, text, https://huggingface.co/ibm-granite/granite-4.0-h-tiny-base
+ibm-granite/granite-4.0-tiny-preview, 7B, text, https://huggingface.co/ibm-granite/granite-4.0-tiny-preview
+moonshotai/Kimi-K2-Instruct-0905, -, text, https://huggingface.co/moonshotai/Kimi-K2-Instruct-0905
+google/gemma-3n-E4B-it-litert-lm, 8B, text, https://huggingface.co/google/gemma-3n-E4B-it-litert-lm
+zai-org/GLM-4.5-Air, 110B, text, https://huggingface.co/zai-org/GLM-4.5-Air
+DavidAU/OpenAi-GPT-oss-20b-abliterated-uncensored-NEO-Imatrix-gguf, 21B, text, https://huggingface.co/DavidAU/OpenAi-GPT-oss-20b-abliterated-uncensored-NEO-Imatrix-gguf
+LiquidAI/LFM2-1.2B-RAG, 1B, text, https://huggingface.co/LiquidAI/LFM2-1.2B-RAG
+litert-community/Gemma3-1B-IT, 1B, text, https://huggingface.co/litert-community/Gemma3-1B-IT
+neuphonic/neutts-air, 0.7B, tts, https://huggingface.co/neuphonic/neutts-air
+nineninesix/kani-tts-370m, 0.4B, tts, https://huggingface.co/nineninesix/kani-tts-370m
+hexgrad/Kokoro-82M, 0.08B, tts, https://huggingface.co/hexgrad/Kokoro-82M
+microsoft/VibeVoice-1.5B, 3B, tts, https://huggingface.co/microsoft/VibeVoice-1.5B
+neuphonic/neutts-air-q4-gguf, 0.7B, tts, https://huggingface.co/neuphonic/neutts-air-q4-gguf
+neuphonic/neutts-air-q8-gguf, 0.7B, tts, https://huggingface.co/neuphonic/neutts-air-q8-gguf
+openbmb/VoxCPM-0.5B, 0.5B, tts, https://huggingface.co/openbmb/VoxCPM-0.5B
+ResembleAI/chatterbox, -, tts, https://huggingface.co/ResembleAI/chatterbox
+coqui/XTTS-v2, -, tts, https://huggingface.co/coqui/XTTS-v2
+vibevoice/VibeVoice-7B, 9B, tts, https://huggingface.co/vibevoice/VibeVoice-7B
+fishaudio/fish-speech-1.5, 1.5B, tts, https://huggingface.co/fishaudio/fish-speech-1.5
+canopylabs/orpheus-3b-0.1-ft, 4B, tts, https://huggingface.co/canopylabs/orpheus-3b-0.1-ft
+fishaudio/openaudio-s1-mini, -, tts, https://huggingface.co/fishaudio/openaudio-s1-mini
+aoi-ot/VibeVoice-Large, 9B, tts, https://huggingface.co/aoi-ot/VibeVoice-Large
+nineninesix/kani-tts-450m-0.1-pt, 0.5B, tts, https://huggingface.co/nineninesix/kani-tts-450m-0.1-pt
+nari-labs/Dia-1.6B, 1.6B, tts, https://huggingface.co/nari-labs/Dia-1.6B
+NandemoGHS/Anime-Llasa-3B, 3B, tts, https://huggingface.co/NandemoGHS/Anime-Llasa-3B
+onnx-community/chatterbox-multilingual-ONNX, -, tts, https://huggingface.co/onnx-community/chatterbox-multilingual-ONNX
+Ken-Z/latin_SpeechT5, 0.1B, tts, https://huggingface.co/Ken-Z/latin_SpeechT5
+microsoft/speecht5_tts, -, tts, https://huggingface.co/microsoft/speecht5_tts
+facebook/mms-tts-uig-script_arabic, -, tts, https://huggingface.co/facebook/mms-tts-uig-script_arabic
+myshell-ai/OpenVoice, -, tts, https://huggingface.co/myshell-ai/OpenVoice
+SWivid/F5-TTS, -, tts, https://huggingface.co/SWivid/F5-TTS
+OuteAI/OuteTTS-0.2-500M, 0.5B, tts, https://huggingface.co/OuteAI/OuteTTS-0.2-500M
+Respair/Tsukasa_Speech, -, tts, https://huggingface.co/Respair/Tsukasa_Speech
+hexgrad/Kokoro-82M-v1.1-zh, 0.08B, tts, https://huggingface.co/hexgrad/Kokoro-82M-v1.1-zh
+campwill/HAL-9000-Piper-TTS, -, tts, https://huggingface.co/campwill/HAL-9000-Piper-TTS
+keanteng/sesame-csm-elise, 2B, tts, https://huggingface.co/keanteng/sesame-csm-elise
+calcuis/chatterbox-gguf, 0.3B, tts, https://huggingface.co/calcuis/chatterbox-gguf
+bosonai/higgs-audio-v2-generation-3B-base, 6B, tts, https://huggingface.co/bosonai/higgs-audio-v2-generation-3B-base
+lightx2v/Wan2.2-Lightning, -, t2v, https://huggingface.co/lightx2v/Wan2.2-Lightning
+htdong/Wan-Alpha, -, t2v, https://huggingface.co/htdong/Wan-Alpha
+htdong/Wan-Alpha_ComfyUI, -, t2v, https://huggingface.co/htdong/Wan-Alpha_ComfyUI
+Wan-AI/Wan2.2-TI2V-5B, 5B, t2v, https://huggingface.co/Wan-AI/Wan2.2-TI2V-5B
+QuantStack/Wan2.2-T2V-A14B-GGUF, 14B, t2v, https://huggingface.co/QuantStack/Wan2.2-T2V-A14B-GGUF
+Wan-AI/Wan2.1-T2V-1.3B, 1.3B, t2v, https://huggingface.co/Wan-AI/Wan2.1-T2V-1.3B
+Wan-AI/Wan2.2-T2V-A14B, 14B, t2v, https://huggingface.co/Wan-AI/Wan2.2-T2V-A14B
+vrgamedevgirl84/Wan14BT2VFusioniX, -, t2v, https://huggingface.co/vrgamedevgirl84/Wan14BT2VFusioniX
+QuantStack/Wan2.2-TI2V-5B-GGUF, 5B, t2v, https://huggingface.co/QuantStack/Wan2.2-TI2V-5B-GGUF
+ali-vilab/modelscope-damo-text-to-video-synthesis, -, t2v, https://huggingface.co/ali-vilab/modelscope-damo-text-to-video-synthesis
+tencent/HunyuanVideo, -, t2v, https://huggingface.co/tencent/HunyuanVideo
+alibaba-pai/Wan2.2-Fun-Reward-LoRAs, -, t2v, https://huggingface.co/alibaba-pai/Wan2.2-Fun-Reward-LoRAs
+genmo/mochi-1-preview, -, t2v, https://huggingface.co/genmo/mochi-1-preview
+Wan-AI/Wan2.1-T2V-14B, 14B, t2v, https://huggingface.co/Wan-AI/Wan2.1-T2V-14B
+calcuis/wan-gguf, 0.1B, t2v, https://huggingface.co/calcuis/wan-gguf
+Wan-AI/Wan2.1-T2V-14B-Diffusers, 14B, t2v, https://huggingface.co/Wan-AI/Wan2.1-T2V-14B-Diffusers
+lightx2v/Wan2.1-T2V-14B-StepDistill-CfgDistill, 14B, t2v, https://huggingface.co/lightx2v/Wan2.1-T2V-14B-StepDistill-CfgDistill
+deadman44/Wan2.2_T2i_T2v_LoRA, -, t2v, https://huggingface.co/deadman44/Wan2.2_T2i_T2v_LoRA
+Wan-AI/Wan2.2-TI2V-5B-Diffusers, 5B, t2v, https://huggingface.co/Wan-AI/Wan2.2-TI2V-5B-Diffusers
+FastVideo/FastWan2.2-TI2V-5B-FullAttn-Diffusers, 5B, t2v, https://huggingface.co/FastVideo/FastWan2.2-TI2V-5B-FullAttn-Diffusers
+QuantStack/Wan2.2-S2V-14B-GGUF, 16B, t2v, https://huggingface.co/QuantStack/Wan2.2-S2V-14B-GGUF
+Cseti/wan2.2-14B-Kinestasis_concept-lora-v1, 14B, t2v, https://huggingface.co/Cseti/wan2.2-14B-Kinestasis_concept-lora-v1
+QuantStack/Wan2.2_T2V_A14B_4steps_25-09-28_Dyno_High_lightx2v-GGUF, 14B, t2v, https://huggingface.co/QuantStack/Wan2.2_T2V_A14B_4steps_25-09-28_Dyno_High_lightx2v-GGUF
+ByteDance/AnimateDiff-Lightning, -, t2v, https://huggingface.co/ByteDance/AnimateDiff-Lightning
+zai-org/CogVideoX-2b, 2B, t2v, https://huggingface.co/zai-org/CogVideoX-2b
+zai-org/CogVideoX-5b, 5B, t2v, https://huggingface.co/zai-org/CogVideoX-5b
+Wan-AI/Wan2.1-T2V-1.3B-Diffusers, 1.3B, t2v, https://huggingface.co/Wan-AI/Wan2.1-T2V-1.3B-Diffusers
+hpcai-tech/Open-Sora-v2, -, t2v, https://huggingface.co/hpcai-tech/Open-Sora-v2
+ZuluVision/MoviiGen1.1, -, t2v, https://huggingface.co/ZuluVision/MoviiGen1.1
+QuantStack/Wan2.1_14B_VACE-GGUF, 17B, t2v, https://huggingface.co/QuantStack/Wan2.1_14B_VACE-GGUF
+tencent/HunyuanImage-3.0, 83B, Text-to-Image, 1.92k, https://huggingface.co/tencent/HunyuanImage-3.0
+Phr00t/Qwen-Image-Edit-Rapid-AIO, -, Text-to-Image, 33, https://huggingface.co/Phr00t/Qwen-Image-Edit-Rapid-AIO
+lightx2v/Qwen-Image-Lightning, -, Text-to-Image, 731k, https://huggingface.co/lightx2v/Qwen-Image-Lightning
+black-forest-labs/FLUX.1-dev, -, Text-to-Image, 11.5k, https://huggingface.co/black-forest-labs/FLUX.1-dev
+black-forest-labs/FLUX.1-schnell, -, Text-to-Image, 4.3k, https://huggingface.co/black-forest-labs/FLUX.1-schnell
+stabilityai/stable-diffusion-xl-base-1.0, -, Text-to-Image, 7.02k, https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0
+Qwen/Qwen-Image, -, Text-to-Image, 2.1k, https://huggingface.co/Qwen/Qwen-Image
+nunchaku-tech/nunchaku-qwen-image-edit-2509, -, Text-to-Image, 106, https://huggingface.co/nunchaku-tech/nunchaku-qwen-image-edit-2509
+stable-diffusion-v1-5/stable-diffusion-v1-5, -, Text-to-Image, 835, https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5
+Danrisi/Qwen-image_SamsungCam_UltraReal, -, Text-to-Image, 12, https://huggingface.co/Danrisi/Qwen-image_SamsungCam_UltraReal
+stabilityai/stable-diffusion-3.5-large, -, Text-to-Image, 3.15k, https://huggingface.co/stabilityai/stable-diffusion-3.5-large
+tencent/SRPO, -, Text-to-Image, 924, https://huggingface.co/tencent/SRPO
+OPPOer/Qwen-Image-Pruning, -, Text-to-Image, 80, https://huggingface.co/OPPOer/Qwen-Image-Pruning
+tencent/HunyuanImage-3.0-Instruct, -, Text-to-Image, 37, https://huggingface.co/tencent/HunyuanImage-3.0-Instruct
+xinsir/controlnet-union-sdxl-1.0, -, Text-to-Image, 1.58k, https://huggingface.co/xinsir/controlnet-union-sdxl-1.0
+CompVis/stable-diffusion-v1-4, -, Text-to-Image, 6.92k, https://huggingface.co/CompVis/stable-diffusion-v1-4
+city96/Qwen-Image-gguf, 20B, Text-to-Image, 242, https://huggingface.co/city96/Qwen-Image-gguf
+lodestones/Chroma1-HD, -, Text-to-Image, 229, https://huggingface.co/lodestones/Chroma1-HD
+nunchaku-tech/nunchaku-qwen-image, -, Text-to-Image, 203, https://huggingface.co/nunchaku-tech/nunchaku-qwen-image
+calcuis/hunyuanimage-gguf, 17B, Text-to-Image, 69, https://huggingface.co/calcuis/hunyuanimage-gguf
+KBlueLeaf/HDM-xut-340M-anime, -, Text-to-Image, 121, https://huggingface.co/KBlueLeaf/HDM-xut-340M-anime
+Alissonerdx/flux.1-dev-SRPO-LoRas, -, Text-to-Image, 53, https://huggingface.co/Alissonerdx/flux.1-dev-SRPO-LoRas
+stabilityai/sdxl-turbo, -, Text-to-Image, 2.46k, https://huggingface.co/stabilityai/sdxl-turbo
+stabilityai/stable-diffusion-3.5-large-turbo, -, Text-to-Image, 634, https://huggingface.co/stabilityai/stable-diffusion-3.5-large-turbo
+stabilityai/stable-diffusion-3.5-medium, -, Text-to-Image, 840, https://huggingface.co/stabilityai/stable-diffusion-3.5-medium
+Heartsync/Flux-NSFW-uncensored, -, Text-to-Image, 160, https://huggingface.co/Heartsync/Flux-NSFW-uncensored
+ostris/wan22_i2v_14b_orbit_shot_lora, -, Text-to-Image, 40, https://huggingface.co/ostris/wan22_i2v_14b_orbit_shot_lora
+rockerBOO/flux.1-dev-SRPO, -, Text-to-Image, 56, https://huggingface.co/rockerBOO/flux.1-dev-SRPO
+Sherwinroger002/fashion_mnist_diffusion_class_conditional, -, Text-to-Image, 4, https://huggingface.co/Sherwinroger002/fashion_mnist_diffusion_class_conditional
+CompVis/stable-diffusion-v-1-4-original, -, Text-to-Image, 2.82k, https://huggingface.co/CompVis/stable-diffusion-v-1-4-original
+zai-org/GLM-4.6, 357B, Text Generation, 504, https://huggingface.co/zai-org/GLM-4.6
+deepseek-ai/DeepSeek-V3.2-Exp, 685B, Text Generation, 564, https://huggingface.co/deepseek-ai/DeepSeek-V3.2-Exp
+ibm-granite/granite-4.0-h-small, 32B, Text Generation, 181, https://huggingface.co/ibm-granite/granite-4.0-h-small
+ibm-granite/granite-4.0-micro, 3B, Text Generation, 158, https://huggingface.co/ibm-granite/granite-4.0-micro
+inclusionAI/Ring-1T-preview, 1000B, Text Generation, 245, https://huggingface.co/inclusionAI/Ring-1T-preview
+ibm-granite/granite-4.0-h-tiny, 7B, Text Generation, 102, https://huggingface.co/ibm-granite/granite-4.0-h-tiny
+ibm-granite/granite-4.0-h-micro, 3B, Text Generation, 68, https://huggingface.co/ibm-granite/granite-4.0-h-micro
+unsloth/GLM-4.6-GGUF, 357B, Text Generation, 65, https://huggingface.co/unsloth/GLM-4.6-GGUF
+openai/gpt-oss-120b, 120B, Text Generation, 3.95k, https://huggingface.co/openai/gpt-oss-120b
+openai/gpt-oss-20b, 22B, Text Generation, 3.66k, https://huggingface.co/openai/gpt-oss-20b
+Qwen/Qwen3-0.6B, 0.8B, Text Generation, 680, https://huggingface.co/Qwen/Qwen3-0.6B
+zai-org/GLM-4.6-FP8, 353B, Text Generation, 30, https://huggingface.co/zai-org/GLM-4.6-FP8
+Kwaipilot/KAT-Dev, 33B, Text Generation, 149, https://huggingface.co/Kwaipilot/KAT-Dev
+unsloth/Apriel-1.5-15b-Thinker-GGUF, 14B, Text Generation, 27, https://huggingface.co/unsloth/Apriel-1.5-15b-Thinker-GGUF
+meta-llama/Llama-3.1-8B-Instruct, 8B, Text Generation, 4.71k, https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct
+Qwen/Qwen3-4B-Instruct-2507, 4B, Text Generation, 371, https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507
+ibm-granite/granite-4.0-micro-base, 3B, Text Generation, 26, https://huggingface.co/ibm-granite/granite-4.0-micro-base
+Qwen/Qwen3-Next-80B-A3B-Instruct, 81B, Text Generation, 795, https://huggingface.co/Qwen/Qwen3-Next-80B-A3B-Instruct
+jet-ai/Jet-Nemotron-4B, 4B, Text Generation, 23, https://huggingface.co/jet-ai/Jet-Nemotron-4B
+LiquidAI/LFM2-1.2B-Extract, 1B, Text Generation, 74, https://huggingface.co/LiquidAI/LFM2-1.2B-Extract
+ibm-granite/granite-4.0-h-micro-base, 3B, Text Generation, 22, https://huggingface.co/ibm-granite/granite-4.0-h-micro-base
+Salesforce/CoDA-v0-Instruct, 2B, Text Generation, 21, https://huggingface.co/Salesforce/CoDA-v0-Instruct
+ibm-granite/granite-4.0-h-tiny-base, 7B, Text Generation, 20, https://huggingface.co/ibm-granite/granite-4.0-h-tiny-base
+ibm-granite/granite-4.0-tiny-preview, 7B, Text Generation, 173, https://huggingface.co/ibm-granite/granite-4.0-tiny-preview
+zai-org/GLM-4.5-Air, 110B, Text Generation, 471, https://huggingface.co/zai-org/GLM-4.5-Air
+moonshotai/Kimi-K2-Instruct-0905, -, Text Generation, 462, https://huggingface.co/moonshotai/Kimi-K2-Instruct-0905
+google/gemma-3n-E4B-it-litert-lm, -, Text Generation, 139, https://huggingface.co/google/gemma-3n-E4B-it-litert-lm
+DavidAU/OpenAi-GPT-oss-20b-abliterated-uncensored-NEO-Imatrix-gguf, 21B, Text Generation, 227, https://huggingface.co/DavidAU/OpenAi-GPT-oss-20b-abliterated-uncensored-NEO-Imatrix-gguf
+LiquidAI/LFM2-1.2B-RAG, 1B, Text Generation, 78, https://huggingface.co/LiquidAI/LFM2-1.2B-RAG
+litert-community/Gemma3-1B-IT, -, Text Generation, 331, https://huggingface.co/litert-community/Gemma3-1B-IT
+unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF, 31B, Text Generation, 274, https://huggingface.co/unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF
+Qwen/Qwen3-Coder-30B-A3B-Instruct, 31B, Text Generation, 655, https://huggingface.co/Qwen/Qwen3-Coder-30B-A3B-Instruct
+Qwen/Qwen3-Coder-480B-A35B-Instruct, 480B, Text Generation, 1.22k, https://huggingface.co/Qwen/Qwen3-Coder-480B-A35B-Instruct
+Qwen/Qwen3-Coder-30B-A3B-Instruct-FP8, 31B, Text Generation, 87, https://huggingface.co/Qwen/Qwen3-Coder-30B-A3B-Instruct-FP8
+deepseek-ai/DeepSeek-Coder-V2-Lite-Instruct, 16B, Text Generation, 478, https://huggingface.co/deepseek-ai/DeepSeek-Coder-V2-Lite-Instruct
+mradermacher/Qwen3-30B-A3B-CoderThinking-YOYO-linear-GGUF, 31B, Text Generation, 3, https://huggingface.co/mradermacher/Qwen3-30B-A3B-CoderThinking-YOYO-linear-GGUF
+mradermacher/Qwen3-42B-A3B-2507-Thinking-Abliterated-uncensored-TOTAL-RECALL-v2-Medium-MASTER-CODER-i1-GGUF, 42B, Text Generation, 6, https://huggingface.co/mradermacher/Qwen3-42B-A3B-2507-Thinking-Abliterated-uncensored-TOTAL-RECALL-v2-Medium-MASTER-CODER-i1-GGUF
+BasedBase/Qwen3-Coder-30B-A3B-Instruct-480B-Distill-V2-Fp32, 31B, Text Generation, 13, https://huggingface.co/BasedBase/Qwen3-Coder-30B-A3B-Instruct-480B-Distill-V2-Fp32
+hokar3361/gpt-oss-coderjs-v0.1, 21B, Text Generation, 3, https://huggingface.co/hokar3361/gpt-oss-coderjs-v0.1
+deepseek-ai/deepseek-coder-1.3b-instruct, 1B, Text Generation, 140, https://huggingface.co/deepseek-ai/deepseek-coder-1.3b-instruct
+deepseek-ai/DeepSeek-Coder-V2-Instruct, 236B, Text Generation, 663, https://huggingface.co/deepseek-ai/DeepSeek-Coder-V2-Instruct
+unsloth/Qwen3-Coder-30B-A3B-Instruct-1M-GGUF, 31B, Text Generation, 110, https://huggingface.co/unsloth/Qwen3-Coder-30B-A3B-Instruct-1M-GGUF
+lmstudio-community/Qwen3-Coder-30B-A3B-Instruct-MLX-8bit, 31B, Text Generation, 7, https://huggingface.co/lmstudio-community/Qwen3-Coder-30B-A3B-Instruct-MLX-8bit
+YOYO-AI/Qwen3-30B-A3B-CoderThinking-YOYO-linear, 31B, Text Generation, 5, https://huggingface.co/YOYO-AI/Qwen3-30B-A3B-CoderThinking-YOYO-linear
+BasedBase/Qwen3-Coder-30B-A3B-Instruct-480B-Distill-V2, 31B, Text Generation, 98, https://huggingface.co/BasedBase/Qwen3-Coder-30B-A3B-Instruct-480B-Distill-V2
+DeryFerd/Qwen2.5-Math-Coder-Distill-Phi-2-4.4K-MixMathCode, 3B, Text Generation, 2, https://huggingface.co/DeryFerd/Qwen2.5-Math-Coder-Distill-Phi-2-4.4K-MixMathCode
+TIGER-Lab/Critique-Coder-8B, 8B, Text Generation, 2, https://huggingface.co/TIGER-Lab/Critique-Coder-8B
+ricdomolm/mini-coder-4b, 4B, Text Generation, 2, https://huggingface.co/ricdomolm/mini-coder-4b
+deepseek-ai/deepseek-coder-33b-instruct, 33B, Text Generation, 544, https://huggingface.co/deepseek-ai/deepseek-coder-33b-instruct
+lmstudio-community/DeepSeek-Coder-V2-Lite-Instruct-GGUF, 16B, Text Generation, 56, https://huggingface.co/lmstudio-community/DeepSeek-Coder-V2-Lite-Instruct-GGUF
+legraphista/DeepSeek-Coder-V2-Lite-Instruct-IMat-GGUF, 16B, Text Generation, 7, https://huggingface.co/legraphista/DeepSeek-Coder-V2-Lite-Instruct-IMat-GGUF
+deepseek-ai/DeepSeek-Coder-V2-Instruct-0724, 236B, Text Generation, 112, https://huggingface.co/deepseek-ai/DeepSeek-Coder-V2-Instruct-0724
+Qwen/Qwen2.5-Coder-7B-Instruct, 8B, Text Generation, 546, https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct
+Qwen/Qwen2.5-Coder-1.5B, 2B, Text Generation, 64, https://huggingface.co/Qwen/Qwen2.5-Coder-1.5B
+Qwen/Qwen2.5-Coder-1.5B-Instruct, 2B, Text Generation, 85, https://huggingface.co/Qwen/Qwen2.5-Coder-1.5B-Instruct
+neopolita/qwen2.5-coder-7b-gguf, 8B, Text Generation, 1, https://huggingface.co/neopolita/qwen2.5-coder-7b-gguf
+WhiteRabbitNeo/WhiteRabbitNeo-2.5-Qwen-2.5-Coder-7B, 8B, Text Generation, 60, https://huggingface.co/WhiteRabbitNeo/WhiteRabbitNeo-2.5-Qwen-2.5-Coder-7B
+nomic-ai/CodeRankEmbed, 0.1B, Text Generation, 44, https://huggingface.co/nomic-ai/CodeRankEmbed
+Qwen/Qwen2.5-Coder-14B-Instruct, 15B, Text Generation, 128, https://huggingface.co/Qwen/Qwen2.5-Coder-14B-Instruct
+Qwen/Qwen2.5-Coder-32B-Instruct, 33B, Text Generation, 1.94k, https://huggingface.co/Qwen/Qwen2.5-Coder-32B-Instruct
+JetBrains-Research/cmg-codereviewer-without-history, 0.2B, Text Generation, 3, https://huggingface.co/JetBrains-Research/cmg-codereviewer-without-history
+JetBrains-Research/cmg-codereviewer-with-history, 0.2B, Text Generation, 3, https://huggingface.co/JetBrains-Research/cmg-codereviewer-with-history
+TheBloke/deepseek-coder-1.3b-instruct-AWQ, 0.3B, Text Generation, 3, https://huggingface.co/TheBloke/deepseek-coder-1.3b-instruct-AWQ
+TheBloke/deepseek-coder-1.3b-base-AWQ, 0.3B, Text Generation, 649, https://huggingface.co/TheBloke/deepseek-coder-1.3b-base-AWQ
+TheBloke/deepseek-coder-1.3b-base-GPTQ, 0.3B, Text Generation, 2, https://huggingface.co/TheBloke/deepseek-coder-1.3b-base-GPTQ
+TheBloke/deepseek-coder-1.3b-instruct-GPTQ, 0.3B, Text Generation, 7, https://huggingface.co/TheBloke/deepseek-coder-1.3b-instruct-GPTQ
+TheBloke/deepseek-coder-5.7bmqa-base-GPTQ, 1.0B, Text Generation, -, https://huggingface.co/TheBloke/deepseek-coder-5.7bmqa-base-GPTQ
+TheBloke/deepseek-coder-5.7bmqa-base-AWQ, 1.0B, Text Generation, -, https://huggingface.co/TheBloke/deepseek-coder-5.7bmqa-base-AWQ
+hanspeterlyngsoeraaschoujensen/deepseek-coder-1.3b-instruct-GPTQ, 0.3B, Text Generation, -, https://huggingface.co/hanspeterlyngsoeraaschoujensen/deepseek-coder-1.3b-instruct-GPTQ
+mlx-community/gemma-2b-coder, 0.8B, Text Generation, 26, https://huggingface.co/mlx-community/gemma-2b-coder
+PrunaAI/deepseek-ai-deepseek-coder-1.3b-base-bnb-4bit-smashed, 0.8B, Text Generation, 6, https://huggingface.co/PrunaAI/deepseek-ai-deepseek-coder-1.3b-base-bnb-4bit-smashed
+PrunaAI/deepseek-ai-deepseek-coder-1.3b-instruct-bnb-4bit-smashed, 0.8B, Text Generation, 1, https://huggingface.co/PrunaAI/deepseek-ai-deepseek-coder-1.3b-instruct-bnb-4bit-smashed
+PrunaAI/deepseek-ai-deepseek-coder-1.3b-base-GPTQ-8bit-smashed, 0.4B, Text Generation, 3, https://huggingface.co/PrunaAI/deepseek-ai-deepseek-coder-1.3b-base-GPTQ-8bit-smashed
+PrunaAI/deepseek-ai-deepseek-coder-1.3b-instruct-GPTQ-8bit-smashed, 0.4B, Text Generation, 5, https://huggingface.co/PrunaAI/deepseek-ai-deepseek-coder-1.3b-instruct-GPTQ-8bit-smashed
+RichardErkhov/deepseek-ai_-_deepseek-coder-1.3b-instruct-4bits, 0.8B, Text Generation, 1, https://huggingface.co/RichardErkhov/deepseek-ai_-_deepseek-coder-1.3b-instruct-4bits
+juewang/deepseek-coder-1.3b-instruct-trt-int4-g64-hf, 0.8B, Text Generation, 10, https://huggingface.co/juewang/deepseek-coder-1.3b-instruct-trt-int4-g64-hf
+juewang/deepseek-coder-1.3b-base-trt-int4-g64-hf, 0.8B, Text Generation, 7, https://huggingface.co/juewang/deepseek-coder-1.3b-base-trt-int4-g64-hf
+coderbojack/Qwen-Qwen1.5-0.5B-1717508256, 0.5B, Text Generation, 2, https://huggingface.co/coderbojack/Qwen-Qwen1.5-0.5B-1717508256
+coderbojack/Qwen-Qwen1.5-0.5B-1717516995, 0.5B, Text Generation, 2, https://huggingface.co/coderbojack/Qwen-Qwen1.5-0.5B-1717516995
+coderbojack/Qwen-Qwen1.5-0.5B-1717548496, 0.5B, Text Generation, 2, https://huggingface.co/coderbojack/Qwen-Qwen1.5-0.5B-1717548496
+coderbojack/Qwen-Qwen1.5-0.5B-1717572057, 0.5B, Text Generation, 2, https://huggingface.co/coderbojack/Qwen-Qwen1.5-0.5B-1717572057
+Aravindan/awesome-gpt-2-coder, 0.1B, Text Generation, -, https://huggingface.co/Aravindan/awesome-gpt-2-coder
+stardust-coder/myBit-Llama2-jp-127M-8, 0.1B, Text Generation, -, https://huggingface.co/stardust-coder/myBit-Llama2-jp-127M-8
+K00B404/Qwen-python-coder-0.5b, 0.5B, Text Generation, -, https://huggingface.co/K00B404/Qwen-python-coder-0.5b
+PrunaAI/Replete-AI-Replete-Coder-Qwen2-1.5b-bnb-4bit-smashed, 0.9B, Text Generation, 1, https://huggingface.co/PrunaAI/Replete-AI-Replete-Coder-Qwen2-1.5b-bnb-4bit-smashed
+PrunaAI/Replete-AI-Replete-Coder-Qwen2-1.5b-AWQ-4bit-smashed, 0.6B, Text Generation, 2, https://huggingface.co/PrunaAI/Replete-AI-Replete-Coder-Qwen2-1.5b-AWQ-4bit-smashed
+stardust-coder/myBit-Llama2-jp-127M-4, 0.1B, Text Generation, -, https://huggingface.co/stardust-coder/myBit-Llama2-jp-127M-4
+hcy5561/python-coder-text-gen-gpt2-base, 0.1B, Text Generation, -, https://huggingface.co/hcy5561/python-coder-text-gen-gpt2-base
+mlx-community/Qwen2.5-Coder-1.5B-Instruct-8bit, 0.4B, Text Generation, 17, https://huggingface.co/mlx-community/Qwen2.5-Coder-1.5B-Instruct-8bit
+mlx-community/Qwen2.5-Coder-1.5B-Instruct-4bit, 0.2B, Text Generation, 1, https://huggingface.co/mlx-community/Qwen2.5-Coder-1.5B-Instruct-4bit
+Qwen/Qwen2.5-Coder-32B-Instruct, 33B, Text Generation, 1940, https://huggingface.co/Qwen/Qwen2.5-Coder-32B-Instruct
+Qwen/Qwen2.5-Coder-14B, 15B, Text Generation, 48, https://huggingface.co/Qwen/Qwen2.5-Coder-14B
+CISCai/Qwen2.5-Coder-32B-Instruct-SOTA-GGUF, 33B, Text Generation, 4, https://huggingface.co/CISCai/Qwen2.5-Coder-32B-Instruct-SOTA-GGUF
+inclusionAI/Ling-Coder-lite, 17B, Text Generation, 49, https://huggingface.co/inclusionAI/Ling-Coder-lite
+DavidAU/Qwen3-Esper3-Reasoning-CODER-Instruct-12B-Brainstorm20x, 12B, Text Generation, 1, https://huggingface.co/DavidAU/Qwen3-Esper3-Reasoning-CODER-Instruct-12B-Brainstorm20x
+nightmedia/Qwen3-Esper3-Reasoning-CODER-Instruct-12B-Brainstorm20x-q6-mlx, 12B, Text Generation, 1, https://huggingface.co/nightmedia/Qwen3-Esper3-Reasoning-CODER-Instruct-12B-Brainstorm20x-q6-mlx
+DavidAU/Mistral-Magistral-Devstral-Instruct-FUSED-CODER-Reasoning-36B, 36B, Text Generation, 2, https://huggingface.co/DavidAU/Mistral-Magistral-Devstral-Instruct-FUSED-CODER-Reasoning-36B
+mlx-community/Qwen3-Coder-30B-A3B-Instruct-8bit, 31B, Text Generation, 2, https://huggingface.co/mlx-community/Qwen3-Coder-30B-A3B-Instruct-8bit
+huihui-ai/Huihui-Qwen3-Coder-30B-A3B-Instruct-abliterated, 31B, Text Generation, 18, https://huggingface.co/huihui-ai/Huihui-Qwen3-Coder-30B-A3B-Instruct-abliterated
+DavidAU/Openai_gpt-oss-20b-CODER-NEO-CODE-DI-MATRIX-GGUF, 21B, Text Generation, 7, https://huggingface.co/DavidAU/Openai_gpt-oss-20b-CODER-NEO-CODE-DI-MATRIX-GGUF
+mlx-community/Qwen3-Coder-30B-A3B-Instruct-4bit-dwq-v2, 31B, Text Generation, 7, https://huggingface.co/mlx-community/Qwen3-Coder-30B-A3B-Instruct-4bit-dwq-v2
+DavidAU/Qwen3-42B-A3B-2507-Thinking-Abliterated-uncensored-TOTAL-RECALL-v2-Medium-MASTER-CODER, 42B, Text Generation, 14, https://huggingface.co/DavidAU/Qwen3-42B-A3B-2507-Thinking-Abliterated-uncensored-TOTAL-RECALL-v2-Medium-MASTER-CODER
+nightmedia/Qwen3-42B-A3B-2507-Thinking-Abliterated-uncensored-TOTAL-RECALL-v2-Medium-MASTER-CODER-bf16-mlx, 42B, Text Generation, 1, https://huggingface.co/nightmedia/Qwen3-42B-A3B-2507-Thinking-Abliterated-uncensored-TOTAL-RECALL-v2-Medium-MASTER-CODER-bf16-mlx
+richardr1126/spider-skeleton-wizard-coder-merged, 16B, Text Generation, 13, https://huggingface.co/richardr1126/spider-skeleton-wizard-coder-merged
+patched-codes/patched-coder-34b, 34B, Text Generation, 9, https://huggingface.co/patched-codes/patched-coder-34b
+TheBloke/openbuddy-coder-34b-v11-bf16-GGUF, 34B, Text Generation, 2, https://huggingface.co/TheBloke/openbuddy-coder-34b-v11-bf16-GGUF
+aiplanet/panda-coder-13B, 13B, Text Generation, 13, https://huggingface.co/aiplanet/panda-coder-13B
+deepseek-ai/deepseek-coder-33b-base, 33B, Text Generation, 72, https://huggingface.co/deepseek-ai/deepseek-coder-33b-base
+Trelis/deepseek-coder-33b-instruct-function-calling-v2, 33B, Text Generation, 2, https://huggingface.co/Trelis/deepseek-coder-33b-instruct-function-calling-v2
+Trelis/deepseek-coder-33b-instruct-function-calling-v3, 33B, Text Generation, 3, https://huggingface.co/Trelis/deepseek-coder-33b-instruct-function-calling-v3
+senseable/33x-coder, 33B, Text Generation, 2, https://huggingface.co/senseable/33x-coder
+invalid-coder/Sakura-SOLAR-Instruct-CarbonVillain-en-10.7B-v2-slerp, 11B, Text Generation, -, https://huggingface.co/invalid-coder/Sakura-SOLAR-Instruct-CarbonVillain-en-10.7B-v2-slerp
+invalid-coder/SOLAR-10.7B-Instruct-SOLARC-M-10.7B-slerp, 11B, Text Generation, -, https://huggingface.co/invalid-coder/SOLAR-10.7B-Instruct-SOLARC-M-10.7B-slerp
+rombodawg/Everyone-Coder-4x7b-Base, 24B, Text Generation, 42, https://huggingface.co/rombodawg/Everyone-Coder-4x7b-Base
+epinnock/deepseek-coder-33B-evol-feedback-4bit, 17B, Text Generation, -, https://huggingface.co/epinnock/deepseek-coder-33B-evol-feedback-4bit
+epinnock/deepseek-coder-33B-evol-feedback-v3, 33B, Text Generation, 1, https://huggingface.co/epinnock/deepseek-coder-33B-evol-feedback-v3
+rombodawg/Everyone-Coder-33b-Base, 33B, Text Generation, 20, https://huggingface.co/rombodawg/Everyone-Coder-33b-Base
+epinnock/deepseek-coder-33-evol-feedback-v1-r512, 17B, Text Generation, -, https://huggingface.co/epinnock/deepseek-coder-33-evol-feedback-v1-r512
+dahwinsingularity/dahyun-coder, 17B, Text Generation, -, https://huggingface.co/dahwinsingularity/dahyun-coder
+cloudyu/60B-MoE-Coder-v2, 32B, Text Generation, 1, https://huggingface.co/cloudyu/60B-MoE-Coder-v2
+rombodawg/Everyone-Coder-33b-v2-Base, 33B, Text Generation, 5, https://huggingface.co/rombodawg/Everyone-Coder-33b-v2-Base
+cloudyu/60B_MoE_Coder_v3, 61B, Text Generation, 3, https://huggingface.co/cloudyu/60B_MoE_Coder_v3
+dranger003/deepseek-coder-33b-instruct-iMat.GGUF, 33B, Text Generation, 7, https://huggingface.co/dranger003/deepseek-coder-33b-instruct-iMat.GGUF
+altomek/CodeRosa-70B-AB1, 69B, Text Generation, 1, https://huggingface.co/altomek/CodeRosa-70B-AB1
+FelixChao/Gemma-10.2B-Coder, 10B, Text Generation, -, https://huggingface.co/FelixChao/Gemma-10.2B-Coder
+TroyDoesAI/Mermaid-Coder-MoE-Expert1, 11B, Text Generation, -, https://huggingface.co/TroyDoesAI/Mermaid-Coder-MoE-Expert1
+RichardErkhov/deepseek-ai_-_deepseek-coder-33b-base-4bits, 17B, Text Generation, -, https://huggingface.co/RichardErkhov/deepseek-ai_-_deepseek-coder-33b-base-4bits
+RichardErkhov/deepseek-ai_-_deepseek-coder-33b-base-8bits, 33B, Text Generation, -, https://huggingface.co/RichardErkhov/deepseek-ai_-_deepseek-coder-33b-base-8bits
+RichardErkhov/deepseek-ai_-_deepseek-coder-33b-instruct-4bits, 17B, Text Generation, -, https://huggingface.co/RichardErkhov/deepseek-ai_-_deepseek-coder-33b-instruct-4bits
+bartowski/Llama-3-11.5B-Instruct-Coder-v2-GGUF, 12B, Text Generation, 7, https://huggingface.co/bartowski/Llama-3-11.5B-Instruct-Coder-v2-GGUF
+deepseek-ai/DeepSeek-Coder-V2-Lite-Base, 16B, Text Generation, 91, https://huggingface.co/deepseek-ai/DeepSeek-Coder-V2-Lite-Base
+bartowski/DeepSeek-Coder-V2-Lite-Instruct-GGUF, 16B, Text Generation, 119, https://huggingface.co/bartowski/DeepSeek-Coder-V2-Lite-Instruct-GGUF
+bartowski/DeepSeek-Coder-V2-Lite-Base-GGUF, 16B, Text Generation, 6, https://huggingface.co/bartowski/DeepSeek-Coder-V2-Lite-Base-GGUF
+legraphista/DeepSeek-Coder-V2-Lite-Base-IMat-GGUF, 16B, Text Generation, 1, https://huggingface.co/legraphista/DeepSeek-Coder-V2-Lite-Base-IMat-GGUF
+QuantFactory/DeepSeek-Coder-V2-Lite-Instruct-GGUF, 16B, Text Generation, 1, https://huggingface.co/QuantFactory/DeepSeek-Coder-V2-Lite-Instruct-GGUF
+QuantFactory/DeepSeek-Coder-V2-Lite-Base-GGUF, 16B, Text Generation, 1, https://huggingface.co/QuantFactory/DeepSeek-Coder-V2-Lite-Base-GGUF
+BirdL/DeepSeek-Coder-V2-Lite-Instruct-FlashAttnPatch, 16B, Text Generation, -, https://huggingface.co/BirdL/DeepSeek-Coder-V2-Lite-Instruct-FlashAttnPatch
+Qwen/Qwen3-Coder-480B-A35B-Instruct, 480B, Text Generation, 1220, https://huggingface.co/Qwen/Qwen3-Coder-480B-A35B-Instruct
+deepseek-ai/DeepSeek-Coder-V2-Base, 236B, Text Generation, 78, https://huggingface.co/deepseek-ai/DeepSeek-Coder-V2-Base
+legraphista/DeepSeek-Coder-V2-Instruct-IMat-GGUF, 236B, Text Generation, 5, https://huggingface.co/legraphista/DeepSeek-Coder-V2-Instruct-IMat-GGUF
+bartowski/DeepSeek-Coder-V2-Instruct-GGUF, 236B, Text Generation, 35, https://huggingface.co/bartowski/DeepSeek-Coder-V2-Instruct-GGUF
+XelotX/DeepSeek-Coder-V2-Instruct-Original, 236B, Text Generation, 1, https://huggingface.co/XelotX/DeepSeek-Coder-V2-Instruct-Original
+RedHatAI/DeepSeek-Coder-V2-Base-FP8, 236B, Text Generation, 6, https://huggingface.co/RedHatAI/DeepSeek-Coder-V2-Base-FP8
+RedHatAI/DeepSeek-Coder-V2-Instruct-FP8, 236B, Text Generation, 7, https://huggingface.co/RedHatAI/DeepSeek-Coder-V2-Instruct-FP8
+migtissera/DeepSeek-Coder-V2-Base, 236B, Text Generation, 1, https://huggingface.co/migtissera/DeepSeek-Coder-V2-Base
+legraphista/DeepSeek-Coder-V2-Instruct-0724-IMat-GGUF, 236B, Text Generation, 1, https://huggingface.co/legraphista/DeepSeek-Coder-V2-Instruct-0724-IMat-GGUF
+lmstudio-community/DeepSeek-Coder-V2-Instruct-0724-GGUF, 236B, Text Generation, 3, https://huggingface.co/lmstudio-community/DeepSeek-Coder-V2-Instruct-0724-GGUF
+bartowski/DeepSeek-Coder-V2-Instruct-0724-GGUF, 236B, Text Generation, 2, https://huggingface.co/bartowski/DeepSeek-Coder-V2-Instruct-0724-GGUF
+RedHatAI/DeepSeek-Coder-V2-Instruct-0724-FP8, 236B, Text Generation, 8, https://huggingface.co/RedHatAI/DeepSeek-Coder-V2-Instruct-0724-FP8
+huihui-ai/DeepSeek-V3-0324-Pruned-Coder-411B, 426B, Text Generation, 13, https://huggingface.co/huihui-ai/DeepSeek-V3-0324-Pruned-Coder-411B
+DevQuasar/huihui-ai.DeepSeek-V3-0324-Pruned-Coder-411B-GGUF, 426B, Text Generation, 2, https://huggingface.co/DevQuasar/huihui-ai.DeepSeek-V3-0324-Pruned-Coder-411B-GGUF
+mlx-community/Qwen3-Coder-480B-A35B-Instruct-4bit, 480B, Text Generation, 18, https://huggingface.co/mlx-community/Qwen3-Coder-480B-A35B-Instruct-4bit
+Qwen/Qwen3-Coder-480B-A35B-Instruct-FP8, 480B, Text Generation, 126, https://huggingface.co/Qwen/Qwen3-Coder-480B-A35B-Instruct-FP8
+lmstudio-community/Qwen3-Coder-480B-A35B-Instruct-MLX-4bit, 480B, Text Generation, 3, https://huggingface.co/lmstudio-community/Qwen3-Coder-480B-A35B-Instruct-MLX-4bit
+lmstudio-community/Qwen3-Coder-480B-A35B-Instruct-MLX-8bit, 480B, Text Generation, 3, https://huggingface.co/lmstudio-community/Qwen3-Coder-480B-A35B-Instruct-MLX-8bit
+lmstudio-community/Qwen3-Coder-480B-A35B-Instruct-MLX-6bit, 480B, Text Generation, 5, https://huggingface.co/lmstudio-community/Qwen3-Coder-480B-A35B-Instruct-MLX-6bit
+unsloth/Qwen3-Coder-480B-A35B-Instruct, 480B, Text Generation, 3, https://huggingface.co/unsloth/Qwen3-Coder-480B-A35B-Instruct
+unsloth/Qwen3-Coder-480B-A35B-Instruct-FP8, 480B, Text Generation, 6, https://huggingface.co/unsloth/Qwen3-Coder-480B-A35B-Instruct-FP8
+unsloth/Qwen3-Coder-480B-A35B-Instruct-GGUF, 480B, Text Generation, 156, https://huggingface.co/unsloth/Qwen3-Coder-480B-A35B-Instruct-GGUF
+unsloth/Qwen3-Coder-480B-A35B-Instruct-1M, 480B, Text Generation, 2, https://huggingface.co/unsloth/Qwen3-Coder-480B-A35B-Instruct-1M
+unsloth/Qwen3-Coder-480B-A35B-Instruct-1M-GGUF, 480B, Text Generation, 40, https://huggingface.co/unsloth/Qwen3-Coder-480B-A35B-Instruct-1M-GGUF
+bartowski/Qwen_Qwen3-Coder-480B-A35B-Instruct-GGUF, 480B, Text Generation, 3, https://huggingface.co/bartowski/Qwen_Qwen3-Coder-480B-A35B-Instruct-GGUF
+lmstudio-community/Qwen3-Coder-480B-A35B-Instruct-GGUF, 480B, Text Generation, 2, https://huggingface.co/lmstudio-community/Qwen3-Coder-480B-A35B-Instruct-GGUF
+DevQuasar/Qwen.Qwen3-Coder-480B-A35B-Instruct-GGUF, 480B, Text Generation, 1, https://huggingface.co/DevQuasar/Qwen.Qwen3-Coder-480B-A35B-Instruct-GGUF
+ubergarm/Qwen3-Coder-480B-A35B-Instruct-GGUF, 480B, Text Generation, 13, https://huggingface.co/ubergarm/Qwen3-Coder-480B-A35B-Instruct-GGUF
+neuphonic/neutts-air, 0.7B, Text-to-Speech, 257, https://huggingface.co/neuphonic/neutts-air
+nineninesix/kani-tts-370m, 0.4B, Text-to-Speech, 66, https://huggingface.co/nineninesix/kani-tts-370m
+microsoft/VibeVoice-1.5B, 3B, Text-to-Speech, 1880, https://huggingface.co/microsoft/VibeVoice-1.5B
+neuphonic/neutts-air-q4-gguf, 0.7B, Text-to-Speech, 22, https://huggingface.co/neuphonic/neutts-air-q4-gguf
+neuphonic/neutts-air-q8-gguf, 0.7B, Text-to-Speech, 16, https://huggingface.co/neuphonic/neutts-air-q8-gguf
+nineninesix/kani-tts-450m-0.1-pt, 0.5B, Text-to-Speech, 49, https://huggingface.co/nineninesix/kani-tts-450m-0.1-pt
+Ken-Z/latin_SpeechT5, 0.1B, Text-to-Speech, 3, https://huggingface.co/Ken-Z/latin_SpeechT5
+facebook/mms-tts-uig-script_arabic, 0.0B, Text-to-Speech, 12, https://huggingface.co/facebook/mms-tts-uig-script_arabic
+OuteAI/OuteTTS-0.2-500M, 0.5B, Text-to-Speech, 301, https://huggingface.co/OuteAI/OuteTTS-0.2-500M
+keanteng/sesame-csm-elise, 2B, Text-to-Speech, 8, https://huggingface.co/keanteng/sesame-csm-elise
+calcuis/chatterbox-gguf, 0.3B, Text-to-Speech, 48, https://huggingface.co/calcuis/chatterbox-gguf
+nineninesix/kani-tts-450m-0.2-pt, 0.5B, Text-to-Speech, 2, https://huggingface.co/nineninesix/kani-tts-450m-0.2-pt
+Yue-Wang/BatonTTS-1.7B, 2B, Text-to-Speech, 2, https://huggingface.co/Yue-Wang/BatonTTS-1.7B
+facebook/mms-tts-eng, 0.0B, Text-to-Speech, 154, https://huggingface.co/facebook/mms-tts-eng
+facebook/mms-tts-fas, 0.0B, Text-to-Speech, 7, https://huggingface.co/facebook/mms-tts-fas
+facebook/mms-tts-kaz, 0.0B, Text-to-Speech, 3, https://huggingface.co/facebook/mms-tts-kaz
+facebook/mms-tts-kbp, 0.0B, Text-to-Speech, 2, https://huggingface.co/facebook/mms-tts-kbp
+facebook/mms-tts-pol, 0.0B, Text-to-Speech, 6, https://huggingface.co/facebook/mms-tts-pol
+parler-tts/parler-tts-mini-expresso, 0.6B, Text-to-Speech, 112, https://huggingface.co/parler-tts/parler-tts-mini-expresso
+PawanKrd/tts-ckb, 0.0B, Text-to-Speech, 2, https://huggingface.co/PawanKrd/tts-ckb
+parler-tts/parler-tts-mini-v1.1, 0.9B, Text-to-Speech, 22, https://huggingface.co/parler-tts/parler-tts-mini-v1.1
+ai4bharat/indic-parler-tts, 0.9B, Text-to-Speech, 159, https://huggingface.co/ai4bharat/indic-parler-tts
+OuteAI/OuteTTS-0.2-500M-GGUF, 0.5B, Text-to-Speech, 81, https://huggingface.co/OuteAI/OuteTTS-0.2-500M-GGUF
+ai4bharat/vits_rasa_13, 0.0B, Text-to-Speech, 6, https://huggingface.co/ai4bharat/vits_rasa_13
+CONCREE/Adia_TTS, 0.9B, Text-to-Speech, 11, https://huggingface.co/CONCREE/Adia_TTS
+HKUSTAudio/Llasa-1B-Multilingual, 2B, Text-to-Speech, 39, https://huggingface.co/HKUSTAudio/Llasa-1B-Multilingual
+ai4bharat/IndicF5, 0.4B, Text-to-Speech, 79, https://huggingface.co/ai4bharat/IndicF5
+OuteAI/Llama-OuteTTS-1.0-1B, 1B, Text-to-Speech, 217, https://huggingface.co/OuteAI/Llama-OuteTTS-1.0-1B
+OuteAI/Llama-OuteTTS-1.0-1B-GGUF, 1B, Text-to-Speech, 82, https://huggingface.co/OuteAI/Llama-OuteTTS-1.0-1B-GGUF
+timBoML/2cent-tts-25m, 0.0B, Text-to-Speech, 3, https://huggingface.co/timBoML/2cent-tts-25m
+vibevoice/VibeVoice-7B, 9B, Text-to-Speech, 97, https://huggingface.co/vibevoice/VibeVoice-7B
+aoi-ot/VibeVoice-Large, 9B, Text-to-Speech, 178, https://huggingface.co/aoi-ot/VibeVoice-Large
+nagayama0706/sales_talk_model, 7B, Text-to-Speech, 7, https://huggingface.co/nagayama0706/sales_talk_model
+HKUSTAudio/Llasa-8B, 9B, Text-to-Speech, 95, https://huggingface.co/HKUSTAudio/Llasa-8B
+everardo43/Llasa-8B-Q8_0-GGUF, 9B, Text-to-Speech, 1, https://huggingface.co/everardo43/Llasa-8B-Q8_0-GGUF
+moonshotai/Kimi-Audio-7B-Instruct, 10B, Text-to-Speech, 357, https://huggingface.co/moonshotai/Kimi-Audio-7B-Instruct
+moonshotai/Kimi-Audio-7B, 10B, Text-to-Speech, 65, https://huggingface.co/moonshotai/Kimi-Audio-7B
+rsxdalv/Kimi-Audio-7B-Instruct, 10B, Text-to-Speech, 2, https://huggingface.co/rsxdalv/Kimi-Audio-7B-Instruct
+MoYoYoTech/VoiceDialogue, 8B, Text-to-Speech, 2, https://huggingface.co/MoYoYoTech/VoiceDialogue
+zh794390558/Kimi-Audio-7B, 10B, Text-to-Speech, 1, https://huggingface.co/zh794390558/Kimi-Audio-7B
+sheliak/VibeVoice-Large_Mirror, 9B, Text-to-Speech, 5, https://huggingface.co/sheliak/VibeVoice-Large_Mirror
+aoi-ot/VibeVoice-7B, 9B, Text-to-Speech, 22, https://huggingface.co/aoi-ot/VibeVoice-7B
+theo77186/VibeVoice-Large, 9B, Text-to-Speech, 9, https://huggingface.co/theo77186/VibeVoice-Large
+Sergey004/VibeVoice-Large-pt, 9B, Text-to-Speech, 6, https://huggingface.co/Sergey004/VibeVoice-Large-pt
+Sergey004/VibeVoice-Large, 9B, Text-to-Speech, 4, https://huggingface.co/Sergey004/VibeVoice-Large
+rsxdalv/VibeVoice-Large, 9B, Text-to-Speech, 9, https://huggingface.co/rsxdalv/VibeVoice-Large
+divyendra/VibeVoice-Large, 9B, Text-to-Speech, 5, https://huggingface.co/divyendra/VibeVoice-Large
+amentaga-nttd/VibeVoice-7B, 9B, Text-to-Speech, 20, https://huggingface.co/amentaga-nttd/VibeVoice-7B
+venkatraj/VibeVoice, 9B, Text-to-Speech, 6, https://huggingface.co/venkatraj/VibeVoice
+ehartford/VibeVoice-7B, 9B, Text-to-Speech, 35, https://huggingface.co/ehartford/VibeVoice-7B
+ehartford/VibeVoice-Large, 9B, Text-to-Speech, 39, https://huggingface.co/ehartford/VibeVoice-Large
+QuantStack/Wan2.2-T2V-A14B-GGUF, 14B, Text-to-Video, 127, https://huggingface.co/QuantStack/Wan2.2-T2V-A14B-GGUF
+QuantStack/Wan2.2-S2V-14B-GGUF, 16B, Text-to-Video, 59, https://huggingface.co/QuantStack/Wan2.2-S2V-14B-GGUF
+QuantStack/Wan2.2_T2V_A14B_4steps_25-09-28_Dyno_High_lightx2v-GGUF, 14B, Text-to-Video, 2, https://huggingface.co/QuantStack/Wan2.2_T2V_A14B_4steps_25-09-28_Dyno_High_lightx2v-GGUF
+QuantStack/Wan2.1_14B_VACE-GGUF, 17B, Text-to-Video, 224, https://huggingface.co/QuantStack/Wan2.1_14B_VACE-GGUF
+QuantStack/Wan2.2-Fun-A14B-InP-GGUF, 14B, Text-to-Video, 8, https://huggingface.co/QuantStack/Wan2.2-Fun-A14B-InP-GGUF
+QuantStack/Wan2.2-Fun-A14B-Control-GGUF, 14B, Text-to-Video, 30, https://huggingface.co/QuantStack/Wan2.2-Fun-A14B-Control-GGUF
+QuantStack/Wan2.2-Fun-A14B-Control-Camera-GGUF, 15B, Text-to-Video, 8, https://huggingface.co/QuantStack/Wan2.2-Fun-A14B-Control-Camera-GGUF
+city96/HunyuanVideo-gguf, 13B, Text-to-Video, 180, https://huggingface.co/city96/HunyuanVideo-gguf
+calcuis/hunyuan-gguf, 13B, Text-to-Video, 66, https://huggingface.co/calcuis/hunyuan-gguf
+calcuis/hyvid, 13B, Text-to-Video, 24, https://huggingface.co/calcuis/hyvid
+city96/FastHunyuan-gguf, 13B, Text-to-Video, 48, https://huggingface.co/city96/FastHunyuan-gguf
+city96/Wan2.1-T2V-14B-gguf, 14B, Text-to-Video, 178, https://huggingface.co/city96/Wan2.1-T2V-14B-gguf
+city96/Wan2.1-Fun-14B-InP-gguf, 16B, Text-to-Video, 20, https://huggingface.co/city96/Wan2.1-Fun-14B-InP-gguf
+city96/Wan2.1-Fun-14B-Control-gguf, 16B, Text-to-Video, 17, https://huggingface.co/city96/Wan2.1-Fun-14B-Control-gguf
+Skywork/SkyReels-V2-DF-14B-540P, 14B, Text-to-Video, 17, https://huggingface.co/Skywork/SkyReels-V2-DF-14B-540P
+Skywork/SkyReels-V2-T2V-14B-540P, 14B, Text-to-Video, 12, https://huggingface.co/Skywork/SkyReels-V2-T2V-14B-540P
+wsbagnsv1/SkyReels-V2-T2V-14B-540P-GGUF, 14B, Text-to-Video, 3, https://huggingface.co/wsbagnsv1/SkyReels-V2-T2V-14B-540P-GGUF
+Njbx/Wan2.1-T2V-14B-CausVid-GGUF, 14B, Text-to-Video, 2, https://huggingface.co/Njbx/Wan2.1-T2V-14B-CausVid-GGUF
+wsbagnsv1/MoviiGen1.1-GGUF, 14B, Text-to-Video, 26, https://huggingface.co/wsbagnsv1/MoviiGen1.1-GGUF
+QuantStack/MoviiGen1.1-VACE-GGUF, 17B, Text-to-Video, 13, https://huggingface.co/QuantStack/MoviiGen1.1-VACE-GGUF
+QuantStack/Wan2.1_T2V_14B_FusionX-GGUF, 14B, Text-to-Video, 27, https://huggingface.co/QuantStack/Wan2.1_T2V_14B_FusionX-GGUF
+bullerwins/Wan2.2-T2V-A14B-GGUF, 14B, Text-to-Video, 52, https://huggingface.co/bullerwins/Wan2.2-T2V-A14B-GGUF
+ussoewwin/Wan2.2_T2V_A14B_VACE-test_fp16_GGUF, 17B, Text-to-Video, 378, https://huggingface.co/ussoewwin/Wan2.2_T2V_A14B_VACE-test_fp16_GGUF
+ussoewwin/FakeVace2.2_fp16_GGUF, 17B, Text-to-Video, 85, https://huggingface.co/ussoewwin/FakeVace2.2_fp16_GGUF
+chaitnya26/Wan2.2-Fun-A14B-Control-GGUF-fork, 14B, Text-to-Video, 301, https://huggingface.co/chaitnya26/Wan2.2-Fun-A14B-Control-GGUF-fork

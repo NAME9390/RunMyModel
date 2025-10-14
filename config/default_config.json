@@ -1,0 +1,35 @@
+{
+  "model": {
+    "path": "models/tinyllama.gguf",
+    "context_length": 2048,
+    "threads": 4,
+    "temperature": 0.8,
+    "top_p": 0.95,
+    "max_tokens": 512
+  },
+  "embedding": {
+    "model": "all-MiniLM-L6-v2",
+    "chunk_size": 512,
+    "chunk_overlap": 50
+  },
+  "rag": {
+    "enabled": true,
+    "top_k": 5,
+    "min_score": 0.5
+  },
+  "knowledge_service": {
+    "host": "127.0.0.1",
+    "port": 8001
+  },
+  "storage": {
+    "memory_dir": "memory",
+    "sessions_dir": "sessions",
+    "models_dir": "models"
+  },
+  "ui": {
+    "theme": "dark",
+    "font_size": 12,
+    "show_scores": true
+  }
+}
+
