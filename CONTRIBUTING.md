@@ -1,342 +1,488 @@
 # Contributing to RunMyModel Desktop
 
-Thank you for your interest in contributing to RunMyModel Desktop! This document provides guidelines for contributing to the project.
+Thank you for your interest in contributing to RunMyModel Desktop! This document provides guidelines and information for contributors.
 
-## 🤝 How to Contribute
+## 📋 **Table of Contents**
+
+- [Code of Conduct](#code-of-conduct)
+- [Getting Started](#getting-started)
+- [Development Setup](#development-setup)
+- [Contributing Process](#contributing-process)
+- [Coding Standards](#coding-standards)
+- [Testing](#testing)
+- [Documentation](#documentation)
+- [Pull Request Process](#pull-request-process)
+- [Issue Reporting](#issue-reporting)
+- [Release Process](#release-process)
+
+## 🤝 **Code of Conduct**
+
+### Our Pledge
+
+We are committed to providing a welcoming and inspiring community for all. Please read and follow our code of conduct:
+
+- **Be respectful** - Treat everyone with respect and kindness
+- **Be inclusive** - Welcome newcomers and diverse perspectives
+- **Be constructive** - Provide helpful feedback and suggestions
+- **Be patient** - Remember that everyone is learning and growing
 
 ### Reporting Issues
 
-Before creating an issue, please:
+If you experience or witness unacceptable behavior, please report it by:
+- Creating a private issue with the "conduct" label
+- Contacting the maintainers directly
+- Using GitHub's reporting tools
 
-1. **Search existing issues** to avoid duplicates
-2. **Check the documentation** for common solutions
-3. **Provide detailed information** about your problem
-
-When creating an issue, include:
-
-- **Description**: Clear description of the problem
-- **Steps to Reproduce**: Detailed steps to reproduce the issue
-- **Expected Behavior**: What you expected to happen
-- **Actual Behavior**: What actually happened
-- **Environment**: OS, Qt6 version, GCC version, CUDA version (if applicable)
-- **Screenshots**: If applicable, include screenshots
-
-### Suggesting Features
-
-Feature requests are welcome! Please include:
-
-- **Use Case**: Why this feature would be useful
-- **Proposed Solution**: How you think it should work
-- **Alternatives**: Other solutions you've considered
-- **Additional Context**: Any other relevant information
-
-## 🛠️ Development Setup
+## 🚀 **Getting Started**
 
 ### Prerequisites
 
-- **Linux**: Arch, Ubuntu, Fedora, or similar
-- **Qt6**: Version 6.0 or higher (Widgets, Core, Gui, Concurrent)
-- **GCC/G++**: Version 9 or higher with C++17 support
-- **CMake**: Version 3.10 or higher (for llama.cpp)
-- **Git**: For version control
-- **CUDA** (optional): For GPU acceleration
+Before contributing, ensure you have:
 
-### Getting Started
+- **Git** - Version control
+- **C++17 Compiler** - GCC 7+ or Clang 5+
+- **Qt6** - Widgets, Core, Gui, Concurrent modules
+- **CMake** - Version 3.10 or higher
+- **Python 3.6+** - For build scripts (optional)
 
-1. **Fork the repository** on GitHub
+### Development Environment
 
-2. **Clone your fork**:
-   ```bash
-   git clone https://github.com/your-username/RunMyModel.git
-   cd RunMyModel
-   ```
-
-3. **Download the model**:
-   ```bash
-   mkdir -p models
-   wget https://huggingface.co/TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF/resolve/main/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf -O models/tinyllama.gguf
-   ```
-
-4. **Build and run**:
-   ```bash
-   ./run.sh
-   ```
-
-### Development Workflow
-
-1. **Create a feature branch**:
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
-
-2. **Make your changes**:
-   - Write clean, readable code
-   - Follow the existing code style
-   - Add comments for complex logic
-   - Update documentation if needed
-
-3. **Test your changes**:
-   ```bash
-   # Rebuild and test
-   rm -rf build/
-   ./run.sh
-   
-   # Test all features:
-   # - Chat functionality
-   # - Settings controls
-   # - Model loading
-   # - Save/clear chat
-   ```
-
-4. **Commit your changes**:
-   ```bash
-   git add .
-   git commit -m "feat: brief description of your changes"
-   ```
-
-5. **Push to your fork**:
-   ```bash
-   git push origin feature/your-feature-name
-   ```
-
-6. **Create a Pull Request** on GitHub
-
-## 📝 Code Style Guidelines
-
-### C++
-
-- Use **C++17 standards**
-- Follow **Qt6 coding conventions**
-- Use **RAII** for resource management
-- **Document public methods** with comments
-- Use **const correctness** throughout
-
-```cpp
-/**
- * Generates a response from the LLM
- * @param prompt The user's input prompt
- * @param maxTokens Maximum number of tokens to generate
- */
-void LlamaEngine::generateResponse(const QString &prompt, int maxTokens) {
-    // Implementation
-}
+#### Linux (Ubuntu/Debian)
+```bash
+sudo apt update
+sudo apt install build-essential cmake git
+sudo apt install qt6-base-dev qt6-tools-dev qt6-tools-dev-tools
+sudo apt install python3 python3-pip
 ```
 
-### Qt Guidelines
-
-- Use **signals and slots** for communication
-- Implement **QtConcurrent** for threading
-- Use **Qt containers** (QString, QVector, etc.)
-- Follow **Qt naming conventions** (camelCase for methods, m_ prefix for members)
-
-```cpp
-// Good: Qt style
-class MainWindow : public QMainWindow {
-    Q_OBJECT
-    
-private:
-    LlamaEngine *m_llamaEngine;
-    QTextEdit *m_chatDisplay;
-    
-private slots:
-    void onSendButtonClicked();
-    void onTokenReceived(const QString &token);
-};
+#### Linux (Arch/CachyOS)
+```bash
+sudo pacman -S base-devel cmake git
+sudo pacman -S qt6-base qt6-tools qt6-tools-dev
+sudo pacman -S python python-pip
 ```
 
-### Memory Management
+#### Windows
+- Install Visual Studio 2019+ with C++ support
+- Install Qt6 from [qt.io](https://www.qt.io/download)
+- Install Git for Windows
+- Install CMake
 
-- Use **smart pointers** when appropriate
-- Follow **Qt parent-child ownership** model
-- **Clean up resources** in destructors
-- **Avoid memory leaks** with proper RAII
+## 🛠️ **Development Setup**
 
-```cpp
-// Good: Qt parent manages child widgets
-m_chatDisplay = new QTextEdit(this); // 'this' is parent
-
-// Good: Smart pointers for non-Qt objects
-std::unique_ptr<ModelConfig> config = std::make_unique<ModelConfig>();
-```
-
-## 🧪 Testing
-
-### Manual Testing
-
-Before submitting a PR, please test:
-
-1. **Core Functionality**:
-   - Chat message sending
-   - Response generation
-   - Stop generation button
-   - Settings changes (temperature, max tokens)
-
-2. **UI/UX**:
-   - All tabs work correctly
-   - Buttons respond properly
-   - Scrolling works in chat
-   - Progress indicators update
-
-3. **Edge Cases**:
-   - Empty messages
-   - Very long messages
-   - Rapid message sending
-   - Model loading/unloading
-
-4. **Performance**:
-   - No memory leaks (use valgrind if needed)
-   - Responsive UI during generation
-   - Proper cleanup on exit
-
-### Build Testing
-
-Run the following before submitting:
+### 1. Fork and Clone
 
 ```bash
-# Clean build
-rm -rf build/
+# Fork the repository on GitHub, then:
+git clone https://github.com/YOUR_USERNAME/RunMyModel.git
+cd RunMyModel
+git remote add upstream https://github.com/NAME9390/RunMyModel.git
+```
+
+### 2. Build the Project
+
+```bash
+# Quick setup and build
+./run.sh
+
+# Or manual build
+cd app
 ./build.sh
+```
 
-# Check for compilation warnings
-# (Fix any warnings that appear)
+### 3. Verify Installation
 
-# Test on your platform
+```bash
+# Test the application
+./build/RunMyModelDesktop
+
+# Run tests (if available)
+make test
+```
+
+## 🔄 **Contributing Process**
+
+### 1. Choose an Issue
+
+- Browse [open issues](https://github.com/NAME9390/RunMyModel/issues)
+- Look for issues labeled `good first issue` or `help wanted`
+- Comment on the issue to express interest
+- Wait for maintainer approval before starting
+
+### 2. Create a Branch
+
+```bash
+# Create a feature branch
+git checkout -b feature/your-feature-name
+
+# Or bugfix branch
+git checkout -b bugfix/issue-number-description
+```
+
+### 3. Make Changes
+
+- Write clean, well-documented code
+- Follow our coding standards
+- Add tests for new functionality
+- Update documentation as needed
+
+### 4. Test Your Changes
+
+```bash
+# Build and test
+./run.sh
+
+# Run specific tests
+make test
+
+# Manual testing
 ./build/RunMyModelDesktop
 ```
 
-## 📋 Pull Request Guidelines
+### 5. Commit Changes
+
+```bash
+# Stage changes
+git add .
+
+# Commit with descriptive message
+git commit -m "feat: add new feature description
+
+- Detailed description of changes
+- Any breaking changes
+- Related issues: #123"
+```
+
+### 6. Push and Create PR
+
+```bash
+# Push to your fork
+git push origin feature/your-feature-name
+
+# Create pull request on GitHub
+```
+
+## 📝 **Coding Standards**
+
+### C++ Style Guide
+
+We follow modern C++ best practices:
+
+#### Naming Conventions
+```cpp
+// Classes: PascalCase
+class MainWindow { };
+
+// Functions: camelCase
+void loadModel() { }
+
+// Variables: camelCase
+QString modelPath;
+
+// Constants: UPPER_CASE
+const int MAX_TOKENS = 2048;
+
+// Private members: m_ prefix
+QString m_modelPath;
+```
+
+#### Code Formatting
+```cpp
+// Use 4 spaces for indentation
+if (condition) {
+    doSomething();
+}
+
+// Braces on same line for functions
+void function() {
+    // code
+}
+
+// Braces on new line for classes
+class MyClass
+{
+public:
+    MyClass();
+};
+```
+
+#### Documentation
+```cpp
+/**
+ * @brief Loads a GGUF model from the specified path
+ * @param path The file path to the GGUF model
+ * @return true if successful, false otherwise
+ * @throws ModelLoadException if model is invalid
+ */
+bool loadModel(const QString& path);
+```
+
+### Qt-Specific Guidelines
+
+#### Signal/Slot Connections
+```cpp
+// Use new-style connections
+connect(button, &QPushButton::clicked, this, &MainWindow::onButtonClicked);
+
+// Avoid old-style connections
+connect(button, SIGNAL(clicked()), this, SLOT(onButtonClicked()));
+```
+
+#### Memory Management
+```cpp
+// Use smart pointers when possible
+std::unique_ptr<QWidget> widget = std::make_unique<QWidget>();
+
+// Use Qt's parent-child system
+QWidget* child = new QWidget(parent);
+```
+
+#### Threading
+```cpp
+// Use QtConcurrent for background tasks
+QFuture<void> future = QtConcurrent::run([this]() {
+    // Background work
+});
+```
+
+## 🧪 **Testing**
+
+### Unit Tests
+
+```cpp
+// Example test structure
+#include <QtTest>
+
+class TestLlamaEngine : public QObject
+{
+    Q_OBJECT
+
+private slots:
+    void testModelLoading();
+    void testInference();
+    void testErrorHandling();
+};
+```
+
+### Integration Tests
+
+```cpp
+// Test complete workflows
+void testChatWorkflow() {
+    // Setup
+    MainWindow window;
+    
+    // Test
+    window.loadModel("test_model.gguf");
+    window.sendMessage("Hello");
+    
+    // Verify
+    QVERIFY(window.hasResponse());
+}
+```
+
+### Manual Testing Checklist
+
+- [ ] Application starts without errors
+- [ ] Model loads successfully
+- [ ] Chat functionality works
+- [ ] Settings are saved/loaded
+- [ ] GPU acceleration works (if available)
+- [ ] Error handling works correctly
+- [ ] UI is responsive
+- [ ] Memory usage is reasonable
+
+## 📚 **Documentation**
+
+### Code Documentation
+
+- Use Doxygen-style comments for public APIs
+- Document all parameters and return values
+- Include usage examples for complex functions
+- Update documentation when changing APIs
+
+### User Documentation
+
+- Update README.md for user-facing changes
+- Add troubleshooting information
+- Include screenshots for UI changes
+- Update installation instructions
+
+### Developer Documentation
+
+- Document build requirements
+- Explain architecture decisions
+- Provide debugging guides
+- Include performance considerations
+
+## 🔀 **Pull Request Process**
 
 ### Before Submitting
 
-- [ ] **Code follows** the project's style guidelines
-- [ ] **Code compiles** without errors or warnings
-- [ ] **Tested manually** on your platform
-- [ ] **Documentation is updated** if necessary
-- [ ] **Commits are clear** and well-described
-- [ ] **PR description** explains the changes clearly
+- [ ] Code follows style guidelines
+- [ ] Tests pass locally
+- [ ] Documentation is updated
+- [ ] No merge conflicts
+- [ ] Commit messages are clear
 
-### PR Description Template
+### PR Template
 
 ```markdown
 ## Description
-Brief description of the changes
+Brief description of changes
 
 ## Type of Change
-- [ ] Bug fix (non-breaking change which fixes an issue)
-- [ ] New feature (non-breaking change which adds functionality)
-- [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
+- [ ] Bug fix
+- [ ] New feature
+- [ ] Breaking change
 - [ ] Documentation update
 
 ## Testing
-- [ ] Tested on Linux (specify distro)
-- [ ] Tested with CPU inference
-- [ ] Tested with GPU inference (if applicable)
+- [ ] Unit tests pass
+- [ ] Integration tests pass
 - [ ] Manual testing completed
 
-## Screenshots (if applicable)
-Add screenshots to help explain your changes
-
-## Additional Notes
-Any additional information about the changes
+## Checklist
+- [ ] Code follows style guidelines
+- [ ] Self-review completed
+- [ ] Documentation updated
+- [ ] No new warnings introduced
 ```
 
-## 🏷️ Commit Message Format
+### Review Process
 
-Use clear, descriptive commit messages:
+1. **Automated Checks** - CI/CD runs tests and checks
+2. **Code Review** - Maintainers review code quality
+3. **Testing** - Manual testing by maintainers
+4. **Approval** - At least one maintainer approval required
+5. **Merge** - Maintainer merges the PR
 
+## 🐛 **Issue Reporting**
+
+### Bug Reports
+
+Use the bug report template:
+
+```markdown
+## Bug Description
+Clear description of the bug
+
+## Steps to Reproduce
+1. Go to '...'
+2. Click on '....'
+3. See error
+
+## Expected Behavior
+What should happen
+
+## Actual Behavior
+What actually happens
+
+## Environment
+- OS: [e.g., Ubuntu 20.04]
+- Qt Version: [e.g., 6.5.0]
+- Compiler: [e.g., GCC 9.4.0]
+
+## Additional Context
+Screenshots, logs, etc.
 ```
-type: brief description
 
-Detailed description of the changes (if needed)
+### Feature Requests
 
-- Bullet point for specific changes
-- Another bullet point if needed
+Use the feature request template:
+
+```markdown
+## Feature Description
+Clear description of the feature
+
+## Use Case
+Why is this feature needed?
+
+## Proposed Solution
+How should it work?
+
+## Alternatives Considered
+Other approaches considered
+
+## Additional Context
+Screenshots, mockups, etc.
 ```
 
-### Commit Types
+## 🚀 **Release Process**
 
-- **feat**: New feature
-- **fix**: Bug fix
-- **docs**: Documentation changes
-- **style**: Code style changes (formatting, etc.)
-- **refactor**: Code refactoring
-- **perf**: Performance improvements
-- **test**: Adding or updating tests
-- **chore**: Maintenance tasks
-- **build**: Build system changes
+### Version Numbering
 
-### Examples
+We follow [Semantic Versioning](https://semver.org/):
+- **MAJOR**: Breaking changes
+- **MINOR**: New features (backward compatible)
+- **PATCH**: Bug fixes (backward compatible)
 
-```
-feat: add temperature slider to settings tab
+### Release Types
 
-fix: resolve memory leak in llama engine cleanup
+- **ALPHA**: Early development, unstable
+- **BETA**: Feature complete, testing phase
+- **PRE-RELEASE**: Release candidate
+- **STABLE**: Production release
 
-docs: update README with GPU setup instructions
+### Release Checklist
 
-perf: optimize token streaming with better buffering
-```
+- [ ] All tests pass
+- [ ] Documentation updated
+- [ ] CHANGELOG.md updated
+- [ ] Version numbers updated
+- [ ] Release notes written
+- [ ] Packages built and tested
+- [ ] GitHub release created
 
-## 🐛 Bug Reports
+## 🏷️ **Labels and Milestones**
 
-When reporting bugs, please include:
+### Issue Labels
 
-1. **Clear title** describing the issue
-2. **Detailed description** of the problem
-3. **Steps to reproduce** the issue
-4. **Expected vs actual behavior**
-5. **Environment details**:
-   - OS and version
-   - Qt6 version (`qmake --version`)
-   - GCC version (`g++ --version`)
-   - CUDA version (if applicable)
-   - Model file being used
-6. **Error messages or logs** if applicable
-7. **Screenshots** showing the problem
+- `bug` - Something isn't working
+- `enhancement` - New feature or request
+- `documentation` - Documentation improvements
+- `good first issue` - Good for newcomers
+- `help wanted` - Extra attention needed
+- `priority: high` - High priority
+- `priority: low` - Low priority
 
-## 💡 Feature Requests
+### Pull Request Labels
 
-When suggesting features:
+- `ready for review` - Ready for maintainer review
+- `needs testing` - Requires additional testing
+- `breaking change` - Contains breaking changes
+- `documentation` - Documentation changes only
 
-1. **Clear title** describing the feature
-2. **Detailed description** of the proposed feature
-3. **Use case** explaining why it would be useful
-4. **Proposed implementation** (if you have ideas)
-5. **Additional context** or examples
-6. **Mockups** or sketches (if UI-related)
+## 📞 **Getting Help**
 
-## 📞 Getting Help
+### Communication Channels
 
-If you need help:
+- **GitHub Issues** - Bug reports and feature requests
+- **GitHub Discussions** - General questions and ideas
+- **Pull Requests** - Code review discussions
+- **Email** - Contact maintainers directly
 
-1. **Check the README** first for usage instructions
-2. **Search existing issues** for similar problems
-3. **Ask in discussions** for general questions
-4. **Create an issue** for bugs or feature requests
+### Resources
 
-## 🎯 Areas for Contribution
+- [Qt Documentation](https://doc.qt.io/)
+- [llama.cpp Documentation](https://github.com/ggerganov/llama.cpp)
+- [C++ Best Practices](https://github.com/lefticus/cppbestpractices)
+- [Git Workflow](https://www.atlassian.com/git/tutorials/comparing-workflows)
 
-We especially welcome contributions in:
-
-- **Session persistence**: Save/load chat history
-- **Model management**: Download and switch between models
-- **UI/UX improvements**: Better themes, responsive design
-- **Performance**: Optimization of inference or UI
-- **Documentation**: Improve guides and examples
-- **Testing**: Add automated tests
-- **Platform support**: Windows builds, AppImage packaging
-- **RAG system**: Knowledge ingestion and retrieval
-
-## 📄 License
-
-By contributing to RunMyModel Desktop, you agree that your contributions will be licensed under the Mozilla Public License 2.0 (MPL-2.0).
-
-## 🙏 Recognition
+## 🙏 **Recognition**
 
 Contributors will be recognized in:
+- CONTRIBUTORS.md file
+- Release notes
+- Project documentation
+- GitHub contributors page
 
-- **README.md**: Listed as contributors
-- **Release notes**: Mentioned in relevant releases
-- **GitHub**: Shown in the contributors section
+## 📄 **License**
 
-Thank you for contributing to RunMyModel Desktop! 🚀
+By contributing to RunMyModel Desktop, you agree that your contributions will be licensed under the Mozilla Public License Version 2.0.
+
+---
+
+**Thank you for contributing to RunMyModel Desktop!** 🚀
+
+Your contributions help make local AI accessible to everyone.
