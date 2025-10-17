@@ -3,7 +3,7 @@
 <div align="center">
 
 ![RunMyModel Desktop](https://img.shields.io/badge/RunMyModel-Desktop-blue?style=for-the-badge&logo=qt)
-![Version](https://img.shields.io/badge/version-0.5.0--PRE--RELEASE-green?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-0.6.0--PRE--RELEASE-green?style=for-the-badge)
 ![License](https://img.shields.io/badge/license-MPL--2.0-orange?style=for-the-badge)
 ![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20Windows-lightgrey?style=for-the-badge)
 
@@ -64,11 +64,11 @@ git clone https://github.com/NAME9390/RunMyModel.git && cd RunMyModel && ./run.s
 
 ## 📦 **Download**
 
-### Latest Release: v0.5.0-PRE-RELEASE
+### Latest Release: v0.6.0-PRE-RELEASE
 
 | Platform | Download | Size | Type |
 |----------|----------|------|------|
-| **Linux** | [AppImage](executables/RunMyModelDesktop-v0.5.0-PRE-RELEASE-x86_64.AppImage) | 18MB | Portable |
+| **Linux** | [AppImage](executables/RunMyModelDesktop-v0.6.0-PRE-RELEASE-x86_64.AppImage) | 18MB | Portable |
 | **Windows** | [EXE](executables/RunMyModelDesktop-v0.5.0-PRE-RELEASE-x64.exe) | 100KB | Demo |
 | **Windows** | [MSI](executables/RunMyModelDesktop-v0.5.0-PRE-RELEASE-x64.msi) | 4KB | Installer |
 
