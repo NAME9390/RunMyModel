@@ -1,0 +1,10 @@
+# Issue Templates Configuration
+
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 GitHub Discussions
+    url: https://github.com/NAME9390/RunMyModel/discussions
+    about: Ask questions, share ideas, and discuss the project
+  - name: 📧 Contact Maintainers
+    url: https://github.com/NAME9390/RunMyModel/issues/new?template=contact.md
+    about: Contact the maintainers directly for sensitive issues

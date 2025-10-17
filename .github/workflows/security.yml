@@ -1,0 +1,50 @@
+name: 🔒 Security Audit
+
+on:
+  schedule:
+    - cron: '0 2 * * 1'  # Weekly on Monday at 2 AM
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 🔍 Run Trivy Vulnerability Scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+        
+    - name: 📤 Upload Trivy scan results
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: 'trivy-results.sarif'
+        
+    - name: 🛡️ Run CodeQL Analysis
+      uses: github/codeql-action/analyze@v2
+      with:
+        languages: cpp
+        
+    - name: 🔐 Check for secrets
+      run: |
+        # Check for accidentally committed secrets
+        if grep -r "password\|secret\|key\|token" --include="*.cpp" --include="*.h" --include="*.md" app/src-cpp/; then
+          echo "⚠️ Potential secrets found in code"
+          exit 1
+        fi
+        
+    - name: 📊 Security Report
+      run: |
+        echo "## Security Audit Report" >> $GITHUB_STEP_SUMMARY
+        echo "✅ Trivy vulnerability scan completed" >> $GITHUB_STEP_SUMMARY
+        echo "✅ CodeQL analysis completed" >> $GITHUB_STEP_SUMMARY
+        echo "✅ Secret scanning completed" >> $GITHUB_STEP_SUMMARY
