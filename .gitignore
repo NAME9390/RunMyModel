@@ -9,8 +9,12 @@ build/
 *.dll
 *.dylib
 
-# Executables directory
-executables/
+# Executable files (but not the executables directory structure)
+executables/*.exe
+executables/*.msi
+executables/*.AppImage
+executables/*.deb
+executables/*.rpm
 
 # Qt build files
 *.pro.user
