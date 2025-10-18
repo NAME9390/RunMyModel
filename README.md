@@ -7,7 +7,7 @@
 ![License](https://img.shields.io/badge/license-MPL--2.0-orange?style=for-the-badge)
 ![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20Windows-lightgrey?style=for-the-badge)
 
-**Professional-grade local LLM desktop application built with C++ and Qt6**
+**Professional-grade local LLM desktop application**
 
 [![GitHub stars](https://img.shields.io/github/stars/NAME9390/RunMyModel?style=social)](https://github.com/NAME9390/RunMyModel/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/NAME9390/RunMyModel?style=social)](https://github.com/NAME9390/RunMyModel/network/members)
@@ -18,228 +18,179 @@
 
 ---
 
-## 🚀 **Quick Start**
-
-```bash
-# Clone and run in one command
-git clone https://github.com/NAME9390/RunMyModel.git && cd RunMyModel && ./run.sh
-```
-
-**That's it!** RunMyModel Desktop will automatically:
-- ✅ Check dependencies
-- ✅ Build llama.cpp
-- ✅ Compile the application
-- ✅ Launch the GUI
-
----
-
 ## ✨ **Features**
 
-<table>
-<tr>
-<td width="50%">
+- 🤖 **Local LLM Inference** - Run models locally without cloud dependencies
+- 🎨 **Modern Qt6 GUI** - Clean, responsive interface with tabbed layout
+- ⚡ **Real-time Streaming** - Token-by-token response generation with speed metrics
+- 🚀 **GPU Acceleration** - Automatic CUDA support for NVIDIA GPUs
+- 💾 **Session Management** - Save and load chat conversations
+- ⚙️ **Configurable Settings** - Adjust temperature, max tokens, and more
+- 🎯 **Model Management** - Load/unload models, view model information
+- 📊 **Performance Metrics** - Real-time tokens/second and total token count
+- 🔒 **100% Offline** - Complete privacy and security
+- 🔌 **Plugin System** - Extensible architecture for custom functionality
+- 📚 **RAG System** - Knowledge ingestion and retrieval capabilities
 
-### 🤖 **Core AI Features**
-- **Local LLM Inference** - Run TinyLlama-1.1B locally
-- **Real-time Streaming** - Token-by-token response generation
-- **GPU Acceleration** - Automatic CUDA support
-- **Model Management** - Load/unload models dynamically
-- **Performance Metrics** - Real-time tokens/second tracking
+## 🚀 **Quick Start**
 
-</td>
-<td width="50%">
+### Prerequisites
 
-### 🎨 **User Experience**
-- **Modern Qt6 GUI** - Clean, responsive interface
-- **Dark Theme** - Professional appearance
-- **Chat History** - Save and manage conversations
-- **Configurable Settings** - Temperature, tokens, and more
-- **100% Offline** - No cloud dependencies
-
-</td>
-</tr>
-</table>
-
----
-
-## 📦 **Download**
-
-### Latest Release: v0.6.0-PRE-RELEASE
-
-| Platform | Download | Size | Type |
-|----------|----------|------|------|
-| **Linux** | [AppImage](executables/RunMyModelDesktop-v0.6.0-PRE-RELEASE-x86_64.AppImage) | 436KB | Portable |
+- **Linux** (tested on Arch/CachyOS, Ubuntu, Fedora)
+- **Qt6** (Widgets, Core, Gui, Concurrent)
+- **GCC/G++** with C++17 support
+- **CMake** (for llama.cpp)
+- **CUDA** (optional, for GPU acceleration)
 
 ### Installation
 
-**Linux (AppImage):**
-```bash
-chmod +x RunMyModelDesktop-v0.6.0-PRE-RELEASE-x86_64.AppImage
-./RunMyModelDesktop-v0.6.0-PRE-RELEASE-x86_64.AppImage
-```
-
----
-
-## 🏗️ **Architecture**
-
-```mermaid
-graph TB
-    A[Qt6 GUI Application] --> B[MainWindow]
-    B --> C[Chat Tab]
-    B --> D[Settings Tab]
-    B --> E[Models Tab]
-    B --> F[LlamaEngine]
-    F --> G[llama.cpp Library]
-    G --> H[CPU Inference]
-    G --> I[GPU Inference CUDA]
-    
-    style A fill:#e1f5fe
-    style F fill:#f3e5f5
-    style G fill:#e8f5e8
-    style I fill:#fff3e0
-```
-
-**Technology Stack:**
-- **Frontend**: Qt6 (C++) with modern UI components
-- **Backend**: llama.cpp for LLM inference
-- **Threading**: QtConcurrent for non-blocking operations
-- **GPU**: CUDA acceleration with automatic fallback
-- **Models**: GGUF format support
-
----
-
-## 📋 **Requirements**
-
-### System Requirements
-- **OS**: Linux (Ubuntu/Debian, Arch, Fedora) or Windows
-- **RAM**: 4GB minimum, 8GB recommended
-- **Storage**: 2GB free space
-- **CPU**: x86_64 architecture
-
-### Development Requirements
-- **Qt6**: Widgets, Core, Gui, Concurrent
-- **Compiler**: GCC/G++ with C++17 support
-- **CMake**: 3.10 or higher
-- **CUDA**: Toolkit (optional, for GPU acceleration)
-
----
-
-## 🛠️ **Development**
-
-### Building from Source
-
+#### Universal Linux
 ```bash
 # Clone repository
 git clone https://github.com/NAME9390/RunMyModel.git
 cd RunMyModel
 
-# Download model (first time only)
+# Download TinyLlama model (first time only)
 mkdir -p models
 wget https://huggingface.co/TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF/resolve/main/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf -O models/tinyllama.gguf
 
-# Build and run
+# Run with ONE command
 ./run.sh
 ```
 
-### Development Scripts
+#### Arch Linux / CachyOS (Optimized)
+```bash
+# Clone repository
+git clone https://github.com/NAME9390/RunMyModel.git
+cd RunMyModel
 
-| Script | Purpose | Platform |
-|--------|---------|----------|
-| `run.sh` | Universal build and run | Linux |
-| `run_arch.sh` | Arch-optimized build | Arch Linux |
-| `app/build.sh` | Manual build only | Linux |
+# Download TinyLlama model (first time only)
+mkdir -p models
+wget https://huggingface.co/TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF/resolve/main/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf -O models/tinyllama.gguf
 
-### Project Structure
+# Run with Arch-optimized script
+./run_arch.sh
+```
+
+**What's the difference?**
+- `run.sh` - Universal script, works on any Linux distro
+- `run_arch.sh` - Arch-optimized with automatic CUDA installation and native optimizations
+
+## 📖 **Usage**
+
+### Chat Interface
+- **Type and Send**: Type your message and press Enter or click "Send"
+- **Real-time Streaming**: Watch AI responses appear token-by-token
+- **Stop Generation**: Click "Stop" to interrupt long responses
+- **Save Chat**: Save conversation to a text file
+- **Clear Chat**: Clear all messages and start fresh
+
+### Settings
+- **Temperature**: Control response randomness (0.0 = deterministic, 1.0 = creative)
+- **Max Tokens**: Limit response length (1-2048 tokens)
+- **GPU Acceleration**: Enable/disable CUDA acceleration
+
+### Model Management
+- **Current Model**: View loaded model information
+- **Model Path**: See where the model is located
+- **Load/Unload**: Manage model loading (auto-loads on startup)
+
+## 🏗️ **Architecture**
+
+```
+┌─────────────────────────────────────────┐
+│         C++ Qt6 GUI Application         │
+│  ┌──────────┐ ┌──────────┐ ┌─────────┐ │
+│  │   Chat   │ │ Settings │ │ Models  │ │
+│  └──────────┘ └──────────┘ └─────────┘ │
+│                                         │
+│              MainWindow                 │
+│                   │                     │
+│              ┌────▼────┐                │
+│              │ Llama   │                │
+│              │ Engine  │                │
+│              └────┬────┘                │
+└───────────────────┼─────────────────────┘
+                    │
+               ┌────▼────┐
+               │llama.cpp│
+               │ Library │
+               └────┬────┘
+                    │
+        ┌───────────┴───────────┐
+        │                       │
+   ┌────▼────┐             ┌────▼────┐
+   │   CPU   │             │   GPU   │
+   │Inference│             │ (CUDA)  │
+   └─────────┘             └─────────┘
+```
+
+**Pure C++ Stack:**
+- **GUI**: Qt6 (Widgets, Core, Gui, Concurrent)
+- **LLM Engine**: llama.cpp with GGUF model support
+- **Threading**: QtConcurrent for non-blocking inference
+- **State**: In-memory chat history and settings
+
+## 📁 **Project Structure**
 
 ```
 RunMyModel/
-├── 📁 app/                    # Application source code
-│   ├── 📁 src-cpp/           # C++ source files
-│   ├── 📄 build.sh           # Build script
-│   └── 📄 run.sh             # Run script
-├── 📁 executables/           # Distribution packages
-│   └── 📦 *.AppImage         # Linux portable
-├── 📁 models/               # LLM model files
-├── 📁 lib/                  # External libraries
-└── 📄 run.sh               # Main launcher
+├── run.sh                   # ⭐ Universal launcher
+├── run_arch.sh              # ⭐ Arch-optimized launcher
+├── build.sh                 # Build helper script
+├── app/                     # Main application directory
+│   ├── src-cpp/             # C++ source code
+│   │   ├── include/         # Header files
+│   │   └── src/             # Source files
+│   ├── models/              # LLM models (.gguf)
+│   ├── sessions/             # Chat session storage
+│   ├── memory/               # RAG system storage
+│   └── config/               # Configuration files
+├── docs/                     # Documentation
+│   ├── user/                 # User documentation
+│   ├── developer/            # Developer documentation
+│   ├── features/             # Feature documentation
+│   ├── quick-start/          # Quick start guides
+│   └── support/              # Support documentation
+├── executables/              # Pre-built executables
+└── lib/
+    └── llama.cpp/            # llama.cpp library (auto-cloned)
 ```
 
----
+## 🛠️ **Development**
 
-## 📊 **Performance**
-
-### Benchmarks (TinyLlama-1.1B)
-
-| Hardware | Tokens/sec | Memory Usage |
-|----------|------------|--------------|
-| **CPU Only** | ~15-25 | 2GB |
-| **GPU (CUDA)** | ~50-80 | 1.5GB |
-| **GPU (RTX 3080)** | ~100+ | 1.2GB |
-
-### Model Specifications
-
-- **Model**: TinyLlama-1.1B-Chat-v1.0
-- **Format**: GGUF (Q4_K_M quantization)
-- **Size**: ~638MB
-- **Context**: 2048 tokens
-- **Languages**: English, multilingual support
-
----
-
-## 🤝 **Contributing**
-
-We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
-
-### Quick Contribution Guide
-
-1. **Fork** the repository
-2. **Create** a feature branch
-3. **Make** your changes
-4. **Test** thoroughly
-5. **Submit** a pull request
-
-### Development Setup
-
+### Manual Build
 ```bash
-# Fork and clone
-git clone https://github.com/YOUR_USERNAME/RunMyModel.git
-cd RunMyModel
+# Build C++ application
+./build.sh
 
-# Install dependencies (Ubuntu/Debian)
-sudo apt install qt6-base-dev qt6-tools-dev cmake build-essential
-
-# Install dependencies (Arch Linux)
-sudo pacman -S qt6-base qt6-tools cmake base-devel
-
-# Build and test
-./run.sh
+# Run manually
+export LD_LIBRARY_PATH="$(pwd)/lib/llama.cpp/build/bin:$LD_LIBRARY_PATH"
+./build/RunMyModelDesktop
 ```
 
----
+### GPU Acceleration Setup
+```bash
+# On Arch, run:
+./run_arch.sh  # Auto-installs CUDA and rebuilds llama.cpp
 
-## 📄 **License**
+# On other distros, install CUDA manually and rebuild llama.cpp with:
+cd lib/llama.cpp
+rm -rf build && mkdir build && cd build
+cmake .. -DGGML_CUDA=ON
+make -j$(nproc)
+```
 
-This project is licensed under the **Mozilla Public License 2.0** - see the [LICENSE](LICENSE) file for details.
+## 🐛 **Troubleshooting**
 
----
-
-## 🆘 **Support**
-
-### Getting Help
-
-- 📖 **Documentation**: Check this README and [docs/](docs/)
-- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/NAME9390/RunMyModel/issues)
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/NAME9390/RunMyModel/discussions)
-- 📧 **Contact**: [Create an issue](https://github.com/NAME9390/RunMyModel/issues/new)
-
-### Common Issues
-
-<details>
-<summary><strong>Build fails</strong></summary>
-
+**Build fails:**
 ```bash
 # Check Qt6 installation
-pkg-config --modversion Qt6Core
+pkg-config --modversion Qt6Core  # Universal
+pacman -Qi qt6-base              # Arch
+
+# Check GCC
+g++ --version
 
 # Rebuild llama.cpp
 cd lib/llama.cpp
@@ -248,65 +199,52 @@ mkdir build && cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
 make -j$(nproc)
 ```
-</details>
 
-<details>
-<summary><strong>Model not found</strong></summary>
-
+**Model not found:**
 ```bash
-# Download TinyLlama model
+# Download TinyLlama (~638MB)
 mkdir -p models
 wget https://huggingface.co/TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF/resolve/main/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf -O models/tinyllama.gguf
 ```
-</details>
 
-<details>
-<summary><strong>GPU not working</strong></summary>
+## 📊 **Technical Details**
 
-```bash
-# Install CUDA (Ubuntu)
-sudo apt install nvidia-cuda-toolkit
+- **LLM Engine:** llama.cpp with GGUF models
+- **Model:** TinyLlama-1.1B-Chat-v1.0 (Q4_K_M quantization, ~638MB)
+- **GUI Framework:** Qt6 (C++)
+- **Threading:** QtConcurrent for non-blocking inference
+- **GPU Support:** CUDA (automatic offloading with 99 layers)
+- **Token Sampling:** llama.cpp sampler chain
+- **Default Settings:** Temperature 0.7, Max Tokens 512
 
-# Rebuild with CUDA support
-cd lib/llama.cpp
-rm -rf build && mkdir build && cd build
-cmake .. -DGGML_CUDA=ON
-make -j$(nproc)
-```
-</details>
+## 🔮 **Roadmap**
 
----
+- [ ] Session persistence (save/load conversations)
+- [ ] Multiple model support (switch between models)
+- [ ] System prompt customization
+- [ ] Dark/light theme toggle
+- [ ] Chat history browser
+- [ ] Model download manager (in-app)
+- [ ] Windows support
+- [ ] AppImage packaging
+- [ ] RAG system (knowledge ingestion)
+- [ ] API key integration (OpenAI, Anthropic)
 
-## 🌟 **Roadmap**
+## 📄 **License**
 
-### v0.6.0 (Current)
-- ✅ **RAG System** - Knowledge ingestion and retrieval
-- ✅ **Multiple Models** - Support for different LLM models
-- ✅ **Session Management** - Save/load conversation sessions
-- ✅ **Plugin System** - Extensible architecture
-- ✅ **Model Training** - Fine-tuning capabilities
+MPL 2.0 - See LICENSE file
 
-### v1.0 (Planned)
-- [ ] **RAG System** - Knowledge ingestion and retrieval
-- [ ] **Multiple Models** - Support for different LLM models
-- [ ] **Session Management** - Save/load conversation sessions
-- [ ] **Plugin System** - Extensible architecture
-- [ ] **Model Training** - Fine-tuning capabilities
+## 🤝 **Contributing**
 
-### v1.1 (Future)
-- [ ] **API Integration** - OpenAI, Anthropic compatibility
-- [ ] **Model Training** - Fine-tuning capabilities
-- [ ] **Cloud Sync** - Cross-device synchronization
-- [ ] **Mobile Support** - Android/iOS applications
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
----
+## 📚 **Documentation**
 
-## 🙏 **Acknowledgments**
-
-- **llama.cpp** - Excellent C++ LLM inference library
-- **Qt6** - Powerful cross-platform GUI framework
-- **TinyLlama** - Lightweight and efficient language model
-- **Hugging Face** - Model hosting and distribution
+- [User Guide](docs/user/installation.md) - Installation and usage
+- [Developer Guide](docs/developer/README.md) - Development setup
+- [Features](docs/features/README.md) - Feature documentation
+- [Quick Start](docs/quick-start/README.md) - Getting started
+- [Support](docs/support/README.md) - Troubleshooting and support
 
 ---
 

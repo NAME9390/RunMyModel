@@ -9,12 +9,8 @@ build/
 *.dll
 *.dylib
 
-# Executables directory - Only keep the 3 main executables
-executables/*
-!executables/RunMyModelDesktop-v0.6.0-PRE-RELEASE-x86_64.AppImage
-!executables/RunMyModelDesktop-v0.6.0-PRE-RELEASE-x64.msi
-!executables/RunMyModelDesktop-v0.6.0-PRE-RELEASE-x64.exe
-!executables/.gitignore
+# Executables directory
+executables/
 
 # Qt build files
 *.pro.user

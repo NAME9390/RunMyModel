@@ -1,331 +1,452 @@
-# Support & Troubleshooting
+# Support Documentation
 
-Get help with RunMyModel Desktop issues and find solutions to common problems.
+<div align="center">
 
-## 🐛 Common Issues
+![RunMyModel Desktop](https://img.shields.io/badge/RunMyModel-Desktop-blue?style=for-the-badge&logo=qt)
 
-### Build & Installation Issues
+**Support and troubleshooting guide for RunMyModel Desktop**
 
-<details>
-<summary><strong>Build fails with "Qt6 not found"</strong></summary>
+</div>
 
-**Problem**: CMake can't find Qt6 installation
+---
+
+## 🆘 **Getting Help**
+
+### Support Channels
+
+- **GitHub Issues**: [Report bugs or request features](https://github.com/NAME9390/RunMyModel/issues)
+- **GitHub Discussions**: [Community discussions and support](https://github.com/NAME9390/RunMyModel/discussions)
+- **Documentation**: [Complete documentation](docs/README.md)
+- **FAQ**: [Frequently asked questions](user/faq.md)
+
+### Before Asking for Help
+
+1. **Check Documentation**: Review the relevant documentation
+2. **Search Issues**: Look for similar issues on GitHub
+3. **Check Troubleshooting**: Review the troubleshooting section below
+4. **Gather Information**: Collect relevant system information
+
+## 🐛 **Troubleshooting**
+
+### Installation Issues
+
+#### Build Fails
+
+**Symptoms:**
+- Build script fails with errors
+- Compilation errors
+- Missing dependencies
 
 **Solutions:**
 ```bash
-# Ubuntu/Debian
-sudo apt install qt6-base-dev qt6-tools-dev
+# Check Qt6 installation
+pkg-config --modversion Qt6Core  # Universal
+pacman -Qi qt6-base              # Arch
+apt list --installed | grep qt6  # Ubuntu
 
-# Arch Linux
-sudo pacman -S qt6-base qt6-tools
+# Check GCC
+g++ --version
 
-# Set Qt6 path explicitly
-export CMAKE_PREFIX_PATH=/usr/lib/x86_64-linux-gnu/cmake/Qt6
-```
+# Check CMake
+cmake --version
 
-**Check installation:**
-```bash
-pkg-config --modversion Qt6Core
-```
-</details>
-
-<details>
-<summary><strong>llama.cpp build fails</strong></summary>
-
-**Problem**: Compilation errors in llama.cpp
-
-**Solutions:**
-```bash
-# Clean build directory
+# Rebuild llama.cpp
 cd lib/llama.cpp
 rm -rf build
 mkdir build && cd build
-
-# Rebuild with verbose output
-cmake .. -DCMAKE_BUILD_TYPE=Release -DGGML_CUDA=ON
-make -j$(nproc) VERBOSE=1
+cmake .. -DCMAKE_BUILD_TYPE=Release
+make -j$(nproc)
 ```
 
-**Common fixes:**
-- Update CMake: `sudo apt install cmake`
-- Install CUDA toolkit for GPU support
-- Use older GCC if compatibility issues
-</details>
+#### Missing Dependencies
 
-<details>
-<summary><strong>Permission denied on AppImage</strong></summary>
-
-**Problem**: Can't execute AppImage file
-
-**Solution:**
+**Ubuntu/Debian:**
 ```bash
-chmod +x RunMyModelDesktop-v0.6.0-PRE-RELEASE-x86_64.AppImage
-./RunMyModelDesktop-v0.6.0-PRE-RELEASE-x86_64.AppImage
+sudo apt update
+sudo apt install qt6-base-dev qt6-tools-dev cmake build-essential
 ```
-</details>
+
+**Arch Linux:**
+```bash
+sudo pacman -S qt6-base qt6-tools cmake gcc
+```
+
+**Fedora:**
+```bash
+sudo dnf install qt6-qtbase-devel qt6-qttools-devel cmake gcc-c++
+```
 
 ### Runtime Issues
 
-<details>
-<summary><strong>Model not found</strong></summary>
+#### Application Won't Start
 
-**Problem**: "Model file not found" error
+**Symptoms:**
+- Application crashes on startup
+- GUI doesn't appear
+- Error messages on launch
 
 **Solutions:**
 ```bash
-# Download TinyLlama model
+# Check if executable exists
+ls -la build/RunMyModelDesktop
+
+# Check library path
+export LD_LIBRARY_PATH="$(pwd)/lib/llama.cpp/build/bin:$LD_LIBRARY_PATH"
+
+# Run with debug output
+./build/RunMyModelDesktop --debug
+
+# Check logs
+cat build.log
+```
+
+#### Model Loading Issues
+
+**Symptoms:**
+- "Model not found" error
+- Model loading fails
+- Empty model information
+
+**Solutions:**
+```bash
+# Check model file exists
+ls -lh models/tinyllama.gguf
+
+# Download model if missing
 mkdir -p models
 wget https://huggingface.co/TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF/resolve/main/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf -O models/tinyllama.gguf
 
-# Check file exists
-ls -la models/
+# Verify model integrity
 file models/tinyllama.gguf
 ```
 
-**Verify model:**
-- File size should be ~638MB
-- Format should be GGUF
-- Check file permissions
-</details>
+#### GPU Issues
 
-<details>
-<summary><strong>Out of memory error</strong></summary>
-
-**Problem**: Application crashes with memory errors
+**Symptoms:**
+- GPU not detected
+- Slow inference despite GPU
+- CUDA errors
 
 **Solutions:**
 ```bash
-# Check available memory
-free -h
-
-# Use smaller model
-wget https://huggingface.co/TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF/resolve/main/tinyllama-1.1b-chat-v1.0.Q2_K.gguf -O models/tinyllama-small.gguf
-
-# Increase swap space
-sudo fallocate -l 4G /swapfile
-sudo chmod 600 /swapfile
-sudo mkswap /swapfile
-sudo swapon /swapfile
-```
-
-**Memory requirements:**
-- TinyLlama-1.1B: 2GB RAM minimum
-- Llama-2-7B: 8GB RAM minimum
-- GPU models: Additional VRAM needed
-</details>
-
-<details>
-<summary><strong>GPU not detected</strong></summary>
-
-**Problem**: CUDA/GPU acceleration not working
-
-**Solutions:**
-```bash
-# Check NVIDIA driver
+# Check NVIDIA GPU
 nvidia-smi
 
-# Install CUDA toolkit
+# Check CUDA installation
+nvcc --version
+
+# On Arch, run optimized script
+./run_arch.sh
+
+# On other distros, install CUDA manually
+# Ubuntu example:
 sudo apt install nvidia-cuda-toolkit
 
-# Rebuild with CUDA support
+# Rebuild llama.cpp with CUDA
 cd lib/llama.cpp
 rm -rf build && mkdir build && cd build
 cmake .. -DGGML_CUDA=ON
 make -j$(nproc)
-
-# Test CUDA
-./RunMyModelDesktop --test-cuda
 ```
 
-**Troubleshooting:**
-- Verify NVIDIA driver installation
-- Check CUDA version compatibility
-- Ensure GPU has sufficient VRAM
-</details>
+### Performance Issues
 
-<details>
-<summary><strong>Slow performance</strong></summary>
+#### Slow Inference
 
-**Problem**: Very slow token generation
+**Symptoms:**
+- Very slow response generation
+- Low tokens per second
+- High CPU usage
+
+**Solutions:**
+- **Enable GPU**: Use CUDA acceleration if available
+- **Reduce Max Tokens**: Lower the maximum token limit
+- **Use Quantized Models**: Use Q4_K_M or Q8_0 quantized models
+- **Close Other Applications**: Free up system resources
+- **Check System Resources**: Monitor CPU and memory usage
+
+#### High Memory Usage
+
+**Symptoms:**
+- High RAM usage
+- System slowdown
+- Out of memory errors
+
+**Solutions:**
+- **Use Smaller Models**: Switch to smaller models
+- **Reduce Context Size**: Lower the context window
+- **Enable Memory Optimization**: Use memory-efficient settings
+- **Monitor Memory**: Use system monitoring tools
+
+#### UI Responsiveness
+
+**Symptoms:**
+- UI freezes during inference
+- Unresponsive interface
+- Slow UI updates
+
+**Solutions:**
+- **Check Threading**: Ensure proper threading implementation
+- **Reduce UI Updates**: Limit UI update frequency
+- **Use QtConcurrent**: Proper background processing
+- **Monitor Performance**: Check for performance bottlenecks
+
+### Configuration Issues
+
+#### Settings Not Saving
+
+**Symptoms:**
+- Settings reset on restart
+- Configuration not applied
+- Invalid configuration errors
 
 **Solutions:**
 ```bash
-# Enable GPU acceleration
-./RunMyModelDesktop --gpu-only
+# Check config file permissions
+ls -la app/config/default_config.json
 
-# Use optimized build
-export CFLAGS="-O3 -march=native"
-export CXXFLAGS="-O3 -march=native"
+# Verify config file format
+cat app/config/default_config.json | jq .
 
-# Reduce context length
-# In settings: Max Tokens = 512
-
-# Use quantized model
-# Download Q4_K_M or Q2_K versions
+# Reset configuration
+rm app/config/default_config.json
+# Restart application to recreate default config
 ```
 
-**Performance tips:**
-- Close other applications
-- Use SSD storage for models
-- Enable hardware acceleration
-- Use appropriate model size
-</details>
+#### Plugin Issues
 
-### UI Issues
-
-<details>
-<summary><strong>Application won't start</strong></summary>
-
-**Problem**: GUI doesn't appear or crashes immediately
+**Symptoms:**
+- Plugins not loading
+- Plugin errors
+- Plugin conflicts
 
 **Solutions:**
 ```bash
-# Run from terminal for error messages
-./RunMyModelDesktop
+# Check plugin directory
+ls -la plugins/
 
-# Check Qt6 installation
-ldd ./RunMyModelDesktop | grep Qt
+# Check plugin permissions
+ls -la plugins/*.so
 
-# Install missing dependencies
-sudo apt install libqt6gui6 libqt6widgets6 libqt6core6
+# Disable problematic plugins
+# Edit config to disable specific plugins
+```
 
+## 📋 **Common Questions**
+
+### General Questions
+
+**Q: What models are supported?**
+A: RunMyModel Desktop supports GGUF format models, including TinyLlama, Llama-2, CodeLlama, and custom models.
+
+**Q: Can I use my own models?**
+A: Yes, you can use any GGUF format model by placing it in the models directory and updating the configuration.
+
+**Q: Is internet required?**
+A: No, RunMyModel Desktop runs completely offline. Only the initial model download requires internet.
+
+**Q: What operating systems are supported?**
+A: Currently Linux (Arch, Ubuntu, Fedora) with Windows support planned.
+
+### Technical Questions
+
+**Q: How much RAM do I need?**
+A: Minimum 4GB RAM, recommended 8GB+ for larger models.
+
+**Q: What GPU is required for acceleration?**
+A: NVIDIA GPU with CUDA support. AMD GPU support is planned.
+
+**Q: Can I run multiple models simultaneously?**
+A: Not currently, but this feature is planned for future releases.
+
+**Q: How do I update the application?**
+A: Pull the latest changes from GitHub and rebuild using `./run.sh`.
+
+### Usage Questions
+
+**Q: How do I save conversations?**
+A: Use the "Save Chat" button in the chat interface.
+
+**Q: Can I customize the interface?**
+A: Yes, through configuration files and plugins.
+
+**Q: How do I change the model?**
+A: Place the new model in the models directory and update the configuration.
+
+**Q: Can I use the application programmatically?**
+A: Yes, through the plugin system and API integration.
+
+## 🔧 **Advanced Troubleshooting**
+
+### Debug Mode
+
+Enable debug mode for detailed logging:
+
+```bash
 # Run with debug output
-QT_LOGGING_RULES="*=true" ./RunMyModelDesktop
-```
-</details>
+./build/RunMyModelDesktop --debug
 
-<details>
-<summary><strong>Dark theme not working</strong></summary>
-
-**Problem**: Interface appears in light theme
-
-**Solutions:**
-- Check system theme settings
-- Restart application
-- Clear configuration: `rm -rf ~/.config/RunMyModel/`
-- Force theme: `QT_STYLE_OVERRIDE=dark ./RunMyModelDesktop`
-</details>
-
-## 🐛 Bug Reports
-
-### Before Reporting
-
-1. **Check** this troubleshooting guide
-2. **Search** [existing issues](https://github.com/NAME9390/RunMyModel/issues)
-3. **Update** to latest version
-4. **Test** with default settings
-
-### How to Report
-
-**Use our bug report template:**
-
-1. **Go to**: [GitHub Issues](https://github.com/NAME9390/RunMyModel/issues/new?template=bug_report.md)
-2. **Fill out** the template completely
-3. **Include** system information
-4. **Attach** relevant logs
-
-**Required Information:**
-- Operating system and version
-- RunMyModel Desktop version
-- Steps to reproduce
-- Expected vs actual behavior
-- Error messages or logs
-- System specifications
-
-### Log Collection
-
-**Enable debug logging:**
-```bash
-export QT_LOGGING_RULES="*=true"
-./RunMyModelDesktop > debug.log 2>&1
+# Check debug logs
+tail -f logs/debug.log
 ```
 
-**System information:**
+### System Information
+
+Collect system information for support:
+
 ```bash
-# Collect system info
+# System information
 uname -a
-lscpu
+cat /etc/os-release
+
+# Qt6 version
+pkg-config --modversion Qt6Core
+
+# GCC version
+g++ --version
+
+# CUDA version (if applicable)
+nvcc --version
+
+# Memory information
 free -h
-nvidia-smi  # if NVIDIA GPU
+
+# GPU information (if applicable)
+nvidia-smi
 ```
 
-## 💬 Discussions
+### Log Analysis
 
-### Community Support
+Analyze logs for issues:
 
-**GitHub Discussions**: [Join the conversation](https://github.com/NAME9390/RunMyModel/discussions)
+```bash
+# Application logs
+cat logs/app.log
 
-**Discussion Categories:**
-- **General**: General questions and chat
-- **Q&A**: Technical questions and answers
-- **Ideas**: Feature requests and suggestions
-- **Show and Tell**: Share your projects
+# Build logs
+cat build.log
 
-### Getting Help
+# Error logs
+cat logs/error.log
 
-**Best practices:**
-1. **Search** existing discussions first
-2. **Be specific** about your problem
-3. **Provide** system information
-4. **Include** error messages
-5. **Be patient** - community is volunteer-based
+# Debug logs
+cat logs/debug.log
+```
 
-**Response times:**
-- **Bug reports**: 1-3 days
-- **Feature requests**: 1-2 weeks
-- **General questions**: 1-7 days
-- **Discussions**: Varies
+### Performance Profiling
 
-## 🗺️ Roadmap
+Profile application performance:
 
-### Current Version: v0.6.0-PRE-RELEASE
+```bash
+# CPU profiling
+top -p $(pgrep RunMyModelDesktop)
 
-**✅ Completed Features:**
-- RAG System - Knowledge ingestion and retrieval
-- Multiple Models - Support for different LLM models
-- Session Management - Save/load conversation sessions
-- Plugin System - Extensible architecture
-- Model Training - Fine-tuning capabilities
+# Memory profiling
+ps aux | grep RunMyModelDesktop
 
-### Upcoming Versions
+# GPU profiling (if applicable)
+nvidia-smi -l 1
+```
 
-**v0.7.0 (Next):**
-- [ ] **API Integration** - OpenAI, Anthropic compatibility
-- [ ] **Model Hub** - Built-in model browser
-- [ ] **Advanced RAG** - Vector database integration
-- [ ] **Plugin Marketplace** - Community plugins
+## 🚨 **Emergency Recovery**
 
-**v1.0 (Stable):**
-- [ ] **Production Ready** - Full stability and testing
-- [ ] **Documentation** - Complete user and developer guides
-- [ ] **Performance** - Optimized for all platforms
-- [ ] **Security** - Security audit and hardening
+### Complete Reset
 
-**v1.1+ (Future):**
-- [ ] **Cloud Sync** - Cross-device synchronization
-- [ ] **Mobile Support** - Android/iOS applications
-- [ ] **Enterprise Features** - Team collaboration
-- [ ] **Custom Models** - Training interface
+If the application is completely broken:
+
+```bash
+# Remove all build artifacts
+rm -rf build/
+
+# Remove llama.cpp
+rm -rf lib/llama.cpp/
+
+# Remove configuration
+rm -rf app/config/
+
+# Remove sessions
+rm -rf sessions/
+
+# Remove logs
+rm -rf logs/
+
+# Rebuild everything
+./run.sh
+```
+
+### Model Recovery
+
+If models are corrupted:
+
+```bash
+# Remove corrupted models
+rm -rf models/
+
+# Recreate models directory
+mkdir -p models
+
+# Download fresh model
+wget https://huggingface.co/TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF/resolve/main/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf -O models/tinyllama.gguf
+```
+
+### Configuration Recovery
+
+If configuration is corrupted:
+
+```bash
+# Remove corrupted config
+rm -rf app/config/
+
+# Recreate config directory
+mkdir -p app/config
+
+# Restart application to recreate default config
+./run.sh
+```
+
+## 📞 **Contact Support**
+
+### Reporting Issues
+
+When reporting issues, please include:
+
+1. **Clear Title**: Brief description of the issue
+2. **Detailed Description**: What happened and what you expected
+3. **Steps to Reproduce**: How to reproduce the issue
+4. **Environment Details**:
+   - OS and version
+   - Qt6 version
+   - GCC version
+   - CUDA version (if applicable)
+   - Model being used
+5. **Error Messages**: Any error messages or logs
+6. **Screenshots**: If applicable
 
 ### Feature Requests
 
-**How to request features:**
-1. **Check** existing requests first
-2. **Use** feature request template
-3. **Describe** use case clearly
-4. **Provide** mockups if applicable
-5. **Vote** on existing requests
+When requesting features:
 
-**Popular requests:**
-- Web interface
-- API server mode
-- Model comparison
-- Batch processing
-- Custom themes
+1. **Clear Title**: Brief description of the feature
+2. **Detailed Description**: What the feature should do
+3. **Use Case**: Why this feature would be useful
+4. **Proposed Implementation**: How you think it should work
+5. **Additional Context**: Any other relevant information
+
+### Community Support
+
+- **GitHub Discussions**: [Community discussions](https://github.com/NAME9390/RunMyModel/discussions)
+- **GitHub Issues**: [Bug reports and feature requests](https://github.com/NAME9390/RunMyModel/issues)
+- **Documentation**: [Complete documentation](docs/README.md)
 
 ---
 
-**Still need help?** 
-- 📧 **Create an issue**: [GitHub Issues](https://github.com/NAME9390/RunMyModel/issues/new)
-- 💬 **Start a discussion**: [GitHub Discussions](https://github.com/NAME9390/RunMyModel/discussions)
-- 📖 **Read documentation**: [Quick Start](../quick-start/) or [Developer Guide](../developer/)
+<div align="center">
+
+**Built with ❤️ for the local AI community**
+
+[![GitHub](https://img.shields.io/badge/GitHub-NAME9390/RunMyModel-blue?style=flat-square&logo=github)](https://github.com/NAME9390/RunMyModel)
+[![License](https://img.shields.io/badge/License-MPL--2.0-orange?style=flat-square)](LICENSE)
+
+*Making AI accessible, one desktop at a time* 🚀
+
+</div>

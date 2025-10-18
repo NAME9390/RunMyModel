@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # RunMyModel Desktop - Universal Launcher Script
-# This script handles building and running RunMyModel Desktop
+# Works on any Linux distribution
 
 set -e  # Exit on any error
 
@@ -12,140 +12,204 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Print colored output
+# Function to print colored output
 print_status() {
-    echo -e "${BLUE}[INFO]${NC} $1"
+    echo -e "${GREEN}✅${NC} $1"
 }
 
-print_success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $1"
+print_info() {
+    echo -e "${BLUE}ℹ️${NC} $1"
 }
 
 print_warning() {
-    echo -e "${YELLOW}[WARNING]${NC} $1"
+    echo -e "${YELLOW}⚠️${NC} $1"
 }
 
 print_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
+    echo -e "${RED}❌${NC} $1"
 }
 
-# Check if we're in the right directory
-if [ ! -d "app" ]; then
-    print_error "Please run this script from the RunMyModel root directory"
-    exit 1
-fi
+print_header() {
+    echo -e "${BLUE}🚀${NC} $1"
+}
 
-print_status "RunMyModel Desktop v0.6.0-PRE-RELEASE"
-print_status "Starting build and launch process..."
+# Function to check if command exists
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
 
-# Check dependencies
-print_status "Checking dependencies..."
-
-# Check for Qt6
-if ! pkg-config --exists Qt6Core; then
-    print_error "Qt6 not found! Please install Qt6 development packages:"
-    echo "  Ubuntu/Debian: sudo apt install qt6-base-dev qt6-tools-dev"
-    echo "  Arch Linux: sudo pacman -S qt6-base qt6-tools"
-    echo "  Fedora: sudo dnf install qt6-qtbase-devel qt6-qttools-devel"
-    exit 1
-fi
-
-# Check for CMake
-if ! command -v cmake &> /dev/null; then
-    print_error "CMake not found! Please install CMake:"
-    echo "  Ubuntu/Debian: sudo apt install cmake"
-    echo "  Arch Linux: sudo pacman -S cmake"
-    echo "  Fedora: sudo dnf install cmake"
-    exit 1
-fi
-
-# Check for GCC/G++
-if ! command -v g++ &> /dev/null; then
-    print_error "G++ not found! Please install build tools:"
-    echo "  Ubuntu/Debian: sudo apt install build-essential"
-    echo "  Arch Linux: sudo pacman -S base-devel"
-    echo "  Fedora: sudo dnf install gcc-c++"
-    exit 1
-fi
-
-print_success "All dependencies found!"
-
-# Build llama.cpp if needed
-if [ ! -f "app/lib/llama.cpp/build/libllama.a" ]; then
-    print_status "Building llama.cpp library..."
-    cd app/lib/llama.cpp
+# Function to check dependencies
+check_dependencies() {
+    print_header "Checking dependencies..."
     
-    if [ ! -d "build" ]; then
-        mkdir build
+    # Check Qt6
+    if command_exists pkg-config && pkg-config --exists Qt6Core; then
+        QT_VERSION=$(pkg-config --modversion Qt6Core)
+        print_status "Qt6 found: $QT_VERSION"
+    else
+        print_error "Qt6 not found. Please install Qt6 development packages."
+        echo "Ubuntu/Debian: sudo apt install qt6-base-dev qt6-tools-dev"
+        echo "Arch Linux: sudo pacman -S qt6-base qt6-tools"
+        echo "Fedora: sudo dnf install qt6-qtbase-devel qt6-qttools-devel"
+        exit 1
     fi
     
+    # Check GCC
+    if command_exists g++; then
+        GCC_VERSION=$(g++ --version | head -n1)
+        print_status "GCC found: $GCC_VERSION"
+    else
+        print_error "GCC not found. Please install GCC with C++17 support."
+        exit 1
+    fi
+    
+    # Check CMake
+    if command_exists cmake; then
+        CMAKE_VERSION=$(cmake --version | head -n1)
+        print_status "CMake found: $CMAKE_VERSION"
+    else
+        print_error "CMake not found. Please install CMake."
+        exit 1
+    fi
+    
+    # Check Git
+    if command_exists git; then
+        GIT_VERSION=$(git --version)
+        print_status "Git found: $GIT_VERSION"
+    else
+        print_error "Git not found. Please install Git."
+        exit 1
+    fi
+}
+
+# Function to setup llama.cpp
+setup_llama_cpp() {
+    print_header "Setting up llama.cpp..."
+    
+    # Create lib directory if it doesn't exist
+    mkdir -p lib
+    
+    # Check if llama.cpp already exists
+    if [ -d "lib/llama.cpp" ]; then
+        print_info "llama.cpp already exists, updating..."
+        cd lib/llama.cpp
+        git pull
+        cd ../..
+    else
+        print_info "Cloning llama.cpp repository..."
+        cd lib
+        git clone https://github.com/ggerganov/llama.cpp.git
+        cd ..
+    fi
+    
+    # Build llama.cpp
+    print_info "Building llama.cpp..."
+    cd lib/llama.cpp
+    
+    # Create build directory
+    rm -rf build
+    mkdir build
     cd build
     
-    # Configure with CUDA support if available
-    if command -v nvcc &> /dev/null; then
-        print_status "CUDA detected, enabling GPU acceleration..."
-        cmake .. -DCMAKE_BUILD_TYPE=Release -DGGML_CUDA=ON
+    # Configure with CMake
+    CMAKE_ARGS="-DCMAKE_BUILD_TYPE=Release"
+    
+    # Check for CUDA
+    if command_exists nvcc; then
+        print_info "CUDA found, enabling GPU acceleration..."
+        CMAKE_ARGS="$CMAKE_ARGS -DGGML_CUDA=ON"
     else
-        print_warning "CUDA not found, building CPU-only version"
-        cmake .. -DCMAKE_BUILD_TYPE=Release
+        print_warning "CUDA not found, using CPU only"
     fi
     
+    # Configure and build
+    cmake .. $CMAKE_ARGS
     make -j$(nproc)
-    cd ../../
-    print_success "llama.cpp built successfully!"
-else
-    print_success "llama.cpp already built!"
-fi
+    
+    print_status "llama.cpp build complete"
+    cd ../../..
+}
 
-# Build the application
-print_status "Building RunMyModel Desktop application..."
-cd app
-./build.sh
-cd ../
+# Function to build application
+build_application() {
+    print_header "Building application..."
+    
+    # Create build directory
+    mkdir -p build
+    
+    # Set library path
+    export LD_LIBRARY_PATH="$(pwd)/lib/llama.cpp/build/bin:$LD_LIBRARY_PATH"
+    
+    # Build application
+    cd build
+    
+    # Generate Makefile with qmake
+    qmake6 ../app/src-cpp/RunMyModelDesktop.pro
+    
+    # Compile
+    make -j$(nproc)
+    
+    print_status "Application build complete"
+    cd ..
+}
 
-# Check if build was successful
-if [ ! -f "app/build/RunMyModelDesktop" ]; then
-    print_error "Build failed! Check the output above for errors."
-    exit 1
-fi
-
-print_success "Build completed successfully!"
-
-# Create executables directory structure
-print_status "Creating executables..."
-
-# Copy the built executable to executables directory
-cp app/build/RunMyModelDesktop executables/RunMyModelDesktop-v0.6.0-PRE-RELEASE-x86_64.AppImage
-
-# Create a simple Windows executable placeholder (not a real executable)
-echo "Windows executable placeholder - build with MinGW-w64 for actual Windows support" > executables/RunMyModelDesktop-v0.6.0-PRE-RELEASE-x64.exe
-
-# Create MSI placeholder
-echo "Windows MSI installer placeholder - use WiX Toolset for actual MSI creation" > executables/RunMyModelDesktop-v0.6.0-PRE-RELEASE-x64.msi
-
-print_success "Executables created!"
-
-# Download model if not present
-if [ ! -f "models/tinyllama.gguf" ]; then
-    print_status "Downloading TinyLlama model (638MB)..."
+# Function to check model
+check_model() {
+    print_header "Checking model..."
+    
+    # Create models directory if it doesn't exist
     mkdir -p models
     
-    # Try to download the model
-    if wget -O models/tinyllama.gguf "https://huggingface.co/TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF/resolve/main/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf"; then
-        print_success "Model downloaded successfully!"
+    # Check if model exists
+    if [ -f "models/tinyllama.gguf" ]; then
+        print_status "Model found: models/tinyllama.gguf"
     else
-        print_warning "Failed to download model automatically."
-        print_warning "Please download manually:"
-        echo "  mkdir -p models"
-        echo "  wget https://huggingface.co/TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF/resolve/main/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf -O models/tinyllama.gguf"
+        print_warning "Model not found. Please download TinyLlama model:"
+        echo "mkdir -p models"
+        echo "wget https://huggingface.co/TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF/resolve/main/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf -O models/tinyllama.gguf"
+        echo ""
+        echo "Or run the application and it will prompt you to download the model."
     fi
-else
-    print_success "Model already present!"
-fi
+}
 
-# Launch the application
-print_status "Launching RunMyModel Desktop..."
-print_success "Enjoy using RunMyModel Desktop! 🚀"
+# Function to launch application
+launch_application() {
+    print_header "Launching RunMyModel Desktop..."
+    
+    # Set library path
+    export LD_LIBRARY_PATH="$(pwd)/lib/llama.cpp/build/bin:$LD_LIBRARY_PATH"
+    
+    # Check if executable exists
+    if [ -f "build/RunMyModelDesktop" ]; then
+        print_status "Application started successfully!"
+        ./build/RunMyModelDesktop
+    else
+        print_error "Executable not found. Build may have failed."
+        exit 1
+    fi
+}
 
-# Run the application
-exec app/build/RunMyModelDesktop
+# Main execution
+main() {
+    echo "RunMyModel Desktop - Universal Launcher"
+    echo "======================================"
+    echo ""
+    
+    # Check dependencies
+    check_dependencies
+    
+    # Setup llama.cpp
+    setup_llama_cpp
+    
+    # Build application
+    build_application
+    
+    # Check model
+    check_model
+    
+    # Launch application
+    launch_application
+}
+
+# Run main function
+main "$@"
